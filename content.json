@@ -1,12 +1,12 @@
 {
-  "defaultMode": "gaming",
+  "defaultMode": "football",
   "hero": {
     "gaming": {
       "tagline": "Streamer · Gamer · Goat",
       "bio": "10 years old. Pro Fortnite W's, Roblox glitches, Brawl Stars trios — and the wildest reactions on YouTube. Smash that subscribe."
     },
     "football": {
-      "tagline": "Striker · Madridista · Author",
+      "tagline": "Striker · Madridista · Goat",
       "bio": "10 years old. Real Madrid till I die, hat-tricks at recess, and I post every backyard golazo on YouTube. Hala Madrid y nada más."
     }
   },
