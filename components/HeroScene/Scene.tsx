@@ -24,12 +24,13 @@ interface SceneProps {
   scrollProgress: number;
 }
 
-const BASE_CAMERA: [number, number, number] = [0, 1.6, 5.8];
-const CAMERA_LOOK: [number, number, number] = [0, 1, 0];
+const BASE_CAMERA: [number, number, number] = [0, 1.4, 5.6];
+const CAMERA_LOOK: [number, number, number] = [0, 1.1, 0];
 
 /**
- * Inner R3F scene. Lives inside a <Canvas>. Manages camera parallax, scroll dolly,
- * and the cinematic takeover via a GSAP timeline.
+ * Inner R3F scene. Two scene groups (football / gaming), one is visible at a
+ * time via a hard mode-based toggle. The takeover sequence (pixel-cube burst
+ * + camera shake) masks the snap.
  */
 const SceneInner = ({
   mode,
@@ -41,41 +42,27 @@ const SceneInner = ({
   scrollProgress
 }: SceneProps) => {
   const { camera, gl } = useThree();
-  const footballRef = useRef<THREE.Group | null>(null);
-  const gamingRef = useRef<THREE.Group | null>(null);
-  const ballRef = useRef<THREE.Mesh | null>(null);
-  const controllerRef = useRef<THREE.Group | null>(null);
-  const floodLeftRef = useRef<THREE.PointLight | null>(null);
-  const floodRightRef = useRef<THREE.PointLight | null>(null);
-  const monitorRefs = [
-    useRef<THREE.Mesh | null>(null),
-    useRef<THREE.Mesh | null>(null),
-    useRef<THREE.Mesh | null>(null)
-  ];
   const flashRef = useRef<THREE.PointLight | null>(null);
 
-  // Visibilities are driven by the takeover timeline OR snap to mode otherwise.
-  // We hold them in refs so the timeline can mutate them without re-rendering.
-  const visRef = useRef({
-    football: mode === 'football' ? 1 : 0,
-    gaming: mode === 'gaming' ? 1 : 0,
-    fogColor: new THREE.Color(mode === 'football' ? '#040a25' : '#0a0420'),
-    fogNear: mode === 'football' ? 8 : 4,
-    fogFar: mode === 'football' ? 25 : 16,
-    burst: { progress: 0, kind: null as 'ball' | 'controller' | null, color: '#ffffff' },
-    camera: { shakeX: 0, shakeY: 0 }
+  // Burst state drives the pixel-cube InstancedMesh. Held in a ref so the
+  // timeline can drive it without re-rendering the tree.
+  const burstRef = useRef({
+    progress: 0,
+    active: false,
+    color: '#ffffff' as string,
+    origin: [0, 1, 0.6] as [number, number, number]
   });
+  const cameraShakeRef = useRef({ x: 0, y: 0 });
   const [, force] = useState(0);
   const repaint = () => force((n) => (n + 1) & 0xffff);
 
-  // Sync gl tone mapping + DPR clamp.
   useEffect(() => {
     gl.toneMapping = THREE.ACESFilmicToneMapping;
-    gl.toneMappingExposure = 1.05;
+    gl.toneMappingExposure = 1.1;
     gl.setClearColor('#06051a', 1);
   }, [gl]);
 
-  // Mouse parallax — track in a ref to avoid re-renders.
+  // Mouse parallax target — desktop only.
   const mouseTarget = useRef({ x: 0, y: 0 });
   useEffect(() => {
     if (reducedMotion) return;
@@ -101,273 +88,179 @@ const SceneInner = ({
     };
   }, [reducedMotion]);
 
-  // Default scene state when there is no takeover — directly drives camera, fog, vis.
-  useFrame((_state, delta) => {
-    const v = visRef.current;
-
-    // Mouse parallax: lerp camera position offset.
+  // Per-frame: camera parallax + scroll dolly + lookAt.
+  useFrame(() => {
+    const shake = cameraShakeRef.current;
     if (!reducedMotion) {
-      const targetX = mouseTarget.current.x * 0.6;
-      const targetY = -mouseTarget.current.y * 0.3;
+      const targetX = mouseTarget.current.x * 0.55;
+      const targetY = -mouseTarget.current.y * 0.25;
       camera.position.x = THREE.MathUtils.lerp(
         camera.position.x,
-        BASE_CAMERA[0] + targetX + v.camera.shakeX,
+        BASE_CAMERA[0] + targetX + shake.x,
         0.08
       );
       camera.position.y = THREE.MathUtils.lerp(
         camera.position.y,
-        BASE_CAMERA[1] + targetY + v.camera.shakeY,
+        BASE_CAMERA[1] + targetY + shake.y,
         0.08
       );
     }
-
-    // Scroll dolly — push camera back as the user leaves the hero.
     const baseZ = BASE_CAMERA[2] + scrollProgress * 3;
-    // The takeover may add a Z offset via gsap directly on camera.position.z;
-    // when no takeover is active, snap back to the base.
     if (takeover === null) {
       camera.position.z = THREE.MathUtils.lerp(camera.position.z, baseZ, 0.1);
     }
-
     camera.lookAt(CAMERA_LOOK[0], CAMERA_LOOK[1], CAMERA_LOOK[2]);
-
-    // Fog state — interpolated by the timeline when transitioning.
-    // We apply visRef.fog* to the scene fog (set in the <fog> element via key/state).
-    // Since fog is a component attr, we drive it via React state on transitions
-    // (rare). For idle-no-transition state, the values are already correct.
   });
 
-  // Takeover orchestration.
+  // Takeover orchestration: simple pixel-burst + optional camera shake.
+  // The scene group swap happens immediately when the mode prop changes; the
+  // burst plays at the moment of the swap to mask the cut.
   useEffect(() => {
     if (!takeover) return;
-    const v = visRef.current;
+    const b = burstRef.current;
     const isF2G = takeover === 'f2g';
-    const longDuration = reducedMotion ? 0.25 : narrow ? 1.0 : 1.5;
+    b.color = isF2G ? '#b026ff' : '#ffd700';
+    b.origin = [0, 1.0, 0.6];
+    b.progress = 0;
+    b.active = true;
+    repaint();
+
+    if (reducedMotion) {
+      b.active = false;
+      repaint();
+      const id = window.setTimeout(onTakeoverDone, 220);
+      return () => window.clearTimeout(id);
+    }
+
+    const total = narrow ? 1.0 : 1.5;
     const tl = gsap.timeline({
       onComplete: () => {
-        v.burst.progress = 0;
-        v.burst.kind = null;
+        b.active = false;
+        b.progress = 0;
+        cameraShakeRef.current.x = 0;
+        cameraShakeRef.current.y = 0;
         repaint();
         onTakeoverDone();
       }
     });
 
-    if (reducedMotion) {
-      tl.kill();
-      v.football = isF2G ? 1 : 0;
-      v.gaming = isF2G ? 0 : 1;
-      v.fogColor.set(isF2G ? '#0a0420' : '#040a25');
-      v.fogNear = isF2G ? 4 : 8;
-      v.fogFar = isF2G ? 16 : 25;
-      repaint();
-      const timeoutId = window.setTimeout(onTakeoverDone, 220);
-      return () => window.clearTimeout(timeoutId);
-    }
-
-    // Camera shake helper (only on desktop).
-    const shake = () => {
-      if (narrow) return;
-      v.camera.shakeX = (Math.random() - 0.5) * 0.25;
-      v.camera.shakeY = (Math.random() - 0.5) * 0.18;
-    };
-    const noShake = () => {
-      v.camera.shakeX = 0;
-      v.camera.shakeY = 0;
-    };
-
-    // Phase 1 (0 → 0.27 of total): focal object scales toward camera.
-    // g→f: controller scales up; f→g: ball scales up.
-    const focal = isF2G ? controllerRef.current : ballRef.current;
-
-    // Set up burst meta for phase 2.
-    v.burst.kind = isF2G ? 'controller' : 'ball';
-    v.burst.color = isF2G ? '#b026ff' : '#ffd700';
-    v.burst.progress = 0;
-
-    // Save original focal scale to restore later.
-    const focalGroup = focal as THREE.Object3D | null;
-    const focalOrigScale = focalGroup ? focalGroup.scale.clone() : new THREE.Vector3(1, 1, 1);
-    const focalOrigPos = focalGroup ? focalGroup.position.clone() : new THREE.Vector3();
-
-    // PHASE 1 — focal object swells, camera pulls in slightly.
-    if (focalGroup) {
-      tl.to(focalGroup.scale, {
-        x: 3.5, y: 3.5, z: 3.5,
-        duration: longDuration * 0.27,
-        ease: 'power2.in'
-      }, 0);
-      tl.to(focalGroup.position, {
-        y: focalOrigPos.y + 0.4,
-        duration: longDuration * 0.27,
-        ease: 'power2.in'
-      }, 0);
-    }
-    tl.to(camera.position, {
-      z: BASE_CAMERA[2] - 1.2,
-      duration: longDuration * 0.27,
-      ease: 'power2.in'
+    // Burst the pixel cubes outward.
+    tl.to(b, {
+      progress: 1,
+      duration: total * 0.65,
+      ease: 'power2.out',
+      onUpdate: repaint
     }, 0);
 
-    // PHASE 2 — focal object fractures into pixel cubes.
-    tl.add(() => {
-      if (focalGroup) {
-        focalGroup.scale.set(0.001, 0.001, 0.001);
-      }
-      v.burst.progress = 0.001;
-      repaint();
-    }, longDuration * 0.27);
-
-    tl.to(v.burst, {
-      progress: 1,
-      duration: longDuration * 0.33,
-      ease: 'power1.out',
-      onUpdate: repaint
-    }, longDuration * 0.27);
-
-    // Camera shake during fracture (desktop only).
-    if (!narrow) {
-      for (let i = 0; i < 6; i++) {
-        tl.add(shake, longDuration * 0.27 + i * 0.05);
-      }
-      tl.add(noShake, longDuration * 0.27 + 6 * 0.05);
-    }
-
-    // PHASE 3 — scene crossfade + fog tint.
-    const target = isF2G
-      ? { football: 0, gaming: 1, fogColor: '#0a0420', fogNear: 4, fogFar: 16 }
-      : { football: 1, gaming: 0, fogColor: '#040a25', fogNear: 8, fogFar: 25 };
-
-    tl.to(v, {
-      football: target.football,
-      gaming: target.gaming,
-      fogNear: target.fogNear,
-      fogFar: target.fogFar,
-      duration: longDuration * 0.4,
-      ease: 'power2.inOut',
-      onUpdate: repaint
-    }, longDuration * 0.4);
-
-    // Tween fog color separately on the THREE.Color instance.
-    tl.to(v.fogColor, {
-      r: new THREE.Color(target.fogColor).r,
-      g: new THREE.Color(target.fogColor).g,
-      b: new THREE.Color(target.fogColor).b,
-      duration: longDuration * 0.4,
-      ease: 'power2.inOut',
-      onUpdate: repaint
-    }, longDuration * 0.4);
-
-    // Flash burst when entering football (f finale).
-    if (!isF2G) {
-      tl.to(flashRef.current ? flashRef.current : { intensity: 0 }, {
-        intensity: 14,
-        duration: 0.12,
-        ease: 'power3.out'
-      }, longDuration * 0.7);
-      tl.to(flashRef.current ? flashRef.current : { intensity: 0 }, {
-        intensity: 0,
-        duration: 0.35,
-        ease: 'power2.in'
-      }, longDuration * 0.82);
-    }
-
-    // PHASE 4 — restore camera, restore focal object position+scale offscreen.
+    // Camera dolly: push in slightly, then settle.
+    tl.to(camera.position, {
+      z: BASE_CAMERA[2] - 0.8,
+      duration: total * 0.3,
+      ease: 'power2.in'
+    }, 0);
     tl.to(camera.position, {
       z: BASE_CAMERA[2],
-      duration: longDuration * 0.25,
+      duration: total * 0.4,
       ease: 'power2.out'
-    }, longDuration * 0.75);
+    }, total * 0.45);
 
-    tl.add(() => {
-      if (focalGroup) {
-        focalGroup.scale.copy(focalOrigScale);
-        focalGroup.position.copy(focalOrigPos);
+    // Camera shake during the first half (desktop only).
+    if (!narrow) {
+      for (let i = 0; i < 5; i++) {
+        tl.add(() => {
+          cameraShakeRef.current.x = (Math.random() - 0.5) * 0.2;
+          cameraShakeRef.current.y = (Math.random() - 0.5) * 0.15;
+        }, i * 0.06);
       }
-    }, longDuration * 0.95);
+      tl.add(() => {
+        cameraShakeRef.current.x = 0;
+        cameraShakeRef.current.y = 0;
+      }, 5 * 0.06);
+    }
+
+    // Flash on g→f finale.
+    if (!isF2G) {
+      tl.to(flashRef.current ?? { intensity: 0 }, {
+        intensity: 10,
+        duration: 0.12,
+        ease: 'power3.out'
+      }, total * 0.55);
+      tl.to(flashRef.current ?? { intensity: 0 }, {
+        intensity: 0,
+        duration: 0.4,
+        ease: 'power2.in'
+      }, total * 0.7);
+    }
 
     return () => {
       tl.kill();
-      noShake();
+      cameraShakeRef.current.x = 0;
+      cameraShakeRef.current.y = 0;
+      b.active = false;
     };
   }, [takeover, reducedMotion, narrow, camera, onTakeoverDone]);
 
-  // Snap visibilities to the current mode when not transitioning AND when mode finishes changing.
-  useEffect(() => {
-    if (takeover) return;
-    const v = visRef.current;
-    v.football = mode === 'football' ? 1 : 0;
-    v.gaming = mode === 'gaming' ? 1 : 0;
-    v.fogColor.set(mode === 'football' ? '#040a25' : '#0a0420');
-    v.fogNear = mode === 'football' ? 8 : 4;
-    v.fogFar = mode === 'football' ? 25 : 16;
-    repaint();
-  }, [mode, takeover]);
-
-  const v = visRef.current;
+  const b = burstRef.current;
 
   return (
     <>
       <fog
         attach="fog"
         args={[
-          `#${v.fogColor.getHexString()}`,
-          v.fogNear,
-          v.fogFar
+          mode === 'football' ? '#6890c8' : '#0a0420',
+          mode === 'football' ? 14 : 6,
+          mode === 'football' ? 38 : 20
         ]}
       />
-      <ambientLight intensity={mode === 'football' ? 0.4 : 0.2} color={mode === 'football' ? '#3a2a1a' : '#1a1a3a'} />
 
-      <FootballScene
-        ref={footballRef}
-        visibility={v.football}
-        ballRef={ballRef}
-        floodlightLeftRef={floodLeftRef}
-        floodlightRightRef={floodRightRef}
+      {/* GLOBAL lighting — always-on, ensures the character is readably lit
+          in both modes regardless of scene-specific mood lighting. */}
+      <ambientLight intensity={0.6} color={'#ffffff'} />
+      <directionalLight
+        position={[3, 5, 4]}
+        intensity={2.2}
+        color={'#ffffff'}
+      />
+      {/* Soft rim from upper back-left, gives shape to the back of the head */}
+      <directionalLight
+        position={[-3, 4, -2]}
+        intensity={0.6}
+        color={mode === 'football' ? '#ffe0a8' : '#a87cff'}
       />
 
-      <GamingScene
-        ref={gamingRef}
-        visibility={v.gaming}
-        controllerRef={controllerRef}
-        monitorRefs={monitorRefs}
-      />
+      {/* Scene groups — hard-toggled by mode. Whichever is hidden has
+          visible=false on the root group, so three.js skips its entire subtree. */}
+      <group visible={mode === 'football'}>
+        <FootballScene />
+      </group>
+      <group visible={mode === 'gaming'}>
+        <GamingScene />
+      </group>
 
       <Character3D
         mode={mode}
-        position={[0, -0.1, 0.5]}
+        position={[0, 0, 0.6]}
         onCharacterClick={onCharacterClick}
         bobEnabled={!takeover && !reducedMotion}
       />
 
-      {/* Pixel-cube burst (visible only during a takeover) */}
-      {v.burst.kind && (
+      {/* Pixel burst — visible only during a takeover */}
+      {b.active && (
         <PixelCubes
-          progress={v.burst.progress}
-          origin={[
-            v.burst.kind === 'ball' ? 1.8 : 1.2,
-            0,
-            v.burst.kind === 'ball' ? 1.2 : -0.9
-          ]}
-          color={v.burst.color}
+          progress={b.progress}
+          origin={b.origin}
+          color={b.color}
           count={narrow ? 30 : 60}
         />
       )}
 
       {/* Flash light used at the f-finale */}
-      <pointLight ref={flashRef} position={[0, 4, 2]} color={'#ffffff'} intensity={0} distance={20} decay={1.4} />
+      <pointLight ref={flashRef} position={[0, 3, 3]} color={'#ffffff'} intensity={0} distance={20} decay={1.2} />
     </>
   );
 };
 
-interface OuterProps {
-  mode: Mode;
-  reducedMotion: boolean;
-  narrow: boolean;
-  onCharacterClick: () => void;
-  takeover: 'g2f' | 'f2g' | null;
-  onTakeoverDone: () => void;
-  scrollProgress: number;
-}
+interface OuterProps extends SceneProps {}
 
 export const Scene = (props: OuterProps) => {
   return (
@@ -375,7 +268,7 @@ export const Scene = (props: OuterProps) => {
       dpr={[1, 2]}
       shadows={false}
       gl={{ antialias: true, alpha: true, powerPreference: 'high-performance' }}
-      camera={{ position: BASE_CAMERA, fov: 50, near: 0.1, far: 60 }}
+      camera={{ position: BASE_CAMERA, fov: 52, near: 0.1, far: 80 }}
       style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', display: 'block' }}
     >
       <SceneInner {...props} />
