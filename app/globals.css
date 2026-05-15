@@ -17,8 +17,6 @@ html.gaming,
   --card-border: rgba(176, 38, 255, 0.4);
   --glow: 0 0 28px rgba(0, 184, 255, 0.6), 0 0 60px rgba(176, 38, 255, 0.35);
   --display-font: 'Bungee', cursive;
-  --mon-from: #00b8ff;
-  --mon-to: #b026ff;
 }
 
 html.football,
@@ -35,8 +33,6 @@ html.football,
   --card-border: rgba(255, 215, 0, 0.45);
   --glow: 0 0 28px rgba(255, 215, 0, 0.55), 0 0 60px rgba(255, 255, 255, 0.2);
   --display-font: 'Russo One', sans-serif;
-  --mon-from: #ffd700;
-  --mon-to: #4d8fff;
 }
 
 .preview-scope {
@@ -52,25 +48,43 @@ body {
   font-family: 'Inter', system-ui, sans-serif;
   color: var(--text);
   background: radial-gradient(ellipse at top left, var(--bg-3) 0%, var(--bg-2) 35%, var(--bg-1) 80%);
-  min-height: 100vh;
-  min-height: 100dvh;
+  min-height: 100vh;          /* fallback for browsers without dvh */
+  min-height: 100dvh;          /* dynamic viewport: stable across iOS Safari address-bar shifts */
   transition: background 0.7s ease;
   position: relative;
+  /* honor the iOS safe area at the bottom of the page (under the home-indicator) */
   padding-bottom: env(safe-area-inset-bottom);
 }
 
-/* Page-level 3D scene container — perspective root for the v2 cinematic space. */
-.stage3d-root {
-  position: relative;
-  width: 100%;
+/* Touch screens still need a visible focus ring on tap-focused elements (e.g. when a
+   form field receives focus via JS scroll-into-view, or when VoiceOver moves focus).
+   :focus-visible is the modern path; we leave it on by default in globals. */
+
+/* Prevent iOS Safari from auto-zooming on focus when a form input's font-size < 16px. */
+input,
+textarea,
+select {
+  font-size: 16px;
 }
 
-input, textarea, select { font-size: 16px; }
-button, a { touch-action: manipulation; }
+/* Disable double-tap zoom on interactive controls — they handle taps themselves. */
+button,
+a {
+  touch-action: manipulation;
+}
 
+/* Backdrop-filter fallback: older iPad / Android Browsers ignore backdrop-filter,
+   leaving the .bg-card translucent panels nearly transparent over the gradient.
+   Bump opacity for clients that don't support backdrop-filter. */
 @supports not ((backdrop-filter: blur(8px)) or (-webkit-backdrop-filter: blur(8px))) {
-  html.gaming, .preview-scope.gaming { --card: rgba(40, 20, 90, 0.92); }
-  html.football, .preview-scope.football { --card: rgba(0, 30, 90, 0.92); }
+  html.gaming,
+  .preview-scope.gaming {
+    --card: rgba(40, 20, 90, 0.92);
+  }
+  html.football,
+  .preview-scope.football {
+    --card: rgba(0, 30, 90, 0.92);
+  }
 }
 
 :focus { outline: none; }
@@ -111,80 +125,3 @@ html.football .character .crest { display: block; }
   50% { opacity: 1; }
 }
 .seam-shimmer { animation: seam-shimmer 2.4s ease-in-out infinite; }
-
-/* ─── Hero football environment ───────────────────────────────────────── */
-@keyframes star-twinkle {
-  0%, 100% { opacity: 0.3; }
-  50% { opacity: 0.95; }
-}
-
-@keyframes bokeh-drift {
-  0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.5; }
-  50% { transform: translate(-6px, -4px) scale(1.1); opacity: 0.85; }
-}
-
-@keyframes floodlight-pulse {
-  0%, 100% { opacity: 0.85; filter: brightness(1); }
-  50% { opacity: 1; filter: brightness(1.12); }
-}
-
-@keyframes beam-pulse {
-  0%, 100% { opacity: 0.45; }
-  50% { opacity: 0.85; }
-}
-
-@keyframes grass-sway {
-  0%, 100% { transform: skewX(-2deg); }
-  50% { transform: skewX(3deg); }
-}
-
-@keyframes pennant-sway {
-  0%, 100% { transform: skewX(0deg) rotate(0deg); }
-  25% { transform: skewX(3deg) rotate(1deg); }
-  75% { transform: skewX(-3deg) rotate(-1deg); }
-}
-
-@keyframes ball-rock {
-  0%, 100% { transform: translateX(-50%) rotate(-3deg); }
-  50% { transform: translateX(-50%) rotate(3deg); }
-}
-
-/* ─── Hero gaming environment ─────────────────────────────────────────── */
-@keyframes pixel-blink {
-  0%, 100% { opacity: 0.18; }
-  50% { opacity: 0.5; }
-}
-
-@keyframes monitor-cycle {
-  0%   { --mon-from: #00b8ff; --mon-to: #b026ff; filter: hue-rotate(0deg); }
-  33%  { --mon-from: #b026ff; --mon-to: #ff2bd6; filter: hue-rotate(40deg); }
-  66%  { --mon-from: #ff2bd6; --mon-to: #00b8ff; filter: hue-rotate(-30deg); }
-  100% { --mon-from: #00b8ff; --mon-to: #b026ff; filter: hue-rotate(0deg); }
-}
-
-@keyframes scanline-drift {
-  0% { background-position-y: 0; }
-  100% { background-position-y: 8px; }
-}
-
-@keyframes fan-glow {
-  0%, 100% { box-shadow: 0 0 24px 2px rgba(176,38,255,0.35), 0 0 60px 6px rgba(0,184,255,0.18); }
-  50%      { box-shadow: 0 0 32px 4px rgba(255,43,214,0.55), 0 0 80px 10px rgba(0,184,255,0.32); }
-}
-
-@keyframes rgb-shift {
-  0%   { filter: hue-rotate(0deg); }
-  100% { filter: hue-rotate(360deg); }
-}
-
-/* ─── Section ambient drift (cheap DOM-based) ─────────────────────────── */
-@keyframes section-drift {
-  0%   { transform: translate(0, 0) rotate(0deg); }
-  25%  { transform: translate(-14px, -8px) rotate(8deg); }
-  50%  { transform: translate(8px, -22px) rotate(-6deg); }
-  75%  { transform: translate(-6px, 4px) rotate(4deg); }
-  100% { transform: translate(0, 0) rotate(0deg); }
-}
-
-/* Legacy character / banner animations (float, idle, pulse, spin-slow, blink)
-   are generated by Tailwind from tailwind.config.ts → keyframes/animation. */
