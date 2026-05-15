@@ -1,0 +1,27 @@
+{
+  "defaultMode": "gaming",
+  "hero": {
+    "gaming": {
+      "tagline": "Streamer · Gamer · Author",
+      "bio": "10 years old. Pro Fortnite W's, Roblox glitches, Brawl Stars trios — and the wildest reactions on YouTube. Smash that subscribe."
+    },
+    "football": {
+      "tagline": "Striker · Madridista · Author",
+      "bio": "10 years old. Real Madrid till I die, hat-tricks at recess, and I post every backyard golazo on YouTube. Hala Madrid y nada más."
+    }
+  },
+  "about": {
+    "paragraph1": "Yo! I'm *Khalil*, I'm 10, and YouTube is basically my whole vibe. I play *Fortnite*, *Roblox*, and *Brawl Stars*, and I post the clips that make my friends scream. When I'm not gaming I'm chasing a football around — biggest *Real Madrid* fan you'll ever meet, and yeah, I'm definitely Ronaldo when I grow up.",
+    "paragraph2": "I'm also writing my own book (more on that below) and trying to hit my first 1K subs. If you read this far you're a real one — go smash subscribe."
+  },
+  "book": {
+    "visible": true,
+    "title": "The Goat Chronicles",
+    "description": "My grandma started it with me last Christmas — now I'm finishing it myself. Stories, drawings, and the funniest stuff that happens at school. First copies dropping soon.",
+    "status": "Coming soon"
+  },
+  "socials": {
+    "tiktok": "",
+    "instagram": ""
+  }
+}
