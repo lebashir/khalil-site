@@ -1,9 +1,22 @@
+'use client';
+
+import { motion } from 'framer-motion';
 import type { SiteContent } from '@/lib/content';
 import { renderBold } from '@/lib/bold';
 
 interface Props {
   content: SiteContent;
 }
+
+const cardVariants = {
+  hidden: { opacity: 0, y: 24 },
+  visible: { opacity: 1, y: 0 }
+};
+
+const paragraphVariants = {
+  hidden: { opacity: 0, y: 12 },
+  visible: { opacity: 1, y: 0 }
+};
 
 export const About = ({ content }: Props) => (
   <section className="relative z-10 py-14">
@@ -15,13 +28,28 @@ export const About = ({ content }: Props) => (
       />
       About me
     </h2>
-    <div className="rounded-3xl border border-card-border bg-card p-8 backdrop-blur-md sm:p-10">
-      <p className="mb-4 text-base leading-[1.8] text-text sm:text-lg">
+    <motion.div
+      className="rounded-3xl border border-card-border bg-card p-8 backdrop-blur-md sm:p-10"
+      variants={cardVariants}
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, amount: 0.3 }}
+      transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+    >
+      <motion.p
+        className="mb-4 text-base leading-[1.8] text-text sm:text-lg"
+        variants={paragraphVariants}
+        transition={{ duration: 0.4, delay: 0.08 }}
+      >
         {renderBold(content.about.paragraph1)}
-      </p>
-      <p className="text-base leading-[1.8] text-text sm:text-lg">
+      </motion.p>
+      <motion.p
+        className="text-base leading-[1.8] text-text sm:text-lg"
+        variants={paragraphVariants}
+        transition={{ duration: 0.4, delay: 0.16 }}
+      >
         {renderBold(content.about.paragraph2)}
-      </p>
-    </div>
+      </motion.p>
+    </motion.div>
   </section>
 );

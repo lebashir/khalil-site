@@ -1,39 +1,33 @@
 'use client';
 
-import { AnimatePresence, motion } from 'framer-motion';
-import { useCallback, useState } from 'react';
+import { motion } from 'framer-motion';
+import { useCallback } from 'react';
 import { useMode } from '@/components/ModeProvider';
 import type { Mode } from '@/lib/content';
-import { GamingToFootball } from './GamingToFootball';
-import { FootballToGaming } from './FootballToGaming';
 import { useToggleQuality, type ToggleQuality } from './useToggleQuality';
 
 const SEAM_ACTIVE = 0.7;   // active pane takes 70%
 const SEAM_INACTIVE = 0.3; // inactive pane takes 30%
-const TRANSITION_MS = 800;
-const TRANSITION_LITE_MS = 650;
-const REDUCED_MS = 200;
 
-type Direction = 'g2f' | 'f2g' | null;
-
-const durationFor = (q: ToggleQuality): number => {
-  if (q === 'none') return REDUCED_MS;
-  if (q === 'lite') return TRANSITION_LITE_MS;
-  return TRANSITION_MS;
+const widthDuration = (q: ToggleQuality): number => {
+  if (q === 'none') return 0.2;
+  if (q === 'lite') return 0.65;
+  return 0.8;
 };
 
+/**
+ * The banner: two angled buttons that animate their share of the row when a mode
+ * is selected. The dramatic transition lives in the R3F scene below — this
+ * component is now just a clean header/control, not a stage.
+ */
 export const ModeToggleBanner = () => {
   const { mode, setMode } = useMode();
   const quality = useToggleQuality();
-  const [transition, setTransition] = useState<Direction>(null);
 
   const onPick = useCallback((target: Mode) => {
-    if (target === mode || transition !== null) return;
-    const dir: Direction = mode === 'gaming' ? 'g2f' : 'f2g';
-    setTransition(dir);
+    if (target === mode) return;
     setMode(target);
-    window.setTimeout(() => setTransition(null), durationFor(quality));
-  }, [mode, setMode, transition, quality]);
+  }, [mode, setMode]);
 
   const onKey = (target: Mode) => (e: React.KeyboardEvent<HTMLButtonElement>) => {
     if (e.key === 'Enter' || e.key === ' ') {
@@ -42,20 +36,17 @@ export const ModeToggleBanner = () => {
     }
   };
 
-  // Width % of the left (gaming) pane.
   const gamingWidth = mode === 'gaming' ? SEAM_ACTIVE : SEAM_INACTIVE;
   const seamLeftPct = gamingWidth * 100;
-  const widthDurS = durationFor(quality) / 1000;
+  const widthDurS = widthDuration(quality);
 
   return (
     <div
-      className="relative w-full overflow-hidden border-b border-white/15"
+      className="relative z-30 w-full overflow-hidden border-b border-white/15"
       style={{ height: 88 }}
       role="region"
       aria-label="Site mode toggle"
     >
-      {/* Gaming pane (always on the left). The whole pane is the tap target — 88px tall × ≥30% wide,
-          well above the 44pt iOS HIG minimum even on iPhone SE. */}
       <motion.button
         type="button"
         onClick={() => onPick('gaming')}
@@ -101,7 +92,6 @@ export const ModeToggleBanner = () => {
         )}
       </motion.button>
 
-      {/* Football pane (always on the right) */}
       <motion.button
         type="button"
         onClick={() => onPick('football')}
@@ -145,7 +135,6 @@ export const ModeToggleBanner = () => {
         )}
       </motion.button>
 
-      {/* Diagonal seam shimmer */}
       <motion.div
         className="seam-shimmer pointer-events-none absolute top-0 h-full"
         animate={{ left: `${seamLeftPct}%` }}
@@ -159,32 +148,6 @@ export const ModeToggleBanner = () => {
         }}
         aria-hidden
       />
-
-      {/* Transition overlays. 'none' → no overlay (cross-fade via width only).
-          'lite' → drop the heaviest effects (RGB-split, scanlines), cut particle counts.
-          'full' → everything. */}
-      <AnimatePresence>
-        {quality !== 'none' && transition === 'g2f' && (
-          <motion.div key="g2f" className="absolute inset-0" initial={{ opacity: 1 }} exit={{ opacity: 0 }}>
-            <GamingToFootball
-              fromSeam={SEAM_ACTIVE}
-              toSeam={SEAM_INACTIVE}
-              durationMs={durationFor(quality)}
-              quality={quality}
-            />
-          </motion.div>
-        )}
-        {quality !== 'none' && transition === 'f2g' && (
-          <motion.div key="f2g" className="absolute inset-0" initial={{ opacity: 1 }} exit={{ opacity: 0 }}>
-            <FootballToGaming
-              fromSeam={SEAM_INACTIVE}
-              toSeam={SEAM_ACTIVE}
-              durationMs={durationFor(quality)}
-              quality={quality}
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
 };

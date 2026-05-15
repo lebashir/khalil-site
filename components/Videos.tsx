@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import { formatRelative, formatViews, getRecentVideos, type VideoItem } from '@/lib/youtube';
+import { VideoCardTilt } from './VideoCardTilt';
 
 const youTubeUrl = (id: string) => `https://www.youtube.com/watch?v=${id}`;
 const channelUrl = 'https://www.youtube.com/@khalilgaming2020';
@@ -26,11 +27,10 @@ const VideoCard = ({ video, featured, index }: VideoCardProps) => {
     : '(max-width: 880px) 100vw, 360px';
   const loading: 'eager' | 'lazy' = index === 0 ? 'eager' : 'lazy';
   return (
-    <a
+    <VideoCardTilt
       href={youTubeUrl(video.id)}
-      target="_blank"
-      rel="noopener noreferrer"
-      className="group block overflow-hidden rounded-2xl border border-card-border bg-card backdrop-blur-md transition-all duration-300 hover:-translate-y-1 hover:shadow-glow"
+      ariaLabel={video.title}
+      className="group block overflow-hidden rounded-2xl border border-card-border bg-card backdrop-blur-md transition-shadow duration-300 hover:shadow-glow"
     >
       <div className="relative aspect-video w-full overflow-hidden bg-gradient-to-br from-[var(--accent)] to-[var(--accent-2)]">
         {video.isLive && (
@@ -77,7 +77,7 @@ const VideoCard = ({ video, featured, index }: VideoCardProps) => {
           )}
         </div>
       </div>
-    </a>
+    </VideoCardTilt>
   );
 };
 
