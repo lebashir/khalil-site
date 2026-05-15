@@ -38,6 +38,6 @@ export const Footer = ({ content }: Props) => (
       <SocialLink href={content.socials.tiktok} label="TikTok" glyph="TT" />
       <SocialLink href={content.socials.instagram} label="Instagram" glyph="IG" />
     </div>
-    <span>Made with <span aria-hidden>💙</span> for Khalil</span>
+    <span>Khalil is The Goat</span>
   </footer>
 );
