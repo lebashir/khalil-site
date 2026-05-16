@@ -1,5 +1,5 @@
 {
-  "defaultMode": "football",
+  "defaultMode": "gaming",
   "hero": {
     "gaming": {
       "tagline": "Streamer · Gamer · Goat",
@@ -7,7 +7,7 @@
     },
     "football": {
       "tagline": "Striker · Madridista · Goat",
-      "bio": "10 years old. Real Madrid till I die, hat-tricks at recess, and I post every backyard golazo on YouTube. Hala Madrid y nada más."
+      "bio": "10 years old. Real Madrid till I die, goals at recess, and I post every backyard golazo on YouTube. Hala Madrid y nada más."
     }
   },
   "about": {
