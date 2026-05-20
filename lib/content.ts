@@ -122,6 +122,46 @@ const text = (val: unknown, label: string, max: number, errors: string[]): strin
   return trimmed;
 };
 
+// Same as `text` but allows empty strings (length-only enforcement).
+// Used for optional fields like "now reading" or a blank stat cell.
+const textOptional = (val: unknown, label: string, max: number, errors: string[]): string => {
+  if (typeof val !== 'string') return '';
+  const trimmed = val.trim();
+  if (trimmed.length > max) errors.push(`${label} is too long (max ${max} chars).`);
+  return trimmed;
+};
+
+const VALID_TIERS: VideoTier[] = ['LEGENDARY', 'EPIC', 'RARE', 'COMMON'];
+
+const buildDesignThumbs = (raw: unknown, fallback: DesignThumb[]): DesignThumb[] => {
+  if (!Array.isArray(raw)) return fallback;
+  const out: DesignThumb[] = [];
+  for (const entry of raw) {
+    if (
+      entry &&
+      typeof entry === 'object' &&
+      typeof (entry as DesignThumb).from === 'string' &&
+      typeof (entry as DesignThumb).to === 'string' &&
+      typeof (entry as DesignThumb).emoji === 'string'
+    ) {
+      const e = entry as DesignThumb;
+      out.push({ from: e.from, to: e.to, emoji: e.emoji });
+    }
+  }
+  return out.length > 0 ? out : fallback;
+};
+
+const buildTiers = (raw: unknown, fallback: VideoTier[]): VideoTier[] => {
+  if (!Array.isArray(raw)) return fallback;
+  const out: VideoTier[] = [];
+  for (const entry of raw) {
+    if (typeof entry === 'string' && (VALID_TIERS as string[]).includes(entry)) {
+      out.push(entry as VideoTier);
+    }
+  }
+  return out.length > 0 ? out : fallback;
+};
+
 // Validates a submission against the current schema. Older /edit form
 // payloads (with `about: { paragraph1, paragraph2 }` and no `cta`/`vibe`)
 // are accepted: missing-but-required fields fall back to the values
@@ -201,9 +241,74 @@ export const validateContent = (raw: unknown, base?: SiteContent): ValidationRes
 
   const mood: Mood = isMood(c.mood) ? c.mood : current.mood;
 
-  const stats = current.stats;
-  const now = current.now;
-  const videos = current.videos;
+  // Stats per mode — labels + values tuples. Allowed-empty (a stat cell can
+  // be blank); only length is enforced. Missing mode/field falls back to
+  // current so partial submissions don't wipe data.
+  const statsRaw = (c.stats ?? {}) as Partial<Record<Mode, Partial<ModeStats>>>;
+  const buildStats = (m: Mode): ModeStats => {
+    const src = statsRaw[m] ?? {};
+    const fallback = current.stats[m];
+    const fb = (key: 'labels' | 'values', i: number): string => {
+      const arr = src[key];
+      if (Array.isArray(arr) && typeof arr[i] === 'string') return arr[i] as string;
+      return fallback[key][i] ?? '';
+    };
+    const labels: [string, string, string, string] = [
+      textOptional(fb('labels', 0), `${m} stat #1 label`, FIELD_LIMITS.statLabel, errors),
+      textOptional(fb('labels', 1), `${m} stat #2 label`, FIELD_LIMITS.statLabel, errors),
+      textOptional(fb('labels', 2), `${m} stat #3 label`, FIELD_LIMITS.statLabel, errors),
+      textOptional(fb('labels', 3), `${m} stat #4 label`, FIELD_LIMITS.statLabel, errors)
+    ];
+    const values: [string, string, string, string] = [
+      textOptional(fb('values', 0), `${m} stat #1 value`, FIELD_LIMITS.statValue, errors),
+      textOptional(fb('values', 1), `${m} stat #2 value`, FIELD_LIMITS.statValue, errors),
+      textOptional(fb('values', 2), `${m} stat #3 value`, FIELD_LIMITS.statValue, errors),
+      textOptional(fb('values', 3), `${m} stat #4 value`, FIELD_LIMITS.statValue, errors)
+    ];
+    return { labels, values };
+  };
+  const stats: Record<Mode, ModeStats> = {
+    gaming: buildStats('gaming'),
+    football: buildStats('football')
+  };
+
+  // Now per mode — playing/watching/reading/listening. Allowed-empty.
+  const nowRaw = (c.now ?? {}) as Partial<Record<Mode, Partial<NowBlock>>>;
+  const buildNow = (m: Mode): NowBlock => {
+    const src = nowRaw[m] ?? {};
+    const fallback = current.now[m];
+    return {
+      playing: textOptional(src.playing ?? fallback.playing, `${m} now · playing`, FIELD_LIMITS.nowField, errors),
+      watching: textOptional(src.watching ?? fallback.watching, `${m} now · watching`, FIELD_LIMITS.nowField, errors),
+      reading: textOptional(src.reading ?? fallback.reading, `${m} now · reading`, FIELD_LIMITS.nowField, errors),
+      listening: textOptional(src.listening ?? fallback.listening, `${m} now · listening`, FIELD_LIMITS.nowField, errors)
+    };
+  };
+  const now: Record<Mode, NowBlock> = {
+    gaming: buildNow('gaming'),
+    football: buildNow('football')
+  };
+
+  // Videos editorial — booleans + arrays + pinnedId. Each field falls back
+  // to current.videos if missing/malformed, so partial submissions are safe.
+  const videosRaw = (c.videos ?? {}) as Partial<VideoEditorial>;
+  const pinnedIdRaw = videosRaw.pinnedId;
+  const videos: VideoEditorial = {
+    useDesignThumbForFeatured: typeof videosRaw.useDesignThumbForFeatured === 'boolean'
+      ? videosRaw.useDesignThumbForFeatured
+      : current.videos.useDesignThumbForFeatured,
+    useDesignThumbsForRest: typeof videosRaw.useDesignThumbsForRest === 'boolean'
+      ? videosRaw.useDesignThumbsForRest
+      : current.videos.useDesignThumbsForRest,
+    designThumbs: buildDesignThumbs(videosRaw.designThumbs, current.videos.designThumbs),
+    tiers: buildTiers(videosRaw.tiers, current.videos.tiers),
+    pinnedId:
+      pinnedIdRaw === null
+        ? null
+        : typeof pinnedIdRaw === 'string'
+          ? pinnedIdRaw.trim() || null
+          : current.videos.pinnedId
+  };
 
   if (errors.length > 0) return { ok: false, errors };
 

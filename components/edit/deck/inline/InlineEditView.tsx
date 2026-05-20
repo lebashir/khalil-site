@@ -18,12 +18,16 @@ import { SubsModule } from '../modules/SubsModule';
 import { NowPlayingModule } from '../modules/NowPlayingModule';
 import { PinnedVideoModule } from '../modules/PinnedVideoModule';
 import { AboutModule } from '../modules/AboutModule';
+import { SocialsModule } from '../modules/SocialsModule';
+import { ThumbStyleModule } from '../modules/ThumbStyleModule';
+import { DefaultModeModule } from '../modules/DefaultModeModule';
 import { PinEditor } from './PinEditor';
 import { HeroPreview } from './HeroPreview';
 import { StatusPreview } from './StatusPreview';
 import { ReplaysPreview } from './ReplaysPreview';
 import { AboutPreview } from './AboutPreview';
 import { BookPreview } from './BookPreview';
+import { FooterPreview } from './FooterPreview';
 
 type PinKey =
   | 'handle'
@@ -33,8 +37,11 @@ type PinKey =
   | 'now'
   | 'subs'
   | 'pinned-video'
+  | 'thumb-style'
   | 'about'
-  | 'book';
+  | 'book'
+  | 'socials'
+  | 'defaults';
 
 interface InlineEditViewProps {
   mode: Mode;
@@ -78,6 +85,9 @@ export const InlineEditView = ({
     setContent({ ...content, videos: { ...content.videos, pinnedId } });
   const setAbout = (about: string[]) => setContent({ ...content, about });
   const setBook = (book: SiteContent['book']) => setContent({ ...content, book });
+  const setSocials = (socials: SiteContent['socials']) => setContent({ ...content, socials });
+  const setVideos = (videos: SiteContent['videos']) => setContent({ ...content, videos });
+  const setDefaultMode = (defaultMode: Mode) => setContent({ ...content, defaultMode });
 
   const drawer = renderDrawer(lastPin, {
     mode,
@@ -91,7 +101,10 @@ export const InlineEditView = ({
     setNow,
     setPinnedId,
     setAbout,
-    setBook
+    setBook,
+    setSocials,
+    setVideos,
+    setDefaultMode
   });
 
   return (
@@ -162,6 +175,41 @@ export const InlineEditView = ({
       />
       <AboutPreview about={content.about} onEdit={(k) => open(k)} />
       <BookPreview book={content.book} onEdit={(k) => open(k)} />
+      <FooterPreview socials={content.socials} onEdit={(k) => open(k)} />
+
+      {/* Boot mode + escape hatches */}
+      <div
+        style={{
+          display: 'grid',
+          gap: 10,
+          gridTemplateColumns: '1fr 1fr',
+          padding: '10px 12px',
+          background: 'rgba(0,0,0,0.4)',
+          border: `1px solid ${ED.line}`,
+          borderRadius: 4
+        }}
+      >
+        <button
+          type="button"
+          onClick={() => open('defaults')}
+          style={hatchBtn}
+        >
+          <span style={{ color: ED.amber }}>BOOT MODE</span>
+          <span style={{ color: ED.ink, fontWeight: 700 }}>
+            {content.defaultMode.toUpperCase()}
+          </span>
+        </button>
+        <button
+          type="button"
+          onClick={() => open('socials')}
+          style={hatchBtn}
+        >
+          <span style={{ color: ED.pink }}>SOCIALS</span>
+          <span style={{ color: ED.inkDim }}>
+            {[content.socials.tiktok, content.socials.instagram].filter(Boolean).length} / 2
+          </span>
+        </button>
+      </div>
 
       {/* Drawer */}
       <PinEditor
@@ -175,6 +223,24 @@ export const InlineEditView = ({
       </PinEditor>
     </div>
   );
+};
+
+// ── Inline section escape-hatch button style ───────────────────────────────
+
+const hatchBtn: React.CSSProperties = {
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  gap: 8,
+  padding: '8px 12px',
+  background: 'rgba(0,0,0,0.5)',
+  border: `1px solid ${ED.line}`,
+  borderRadius: 3,
+  cursor: 'pointer',
+  fontFamily: FONT.mono,
+  fontSize: 10,
+  letterSpacing: 1.4,
+  textTransform: 'uppercase'
 };
 
 // ── Drawer routing — picks the editor body + frame ─────────────────────────
@@ -192,6 +258,9 @@ interface DrawerCtx {
   setPinnedId: (id: string | null) => void;
   setAbout: (a: string[]) => void;
   setBook: (b: SiteContent['book']) => void;
+  setSocials: (s: SiteContent['socials']) => void;
+  setVideos: (v: SiteContent['videos']) => void;
+  setDefaultMode: (m: Mode) => void;
 }
 
 interface DrawerView {
@@ -288,6 +357,27 @@ function renderDrawer(pin: PinKey | null, ctx: DrawerCtx): DrawerView | null {
         kicker: '// title + subtitle + description',
         accent: ED.pink,
         content: <BookEditor book={ctx.content.book} onChange={ctx.setBook} />
+      };
+    case 'socials':
+      return {
+        title: 'SOCIAL UPLINK',
+        kicker: '// footer links',
+        accent: ED.pink,
+        content: <SocialsModule hideHeader socials={ctx.content.socials} setSocials={ctx.setSocials} />
+      };
+    case 'thumb-style':
+      return {
+        title: 'REPLAY STYLE',
+        kicker: '// thumbnails + rarity tags',
+        accent: ED.amber,
+        content: <ThumbStyleModule hideHeader videos={ctx.content.videos} setVideos={ctx.setVideos} />
+      };
+    case 'defaults':
+      return {
+        title: 'BOOT MODE',
+        kicker: '// what fresh visitors see first',
+        accent: ED.amber,
+        content: <DefaultModeModule hideHeader defaultMode={ctx.content.defaultMode} setDefaultMode={ctx.setDefaultMode} />
       };
   }
 }

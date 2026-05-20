@@ -7,7 +7,7 @@ import { EditPin } from './EditPin';
 interface ReplaysPreviewProps {
   videos: VideoItem[];
   pinnedId: string | null;
-  onEdit: (key: 'pinned-video') => void;
+  onEdit: (key: 'pinned-video' | 'thumb-style') => void;
 }
 
 const PREVIEW_BG = 'linear-gradient(180deg, rgba(255,255,255,0.04), rgba(0,0,0,0.4))';
@@ -105,6 +105,12 @@ export const ReplaysPreview = ({ videos, pinnedId, onEdit }: ReplaysPreviewProps
         accent={ED.amber}
         onClick={() => onEdit('pinned-video')}
         style={{ top: 10, right: 10 }}
+      />
+      <EditPin
+        label="STYLE"
+        accent={ED.pink}
+        onClick={() => onEdit('thumb-style')}
+        style={{ top: 10, right: 130 }}
       />
     </div>
   );

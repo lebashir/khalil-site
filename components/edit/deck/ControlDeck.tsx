@@ -13,6 +13,9 @@ import { SubsModule } from './modules/SubsModule';
 import { NowPlayingModule } from './modules/NowPlayingModule';
 import { PinnedVideoModule } from './modules/PinnedVideoModule';
 import { AboutModule } from './modules/AboutModule';
+import { SocialsModule } from './modules/SocialsModule';
+import { ThumbStyleModule } from './modules/ThumbStyleModule';
+import { DefaultModeModule } from './modules/DefaultModeModule';
 import { InlineEditView } from './inline/InlineEditView';
 
 interface ControlDeckProps {
@@ -119,6 +122,9 @@ export const ControlDeck = ({ initialContent, videos }: ControlDeckProps) => {
   const setAbout = (about: string[]) => setContent({ ...content, about });
   const setPinnedId = (pinnedId: string | null) =>
     setContent({ ...content, videos: { ...content.videos, pinnedId } });
+  const setSocials = (socials: SiteContent['socials']) => setContent({ ...content, socials });
+  const setVideos = (videos: SiteContent['videos']) => setContent({ ...content, videos });
+  const setDefaultMode = (defaultMode: Mode) => setContent({ ...content, defaultMode });
 
   return (
     <div
@@ -177,6 +183,9 @@ export const ControlDeck = ({ initialContent, videos }: ControlDeckProps) => {
             setNow={setNow}
             setAbout={setAbout}
             setPinnedId={setPinnedId}
+            setSocials={setSocials}
+            setVideos={setVideos}
+            setDefaultMode={setDefaultMode}
           />
         )}
       </main>
@@ -270,6 +279,9 @@ interface LaunchTabProps {
   setNow: (n: NowBlock) => void;
   setAbout: (a: string[]) => void;
   setPinnedId: (id: string | null) => void;
+  setSocials: (s: SiteContent['socials']) => void;
+  setVideos: (v: SiteContent['videos']) => void;
+  setDefaultMode: (m: Mode) => void;
 }
 
 const LaunchTab = ({
@@ -292,7 +304,10 @@ const LaunchTab = ({
   setSubs,
   setNow,
   setAbout,
-  setPinnedId
+  setPinnedId,
+  setSocials,
+  setVideos,
+  setDefaultMode
 }: LaunchTabProps) => (
   <div
     style={{
@@ -344,7 +359,18 @@ const LaunchTab = ({
         pinnedId={content.videos.pinnedId}
         setPinnedId={setPinnedId}
       />
+      <ThumbStyleModule videos={content.videos} setVideos={setVideos} />
       <AboutModule about={content.about} setAbout={setAbout} />
+      <div
+        style={{
+          display: 'grid',
+          gap: 14,
+          gridTemplateColumns: isPhone ? '1fr' : '1fr 1fr'
+        }}
+      >
+        <DefaultModeModule defaultMode={content.defaultMode} setDefaultMode={setDefaultMode} />
+        <SocialsModule socials={content.socials} setSocials={setSocials} />
+      </div>
     </div>
   </div>
 );
