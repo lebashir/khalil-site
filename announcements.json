@@ -1,6 +1,13 @@
 {
   "items": [
     {
+      "id": "e5209cc6-48f8-4e79-bd4a-709da8fd7826",
+      "firedAt": 1779301727178,
+      "message": "test",
+      "payload": "goal",
+      "fuse": "now"
+    },
+    {
       "id": "49fa3427-51f4-44e3-b785-aca7e9795343",
       "firedAt": 1779301721707,
       "message": "test",
