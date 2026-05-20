@@ -31,11 +31,15 @@ export const TunnelShell = ({ content, videos }: Props) => {
   const { mode } = useModeFlipContext();
   const size = useArenaSize();
   const theme = TUNNEL_THEMES[mode];
-  const { ref, progress, containerH } = useTunnelScroll();
+  const { ref, progress } = useTunnelScroll();
 
-  // 5 scenes × viewport-height = a comfortable scroll budget.
-  const trackHeight = Math.max(2400, containerH * 5);
-  const stageHeight = Math.max(560, containerH);
+  // Heights live in CSS so SSR + CSR render identically (avoids the
+  // hydration mismatch you get when reading window.innerHeight on the
+  // client only). dvh tracks the actual visible viewport on mobile so
+  // the sticky stage fills exactly what the user can see; the wrapper
+  // takes 5× that for a comfortable scroll budget across the 5 rooms.
+  const trackHeight = '500dvh';
+  const stageHeight = '100dvh';
 
   return (
     <div

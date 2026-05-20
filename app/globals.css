@@ -47,7 +47,14 @@ html.football,
 
 * { box-sizing: border-box; }
 
-html, body { width: 100%; overflow-x: hidden; }
+/* Horizontal overflow stays clipped at the viewport boundary, but only on
+   <html>. Putting `overflow-x: hidden` on <body> too implicitly resolves
+   <body>'s overflow-y from `visible` to `auto`, which makes <body> the
+   page's scroll container and breaks `position: sticky` for nested
+   elements (the Tunnel's sticky stage in particular). Keep <body> in
+   normal flow. */
+html { width: 100%; overflow-x: hidden; }
+body { width: 100%; }
 
 body {
   font-family: 'Inter', system-ui, sans-serif;

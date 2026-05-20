@@ -3,24 +3,23 @@
 import { useEffect, useRef, useState } from 'react';
 
 interface Result {
-  /** Attach to the tall wrapper element (5× viewport tall). */
+  /** Attach to the tall wrapper element (sized via CSS dvh units). */
   ref: React.RefObject<HTMLDivElement | null>;
   /** Normalized scroll progress through the wrapper, [0, 1]. */
   progress: number;
-  /** Current viewport height in px — drives the sticky stage's height. */
-  containerH: number;
 }
 
 // Tunnel scroll tracker. Reads the wrapper's bounding rect on every rAF
 // scroll tick and computes a normalized progress. Falls back to a 100ms
-// setInterval poll so iOS Safari (which sometimes throttles scroll events
-// during momentum or address-bar collapse) stays in sync.
+// setInterval poll so iOS Safari (which sometimes throttles scroll
+// events during momentum or address-bar collapse) stays in sync.
+//
+// Heights are CSS-driven (dvh units in TunnelShell) so server and
+// client render the same markup — the hook only tracks scroll position,
+// not layout sizes.
 export const useTunnelScroll = (): Result => {
   const ref = useRef<HTMLDivElement | null>(null);
   const [progress, setProgress] = useState(0);
-  const [containerH, setContainerH] = useState(() =>
-    typeof window === 'undefined' ? 800 : window.innerHeight
-  );
 
   useEffect(() => {
     const node = ref.current;
@@ -28,7 +27,6 @@ export const useTunnelScroll = (): Result => {
 
     let rafId = 0;
     let lastP = -1;
-    let lastH = -1;
 
     const tick = () => {
       if (!ref.current) return;
@@ -41,10 +39,6 @@ export const useTunnelScroll = (): Result => {
       if (Math.abs(p - lastP) > 0.0008) {
         lastP = p;
         setProgress(p);
-      }
-      if (vh !== lastH) {
-        lastH = vh;
-        setContainerH(vh);
       }
     };
 
@@ -71,5 +65,5 @@ export const useTunnelScroll = (): Result => {
     };
   }, []);
 
-  return { ref, progress, containerH };
+  return { ref, progress };
 };
