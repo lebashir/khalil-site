@@ -1,9 +1,11 @@
 'use client';
 
+import { useEffect } from 'react';
 import type { SiteContent } from '@/lib/content';
 import type { VideoItem } from '@/lib/youtube';
 import { useModeFlipContext } from '@/components/topbar';
 import { TopBarMode } from '@/components/topbar';
+import { startStadiumAmbient, stopStadiumAmbient } from '@/lib/audio/sounds';
 import { THEMES } from './theme';
 import { useArenaSize } from './useArenaSize';
 import { SceneBackground } from './bg/SceneBackground';
@@ -31,6 +33,18 @@ export const ArenaShell = ({ content, videos, videoError }: Props) => {
   const { mode } = useModeFlipContext();
   const size = useArenaSize();
   const theme = THEMES[mode];
+
+  // Stadium crowd ambient — only when football mode is active on the
+  // homepage. Fades in/out smoothly on mode flip; stops on unmount so
+  // it doesn't follow the user into /edit or /intro.
+  useEffect(() => {
+    if (mode === 'football') {
+      startStadiumAmbient();
+    } else {
+      stopStadiumAmbient();
+    }
+    return () => stopStadiumAmbient();
+  }, [mode]);
 
   return (
     <div style={{ position: 'relative', minHeight: '100dvh', overflow: 'hidden', background: '#000' }}>

@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useMode } from '@/components/ModeProvider';
 import type { Mode } from '@/lib/content';
+import { playModeFlip } from '@/lib/audio/sounds';
 import { FLIP_EVENT, FLIP_TIMING } from './palette';
 
 export interface ModeFlipTransition {
@@ -47,6 +48,10 @@ export const useModeFlip = (): UseModeFlipResult => {
     if (busy.current) return;
     busy.current = true;
     const target: Mode = mode === 'gaming' ? 'football' : 'gaming';
+
+    // Fire the audio transition immediately — same moment the slab wipe
+    // starts on screen so the sound peaks with the visual.
+    playModeFlip(target);
 
     if (prefersReducedMotion()) {
       setMode(target);
