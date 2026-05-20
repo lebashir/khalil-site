@@ -1,7 +1,10 @@
 {
   "defaultMode": "gaming",
   "handle": "@khalilgaming2020",
-  "subs": { "current": 744, "goal": 1000 },
+  "subs": {
+    "current": 744,
+    "goal": 1000
+  },
   "mood": "online",
   "hero": {
     "gaming": {
@@ -18,12 +21,48 @@
     }
   },
   "stats": {
-    "gaming":   { "labels": ["K/D", "WINS", "STREAK", "RANK"],   "values": ["4.2", "128", "11", "GOAT"] },
-    "football": { "labels": ["GOALS", "CAPS", "TROPHIES", "XG"], "values": ["27", "34", "6", "0.71"] }
+    "gaming": {
+      "labels": [
+        "K/D",
+        "WINS",
+        "STREAK",
+        "RANK"
+      ],
+      "values": [
+        "4.2",
+        "128",
+        "11",
+        "GOAT"
+      ]
+    },
+    "football": {
+      "labels": [
+        "GOALS",
+        "CAPS",
+        "TROPHIES",
+        "XG"
+      ],
+      "values": [
+        "27",
+        "34",
+        "6",
+        "0.71"
+      ]
+    }
   },
   "now": {
-    "gaming":   { "playing": "Fortnite — Zero Build",   "watching": "MrBeast challenges",          "reading": "Diary of a Wimpy Kid #18", "listening": "Bad Bunny" },
-    "football": { "playing": "FC 25 Career Mode",       "watching": "Champions League highlights", "reading": "Pelé: My Life",            "listening": "FIFA soundtrack 2002" }
+    "gaming": {
+      "playing": "Fortnite — Zero Build",
+      "watching": "MrBeast challenges",
+      "reading": "Diary of a Wimpy Kid #18",
+      "listening": "Bad Bunny"
+    },
+    "football": {
+      "playing": "FC 25 Career Mode",
+      "watching": "Champions League highlights",
+      "reading": "Pelé: My Life",
+      "listening": "FIFA soundtrack 2002"
+    }
   },
   "about": [
     "yo. i'm khalil. i'm 10. i play *fortnite*, *roblox*, and *brawl stars*, and i post the clips that make my friends scream. when i'm not gaming i'm chasing a football around — biggest *real madrid* fan you'll ever meet, and yeah, i'm definitely ronaldo when i grow up.",
@@ -36,6 +75,45 @@
     "description": "My grandma started it with me last Christmas — now I'm finishing it myself. Stories, drawings, and the funniest stuff that happens at school. First copies dropping soon.",
     "chapter": "ch. 4 of 12",
     "status": "first copies dropping soon"
+  },
+  "videos": {
+    "useDesignThumbForFeatured": true,
+    "useDesignThumbsForRest": true,
+    "designThumbs": [
+      {
+        "from": "#5b3aa6",
+        "to": "#1a0a3a",
+        "emoji": "🎮"
+      },
+      {
+        "from": "#d97757",
+        "to": "#7a2e1a",
+        "emoji": "⭐"
+      },
+      {
+        "from": "#2a7d4f",
+        "to": "#0e3a1f",
+        "emoji": "🟩"
+      },
+      {
+        "from": "#1a3a8a",
+        "to": "#000d33",
+        "emoji": "⚽"
+      },
+      {
+        "from": "#b8527a",
+        "to": "#3a0a1f",
+        "emoji": "🐐"
+      }
+    ],
+    "tiers": [
+      "LEGENDARY",
+      "EPIC",
+      "RARE",
+      "EPIC",
+      "COMMON"
+    ],
+    "pinnedId": null
   },
   "videos": {
     "useDesignThumbForFeatured": false,
