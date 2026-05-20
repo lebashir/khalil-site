@@ -82,16 +82,45 @@ const attachBootstrap = (): void => {
   bootstrapAttached = true;
 
   const unlock = () => {
-    ensureCtx();
+    const c = ensureCtx();
+    if (!c) return;
+
+    // iOS Safari quirk #1: a one-sample silent buffer played inside the
+    // user gesture handler fully primes the audio pipeline. Without this
+    // some iOS versions stay "muted" even after resume() reports running.
+    try {
+      const buf = c.createBuffer(1, 1, 22050);
+      const src = c.createBufferSource();
+      src.buffer = buf;
+      src.connect(c.destination);
+      src.start(0);
+    } catch {
+      // Older iOS may throw on createBufferSource — ignore and rely on resume
+    }
+
+    // iOS Safari quirk #2: resume must be called synchronously from inside
+    // the gesture handler. The promise itself can still be async — what
+    // matters is the invocation happens during the gesture window.
+    if (c.state === 'suspended') {
+      void c.resume().catch(() => undefined);
+    }
+
     window.removeEventListener('pointerdown', unlock);
     window.removeEventListener('touchstart', unlock);
+    window.removeEventListener('touchend', unlock);
     window.removeEventListener('keydown', unlock);
+    window.removeEventListener('click', unlock);
     window.removeEventListener('scroll', unlock);
   };
 
+  // Listen for every plausible gesture type. iOS doesn't reliably treat
+  // passive scroll as a gesture for audio-unlock purposes, so we lean on
+  // pointerdown/touchstart/touchend/click as well.
   window.addEventListener('pointerdown', unlock);
   window.addEventListener('touchstart', unlock, { passive: true });
+  window.addEventListener('touchend', unlock);
   window.addEventListener('keydown', unlock);
+  window.addEventListener('click', unlock);
   window.addEventListener('scroll', unlock, { passive: true });
 };
 
