@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import { ModeProvider } from '@/components/ModeProvider';
 import { ThemeColor } from '@/components/ThemeColor';
 import { ModeFlipProvider } from '@/components/topbar';
+import { MuteToggle } from '@/components/audio/MuteToggle';
 import { getContent } from '@/lib/content';
 import './globals.css';
 
@@ -77,6 +78,7 @@ const RootLayout = ({ children }: { children: React.ReactNode }) => {
         <ModeProvider initialMode={defaultMode}>
           <ThemeColor />
           <ModeFlipProvider>{children}</ModeFlipProvider>
+          <MuteToggle />
         </ModeProvider>
       </body>
     </html>

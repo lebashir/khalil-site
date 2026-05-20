@@ -1,6 +1,8 @@
 'use client';
 
+import { useEffect, useRef } from 'react';
 import type { Mode } from '@/lib/content';
+import { playPayload } from '@/lib/audio/sounds';
 import { ED, FONT, PAYLOADS, type PayloadId } from './constants';
 import { Panel, ToggleChip } from './primitives';
 import { SiteMiniature } from './SiteMiniature';
@@ -30,6 +32,18 @@ export const LaunchWindow = ({
   isDesktop
 }: Props) => {
   const p = PAYLOADS.find((x) => x.id === payload) ?? PAYLOADS[0]!;
+
+  // Plays the matching synth burst whenever launchNonce bumps. The ref
+  // guard means re-renders for other reasons (mode flip, hover, etc.)
+  // don't accidentally fire the sound again.
+  const lastNonceRef = useRef(0);
+  useEffect(() => {
+    if (launchNonce > lastNonceRef.current) {
+      lastNonceRef.current = launchNonce;
+      if (launchNonce > 0) playPayload(payload);
+    }
+  }, [launchNonce, payload]);
+
   const bg =
     mode === 'gaming'
       ? 'radial-gradient(ellipse at 50% 0%, #3a0a5a 0%, #1a0838 35%, #08010c 80%)'

@@ -1,9 +1,16 @@
 'use client';
 
+import { useEffect, useRef } from 'react';
 import type { SiteContent } from '@/lib/content';
 import type { VideoItem } from '@/lib/youtube';
 import { TopBarMode, useModeFlipContext } from '@/components/topbar';
 import { useArenaSize } from '@/components/arena/useArenaSize';
+import {
+  playEnterChime,
+  playRoomEngage,
+  startIntroHum,
+  stopIntroHum
+} from '@/lib/audio/sounds';
 import { TUNNEL_THEMES } from './theme';
 import { SCENES, sceneState, clamp } from './state';
 import { useTunnelScroll } from './useTunnelScroll';
@@ -40,6 +47,57 @@ export const TunnelShell = ({ content, videos }: Props) => {
   // takes 5× that for a comfortable scroll budget across the 5 rooms.
   const trackHeight = '500dvh';
   const stageHeight = '100dvh';
+
+  // ── Audio: ambient hum + scene-engage thunks + ENTER chime ──────────────
+
+  // Start the ambient hum on the user's first gesture (browser autoplay
+  // policy requires it). Stop on unmount.
+  useEffect(() => {
+    let started = false;
+    const onGesture = () => {
+      if (started) return;
+      started = true;
+      startIntroHum();
+      detach();
+    };
+    const detach = () => {
+      window.removeEventListener('scroll', onGesture);
+      window.removeEventListener('pointerdown', onGesture);
+      window.removeEventListener('keydown', onGesture);
+      window.removeEventListener('touchstart', onGesture);
+    };
+    window.addEventListener('scroll', onGesture, { passive: true });
+    window.addEventListener('pointerdown', onGesture);
+    window.addEventListener('keydown', onGesture);
+    window.addEventListener('touchstart', onGesture, { passive: true });
+    return () => {
+      detach();
+      stopIntroHum();
+    };
+  }, []);
+
+  // Track which scene's lockStart we've most recently crossed and fire
+  // the matching sound. Sub-rooms get a 'thunk'; the final SUBSCRIBE room
+  // gets the bell-chord ENTER chime. Skips the very first scene so the
+  // hum's fade-in doesn't collide with a thunk.
+  const lastEngagedRef = useRef(-1);
+  useEffect(() => {
+    let idx = -1;
+    for (let i = 0; i < SCENES.length; i++) {
+      const scene = SCENES[i];
+      if (scene && progress >= scene.lockStart) idx = i;
+      else break;
+    }
+    if (idx > lastEngagedRef.current) {
+      for (let i = lastEngagedRef.current + 1; i <= idx; i++) {
+        const scene = SCENES[i];
+        if (!scene) continue;
+        if (scene.id === 'subscribe') playEnterChime();
+        else if (i > 0) playRoomEngage();
+      }
+      lastEngagedRef.current = idx;
+    }
+  }, [progress]);
 
   return (
     <div

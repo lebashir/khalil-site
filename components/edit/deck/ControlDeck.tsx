@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { Mode, Mood, NowBlock, SiteContent } from '@/lib/content';
 import type { VideoItem } from '@/lib/youtube';
+import { playPlunger } from '@/lib/audio/sounds';
 import { ED, FONT, type FuseId, type PayloadId } from './constants';
 import { TopBar, type DeckTab } from './TopBar';
 import { LaunchWindow } from './LaunchWindow';
@@ -119,6 +120,9 @@ export const ControlDeck = ({ initialContent, videos }: ControlDeckProps) => {
     setLaunching(true);
     setErrors([]);
     setToast(null);
+    // Plunger sound fires first; the LaunchWindow useEffect plays the
+    // matching payload sound when launchNonce bumps a beat later.
+    playPlunger();
     // Animate the in-deck CRT immediately — visual feedback shouldn't wait
     // on a network round-trip.
     setLaunchNonce((n) => n + 1);

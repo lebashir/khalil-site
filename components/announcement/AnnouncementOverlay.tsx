@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import { Burst } from '@/components/edit/deck/Burst';
 import { PAYLOADS } from '@/components/edit/deck/constants';
+import { playPayload } from '@/lib/audio/sounds';
 import { useAnnouncement } from './useAnnouncement';
 
 // Auto-dismiss for non-refresh fuses. 'refresh' stays until page reload
@@ -18,6 +19,14 @@ export const AnnouncementOverlay = () => {
     const id = window.setTimeout(dismiss, AUTO_DISMISS_MS);
     return () => window.clearTimeout(id);
   }, [announcement, dismiss]);
+
+  // Fire the matching payload sound the moment a new announcement appears.
+  // The hook only re-renders with a new object when polling picks one up,
+  // so this effectively fires once per broadcast.
+  useEffect(() => {
+    if (!announcement) return;
+    playPayload(announcement.payload);
+  }, [announcement]);
 
   if (!announcement) return null;
 
