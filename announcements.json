@@ -1,6 +1,13 @@
 {
   "items": [
     {
+      "id": "49fa3427-51f4-44e3-b785-aca7e9795343",
+      "firedAt": 1779301721707,
+      "message": "test",
+      "payload": "confetti",
+      "fuse": "now"
+    },
+    {
       "id": "0ac88c59-4668-458f-9546-d930bb11d827",
       "firedAt": 1779301709758,
       "message": "test",
