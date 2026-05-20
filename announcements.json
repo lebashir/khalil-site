@@ -1,6 +1,13 @@
 {
   "items": [
     {
+      "id": "14644c32-355e-4b21-b379-43747a5372cf",
+      "firedAt": 1779304787932,
+      "message": "Hi marcin I see you !!1",
+      "payload": "fire",
+      "fuse": "now"
+    },
+    {
       "id": "2b9b1207-23b8-4f77-9a78-d9d14e7565d9",
       "firedAt": 1779301750597,
       "message": "test",
