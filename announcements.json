@@ -1,0 +1,11 @@
+{
+  "items": [
+    {
+      "id": "3776efaf-d4ab-41c9-8035-6e980b4b605d",
+      "firedAt": 1779301065657,
+      "message": "yoooo",
+      "payload": "confetti",
+      "fuse": "now"
+    }
+  ]
+}
