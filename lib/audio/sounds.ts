@@ -4,7 +4,12 @@
 // with a single ramp.
 
 import type { AnnouncementPayload } from '@/lib/announcement';
-import { ensureCtx, master } from './engine';
+import { SAFE_START_OFFSET, ensureCtx, master } from './engine';
+
+// Returns a "safe now" — currentTime plus a small buffer. Without this,
+// browsers may drop scheduled oscillator events whose start time is in
+// the past by the time AudioContext.resume() completes.
+const safeNow = (ctx: AudioContext): number => ctx.currentTime + SAFE_START_OFFSET;
 
 // ── Primitive helpers ──────────────────────────────────────────────────────
 
@@ -58,7 +63,7 @@ export const playPlunger = (): void => {
   const ctx = ensureCtx();
   const dest = master();
   if (!ctx || !dest) return;
-  const t0 = ctx.currentTime;
+  const t0 = safeNow(ctx);
 
   // KA — bandpassed noise burst
   const ka = noiseSource(ctx, 0.06);
@@ -217,7 +222,7 @@ export const playPayload = (id: AnnouncementPayload): void => {
   const ctx = ensureCtx();
   const dest = master();
   if (!ctx || !dest) return;
-  const t0 = ctx.currentTime;
+  const t0 = safeNow(ctx);
   switch (id) {
     case 'confetti':
       return playConfetti(ctx, dest, t0);
@@ -251,11 +256,13 @@ export const startIntroHum = (): void => {
   if (!ctx || !dest) return;
   if (humNodes) return; // already running
 
-  const t0 = ctx.currentTime;
+  const t0 = safeNow(ctx);
 
   const gain = ctx.createGain();
   gain.gain.setValueAtTime(0, t0);
-  gain.gain.linearRampToValueAtTime(0.18, t0 + 1.2);
+  // Faster fade-in so the user notices the engine kick on within the
+  // first half-second of scrolling.
+  gain.gain.linearRampToValueAtTime(0.28, t0 + 0.45);
 
   const filt = ctx.createBiquadFilter();
   filt.type = 'lowpass';
@@ -298,7 +305,7 @@ export const stopIntroHum = (): void => {
     humNodes = null;
     return;
   }
-  const t0 = ctx.currentTime;
+  const t0 = safeNow(ctx);
   const { osc1, osc2, lfo, gain } = humNodes;
   gain.gain.cancelScheduledValues(t0);
   gain.gain.setValueAtTime(gain.gain.value, t0);
@@ -313,7 +320,7 @@ export const playRoomEngage = (): void => {
   const ctx = ensureCtx();
   const dest = master();
   if (!ctx || !dest) return;
-  const t0 = ctx.currentTime;
+  const t0 = safeNow(ctx);
 
   // Sine swoop down + light noise tail
   const osc = ctx.createOscillator();
@@ -342,7 +349,7 @@ export const playEnterChime = (): void => {
   const ctx = ensureCtx();
   const dest = master();
   if (!ctx || !dest) return;
-  const t0 = ctx.currentTime;
+  const t0 = safeNow(ctx);
   // Bell-chord arpeggio: C5 E5 G5 C6 with shimmery harmonics
   const notes = [523.25, 659.25, 783.99, 1046.5];
   notes.forEach((freq, i) => {

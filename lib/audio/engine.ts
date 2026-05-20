@@ -62,3 +62,37 @@ export const setMuted = (next: boolean): void => {
 };
 
 export const isMuted = (): boolean => muted;
+
+// Some browsers (especially Safari) silently drop oscillator events
+// scheduled in the past after resume() completes. Sound functions add
+// this small offset to currentTime so the schedule is always in the
+// future when audio actually starts running.
+export const SAFE_START_OFFSET = 0.04;
+
+// Auto-bootstrap: attach a one-shot "first user gesture" listener as
+// soon as this module is loaded. Calling ensureCtx() from inside a
+// gesture handler is what actually transitions the AudioContext from
+// "suspended" to "running", so by the time any sound-playing function
+// is called, the context is already unlocked.
+let bootstrapAttached = false;
+
+const attachBootstrap = (): void => {
+  if (bootstrapAttached) return;
+  if (typeof window === 'undefined') return;
+  bootstrapAttached = true;
+
+  const unlock = () => {
+    ensureCtx();
+    window.removeEventListener('pointerdown', unlock);
+    window.removeEventListener('touchstart', unlock);
+    window.removeEventListener('keydown', unlock);
+    window.removeEventListener('scroll', unlock);
+  };
+
+  window.addEventListener('pointerdown', unlock);
+  window.addEventListener('touchstart', unlock, { passive: true });
+  window.addEventListener('keydown', unlock);
+  window.addEventListener('scroll', unlock, { passive: true });
+};
+
+attachBootstrap();
