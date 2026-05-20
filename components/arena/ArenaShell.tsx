@@ -15,6 +15,7 @@ import { Videos } from './Videos';
 import { About } from './About';
 import { Book } from './Book';
 import { Foot } from './Foot';
+import { AnnouncementOverlay } from '@/components/announcement/AnnouncementOverlay';
 
 interface Props {
   content: SiteContent;
@@ -46,6 +47,11 @@ export const ArenaShell = ({ content, videos, videoError }: Props) => {
         <Book book={content.book} theme={theme} size={size} />
         <Foot theme={theme} size={size} socials={content.socials} />
       </div>
+
+      {/* Site-wide announcement overlay — polls /api/announcement every
+          ~15s and pops a fullscreen burst when Khalil fires the plunger
+          from /edit. */}
+      <AnnouncementOverlay />
     </div>
   );
 };

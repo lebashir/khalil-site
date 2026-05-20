@@ -27,6 +27,14 @@ const SAVE_TOAST_MS = 5000;
 const LAUNCH_ANIM_MS = 1500;
 const SAVE_URL = '/api/edit/save';
 const LOGOUT_URL = '/api/edit/logout';
+const ANNOUNCE_URL = '/api/edit/announcement';
+
+const FUSE_TOAST: Record<FuseId, string> = {
+  now: 'Visitors see it within ~15 seconds.',
+  visit: 'First-time visitors will see it (next 24h).',
+  refresh: 'Shows on every reload for the next hour.',
+  '1h': 'Scheduled for 1 hour from now.'
+};
 
 interface Viewport {
   isPhone: boolean;
@@ -106,15 +114,37 @@ export const ControlDeck = ({ initialContent, videos }: ControlDeckProps) => {
     window.location.href = '/edit';
   }, []);
 
-  const onFire = useCallback(() => {
+  const onFire = useCallback(async () => {
     if (launching || !msg.trim()) return;
     setLaunching(true);
+    setErrors([]);
+    setToast(null);
+    // Animate the in-deck CRT immediately — visual feedback shouldn't wait
+    // on a network round-trip.
     setLaunchNonce((n) => n + 1);
-    window.setTimeout(() => {
-      setLaunching(false);
-      setMsg('');
-    }, LAUNCH_ANIM_MS);
-  }, [launching, msg]);
+    try {
+      const res = await fetch(ANNOUNCE_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: msg, payload, fuse })
+      });
+      const data = (await res.json()) as { ok: boolean; error?: string };
+      if (data.ok) {
+        setToast(`Launched — ${FUSE_TOAST[fuse]}`);
+        window.setTimeout(() => setToast(null), SAVE_TOAST_MS);
+      } else {
+        setErrors([data.error ?? 'Launch failed.']);
+      }
+    } catch {
+      setErrors(['Network error — your message is still here, try Launch again.']);
+    } finally {
+      window.setTimeout(() => {
+        setLaunching(false);
+        // Intentionally keep `msg` so it can be re-fired with a different
+        // payload or fuse without retyping.
+      }, LAUNCH_ANIM_MS);
+    }
+  }, [launching, msg, payload, fuse]);
 
   // Focused setters for non-inline modules in the LAUNCH tab
   const setMood = (mood: Mood) => setContent({ ...content, mood });
