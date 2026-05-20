@@ -5,7 +5,7 @@
     "current": 744,
     "goal": 1000
   },
-  "mood": "on-fire",
+  "mood": "online",
   "hero": {
     "gaming": {
       "tagline": "streamer · gamer · goat",
@@ -77,8 +77,8 @@
     "status": "first copies dropping soon"
   },
   "videos": {
-    "useDesignThumbForFeatured": false,
-    "useDesignThumbsForRest": false,
+    "useDesignThumbForFeatured": true,
+    "useDesignThumbsForRest": true,
     "designThumbs": [
       {
         "from": "#5b3aa6",
