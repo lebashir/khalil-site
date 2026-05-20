@@ -183,6 +183,48 @@ a {
   100% { transform: translate(var(--dx), var(--dy)) rotate(var(--dr)); opacity: 0; }
 }
 
+/* ── Edit / Control Deck keyframes ────────────────────────────────────────
+   Ported from design/directions/edit.jsx. Drive the LED blinks, plunger
+   press, missile shake, CRT scan beam, and message-stamp explosion in
+   the LaunchWindow. */
+
+@keyframes ed-blink-led { 0%, 55%, 100% { opacity: 1; } 60%, 90% { opacity: .3; } }
+@keyframes ed-blink-slow { 0%, 80%, 100% { opacity: 1; } 90% { opacity: .25; } }
+@keyframes ed-scan { 0% { transform: translateY(-100%); } 100% { transform: translateY(100%); } }
+
+@keyframes ed-plunge-down {
+  0%   { transform: translateY(0); }
+  18%  { transform: translateY(34px); }
+  45%  { transform: translateY(34px); }
+  100% { transform: translateY(0); }
+}
+
+@keyframes ed-shake-mini {
+  0%, 100% { transform: translate(0, 0); }
+  20% { transform: translate(-2px, 1px); }
+  40% { transform: translate(2px, -2px); }
+  60% { transform: translate(-1px, 2px); }
+  80% { transform: translate(2px, 1px); }
+}
+
+@keyframes ed-msg-stamp {
+  0%   { transform: translate(-50%, -50%) scale(.3) rotate(-6deg); opacity: 0; filter: blur(8px); }
+  55%  { transform: translate(-50%, -50%) scale(1.15) rotate(2deg); opacity: 1; filter: blur(0); }
+  72%  { transform: translate(-50%, -50%) scale(.96) rotate(-1deg); }
+  100% { transform: translate(-50%, -50%) scale(1) rotate(0); opacity: 1; }
+}
+
+@keyframes ed-shock-ring {
+  0%   { transform: translate(-50%, -50%) scale(.2); opacity: .9; }
+  100% { transform: translate(-50%, -50%) scale(3); opacity: 0; }
+}
+
+@keyframes ed-tick { 50% { opacity: 0.4; } }
+
+.ed-led { animation: ed-blink-led 2.6s ease-in-out infinite; }
+.ed-led-slow { animation: ed-blink-slow 3.6s ease-in-out infinite; }
+.ed-tick { animation: ed-tick 1s steps(2, end) infinite; }
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

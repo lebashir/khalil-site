@@ -1,11 +1,12 @@
 import { cookies } from 'next/headers';
 import { getContent } from '@/lib/content';
 import { SESSION_COOKIE, verifyToken } from '@/lib/edit-session';
+import { getRecentVideos } from '@/lib/youtube';
 import { LoginForm } from '@/components/edit/LoginForm';
-import { EditForm } from '@/components/edit/EditForm';
+import { ControlDeck } from '@/components/edit/deck/ControlDeck';
 
 export const metadata = {
-  title: 'Edit · Khalil the Goat',
+  title: 'Control Deck · Khalil the Goat',
   robots: { index: false, follow: false }
 };
 
@@ -25,8 +26,12 @@ const EditPage = async () => {
   }
 
   if (!isLoggedIn) return <LoginForm />;
+
   const content = getContent();
-  return <EditForm initialContent={content} />;
+  // Pull videos so the PinnedVideoModule + ReplaysPreview have data.
+  // Falls back to an empty list if no YOUTUBE_API_KEY is set.
+  const { videos } = await getRecentVideos();
+  return <ControlDeck initialContent={content} videos={videos} />;
 };
 
 export default EditPage;
