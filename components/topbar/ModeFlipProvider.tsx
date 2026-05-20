@@ -3,6 +3,7 @@
 import { createContext, useContext, type ReactNode } from 'react';
 import type { Mode } from '@/lib/content';
 import { useModeFlip, type ModeFlipTransition } from './useModeFlip';
+import { useSwipeToFlip } from './useSwipeToFlip';
 import { ModeFlipOverlay } from './ModeFlipOverlay';
 
 interface ModeFlipContextValue {
@@ -24,6 +25,9 @@ interface Props {
 // (even /intro and /edit, which don't render the topbar themselves).
 export const ModeFlipProvider = ({ children }: Props) => {
   const value = useModeFlip();
+  // Page-wide horizontal swipe → flip. Touch-only, single-finger,
+  // skips interactive elements + [data-no-swipe] containers.
+  useSwipeToFlip(value.flip);
   return (
     <ModeFlipContext.Provider value={value}>
       {children}

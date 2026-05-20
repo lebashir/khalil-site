@@ -32,6 +32,7 @@ export const PinEditor = ({ open, title, kicker, accent, onClose, children }: Pi
       <div
         onClick={onClose}
         aria-hidden
+        data-no-swipe
         style={{
           position: 'fixed',
           inset: 0,
@@ -48,6 +49,7 @@ export const PinEditor = ({ open, title, kicker, accent, onClose, children }: Pi
       <aside
         role="dialog"
         aria-label={title}
+        data-no-swipe
         style={{
           position: 'fixed',
           top: 0,
