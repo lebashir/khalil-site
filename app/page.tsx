@@ -1,25 +1,11 @@
-import { ModeToggleBanner } from '@/components/ModeToggleBanner';
-import { HeroScene } from '@/components/HeroScene/HeroScene';
-import { Videos } from '@/components/Videos';
-import { About } from '@/components/About';
-import { Books } from '@/components/Books';
-import { Footer } from '@/components/Footer';
+import { ArenaShell } from '@/components/arena/ArenaShell';
 import { getContent } from '@/lib/content';
+import { getRecentVideos } from '@/lib/youtube';
 
-const HomePage = () => {
+const HomePage = async () => {
   const content = getContent();
-  return (
-    <>
-      <ModeToggleBanner />
-      <HeroScene content={content} />
-      <main className="relative z-10 mx-auto max-w-[1200px] px-4 pb-20 sm:px-8">
-        <Videos />
-        <About content={content} />
-        <Books content={content} />
-      </main>
-      <Footer content={content} />
-    </>
-  );
+  const { videos, error } = await getRecentVideos();
+  return <ArenaShell content={content} videos={videos} videoError={error} />;
 };
 
 export default HomePage;

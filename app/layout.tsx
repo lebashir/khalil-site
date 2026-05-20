@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import { ModeProvider } from '@/components/ModeProvider';
 import { ThemeColor } from '@/components/ThemeColor';
+import { ModeFlipProvider } from '@/components/topbar';
 import { getContent } from '@/lib/content';
 import './globals.css';
 
@@ -31,10 +32,10 @@ export const metadata: Metadata = {
 // the non-media-queried theme-color on mode change so iOS Safari's status bar tints live.
 export const viewport: Viewport = {
   themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#1a0a3a' },
-    { media: '(prefers-color-scheme: dark)',  color: '#1a0a3a' },
+    { media: '(prefers-color-scheme: light)', color: '#0e0030' },
+    { media: '(prefers-color-scheme: dark)',  color: '#0e0030' },
     // The bare entry below is the one ThemeColor mutates per mode.
-    { color: '#1a0a3a' }
+    { color: '#0e0030' }
   ],
   width: 'device-width',
   initialScale: 1,
@@ -67,7 +68,7 @@ const RootLayout = ({ children }: { children: React.ReactNode }) => {
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
         <link
-          href="https://fonts.googleapis.com/css2?family=Bungee&family=Russo+One&family=Inter:wght@400;600;800&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Anton&family=Bungee&family=Russo+One&family=Inter:wght@400;600;700;800;900&family=DM+Mono:wght@400;500&display=swap"
           rel="stylesheet"
         />
         <script dangerouslySetInnerHTML={{ __html: inlineModeScript }} />
@@ -75,7 +76,7 @@ const RootLayout = ({ children }: { children: React.ReactNode }) => {
       <body>
         <ModeProvider initialMode={defaultMode}>
           <ThemeColor />
-          {children}
+          <ModeFlipProvider>{children}</ModeFlipProvider>
         </ModeProvider>
       </body>
     </html>

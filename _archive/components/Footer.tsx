@@ -19,6 +19,7 @@ const SocialLink = ({ href, label, glyph }: { href: string; label: string; glyph
     );
   }
   return (
+    
     <a
       href={href}
       target="_blank"

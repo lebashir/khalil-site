@@ -2,35 +2,40 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ── Mode palettes ────────────────────────────────────────────────────────
+   Source of truth (mirrored in components/topbar/palette.ts). Keep these
+   two in sync — the topbar uses raw hex strings; everything else uses
+   CSS vars driven by the html.gaming / html.football class. */
+
 :root,
 html.gaming,
 .preview-scope.gaming {
-  --bg-1: #0a0420;
-  --bg-2: #1a0a3a;
-  --bg-3: #2a0f5a;
-  --accent: #00b8ff;
-  --accent-2: #b026ff;
-  --accent-3: #ff2bd6;
+  --bg-1: #0e0030;
+  --bg-2: #3a0a5a;
+  --bg-3: #5a14a0;
+  --accent: #00f0ff;
+  --accent-2: #ff2bd6;
+  --accent-3: #ffe600;
   --text: #ffffff;
   --text-dim: #b8c4ff;
   --card: rgba(40, 20, 90, 0.55);
-  --card-border: rgba(176, 38, 255, 0.4);
-  --glow: 0 0 28px rgba(0, 184, 255, 0.6), 0 0 60px rgba(176, 38, 255, 0.35);
+  --card-border: rgba(0, 240, 255, 0.4);
+  --glow: 0 0 28px rgba(0, 240, 255, 0.55), 0 0 60px rgba(255, 43, 214, 0.3);
   --display-font: 'Bungee', cursive;
 }
 
 html.football,
 .preview-scope.football {
   --bg-1: #001233;
-  --bg-2: #002970;
-  --bg-3: #0046b5;
-  --accent: #ffffff;
-  --accent-2: #ffd700;
+  --bg-2: #003366;
+  --bg-3: #0a4a2a;
+  --accent: #ffd700;
+  --accent-2: #ffffff;
   --accent-3: #4d8fff;
   --text: #ffffff;
   --text-dim: #c8d8ff;
   --card: rgba(0, 30, 90, 0.55);
-  --card-border: rgba(255, 215, 0, 0.45);
+  --card-border: rgba(255, 215, 0, 0.5);
   --glow: 0 0 28px rgba(255, 215, 0, 0.55), 0 0 60px rgba(255, 255, 255, 0.2);
   --display-font: 'Russo One', sans-serif;
 }
@@ -48,34 +53,24 @@ body {
   font-family: 'Inter', system-ui, sans-serif;
   color: var(--text);
   background: radial-gradient(ellipse at top left, var(--bg-3) 0%, var(--bg-2) 35%, var(--bg-1) 80%);
-  min-height: 100vh;          /* fallback for browsers without dvh */
-  min-height: 100dvh;          /* dynamic viewport: stable across iOS Safari address-bar shifts */
+  min-height: 100vh;
+  min-height: 100dvh;
   transition: background 0.7s ease;
   position: relative;
-  /* honor the iOS safe area at the bottom of the page (under the home-indicator) */
   padding-bottom: env(safe-area-inset-bottom);
 }
 
-/* Touch screens still need a visible focus ring on tap-focused elements (e.g. when a
-   form field receives focus via JS scroll-into-view, or when VoiceOver moves focus).
-   :focus-visible is the modern path; we leave it on by default in globals. */
-
-/* Prevent iOS Safari from auto-zooming on focus when a form input's font-size < 16px. */
 input,
 textarea,
 select {
   font-size: 16px;
 }
 
-/* Disable double-tap zoom on interactive controls — they handle taps themselves. */
 button,
 a {
   touch-action: manipulation;
 }
 
-/* Backdrop-filter fallback: older iPad / Android Browsers ignore backdrop-filter,
-   leaving the .bg-card translucent panels nearly transparent over the gradient.
-   Bump opacity for clients that don't support backdrop-filter. */
 @supports not ((backdrop-filter: blur(8px)) or (-webkit-backdrop-filter: blur(8px))) {
   html.gaming,
   .preview-scope.gaming {
@@ -94,6 +89,93 @@ a {
   border-radius: 6px;
 }
 
+/* ── Cinematic mode-flip keyframes ────────────────────────────────────────
+   Locked spec from design/directions/topbar.jsx. Total transition = 900ms.
+   Slab sweeps in 0–420ms, flash at 250–800ms, page mode swaps at 400ms,
+   labels fall/rise, six light streaks. Do not retune. */
+
+@keyframes tb-wipe-diag-in {
+  0%   { transform: skewX(-12deg) translateX(120%); }
+  100% { transform: skewX(-12deg) translateX(0); }
+}
+
+@keyframes tb-wipe-diag-out {
+  0%   { transform: skewX(-12deg) translateX(0); }
+  100% { transform: skewX(-12deg) translateX(-120%); }
+}
+
+@keyframes tb-flash-bright {
+  0%   { opacity: 0; }
+  25%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+@keyframes tb-rise-label {
+  0%   { transform: translate(-50%, calc(-50% + 40px)) scale(.6); opacity: 0; filter: blur(8px); }
+  45%  { transform: translate(-50%, calc(-50% - 6px)) scale(1.06); opacity: 1; filter: blur(0); }
+  70%  { transform: translate(-50%, calc(-50% + 2px)) scale(0.98); opacity: 1; }
+  100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+}
+
+@keyframes tb-fall-label {
+  0%   { transform: translate(-50%, -50%); opacity: 1; }
+  100% { transform: translate(-50%, calc(-50% - 30px)); opacity: 0; filter: blur(6px); }
+}
+
+@keyframes tb-streak {
+  0%   { transform: translateX(-100%) skewX(-20deg); opacity: 0; }
+  30%  { opacity: 1; }
+  100% { transform: translateX(120vw) skewX(-20deg); opacity: 0; }
+}
+
+@keyframes tb-shake-mode {
+  0%,100% { transform: translate(0,0); }
+  20% { transform: translate(-5px, 2px); }
+  40% { transform: translate(4px, -3px); }
+  60% { transform: translate(-3px, 3px); }
+  80% { transform: translate(3px, 1px); }
+}
+
+@keyframes tb-blink-led {
+  0%, 92%, 100% { opacity: 1; }
+  96% { opacity: 0.35; }
+}
+
+.tb-host { animation: tb-shake-mode .35s ease-out; }
+.tb-half { transition: flex .55s cubic-bezier(.6,1.4,.3,1), opacity .35s; }
+.tb-half:hover.tb-idle { filter: brightness(1.25); }
+
+/* ── Arena keyframes ──────────────────────────────────────────────────────
+   Ported from design/directions/lib.jsx. Only the keyframes actually used
+   by current Arena components are kept; the rest stayed in the design
+   prototype. */
+
+@keyframes k-bob   { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+@keyframes k-bob-s { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-3px); } }
+
+@keyframes k-pop-in {
+  0%   { transform: scale(.3) rotate(-8deg); opacity: 0; }
+  60%  { transform: scale(1.08) rotate(2deg); opacity: 1; }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+
+@keyframes k-stamp-in {
+  0%   { transform: translateY(-30px) scale(.4); opacity: 0; filter: blur(4px); }
+  70%  { transform: translateY(2px) scale(1.05); opacity: 1; filter: blur(0); }
+  85%  { transform: translateY(-2px) scale(0.98); }
+  100% { transform: translateY(0) scale(1); }
+}
+
+@keyframes k-rise-fade {
+  0%   { transform: translateY(0); opacity: 1; }
+  100% { transform: translateY(-260px); opacity: 0; }
+}
+
+@keyframes k-confetti {
+  0%   { transform: translate(0, 0) rotate(0); opacity: 1; }
+  100% { transform: translate(var(--dx), var(--dy)) rotate(var(--dr)); opacity: 0; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -103,25 +185,3 @@ a {
     transition-duration: 0.15s !important;
   }
 }
-
-/* SVG character outfit swap */
-html.gaming .character .jersey { fill: #00b8ff; }
-html.gaming .character .jersey-accent { fill: #b026ff; }
-html.gaming .character .hoodie-strings { display: block; }
-html.gaming .character .jersey-number { display: none; }
-html.gaming .character .headset { display: block; }
-html.gaming .character .crest { display: none; }
-
-html.football .character .jersey { fill: #ffffff; }
-html.football .character .jersey-accent { fill: #ffd700; }
-html.football .character .hoodie-strings { display: none; }
-html.football .character .jersey-number { display: block; }
-html.football .character .headset { display: none; }
-html.football .character .crest { display: block; }
-
-/* Toggle banner seam shimmer */
-@keyframes seam-shimmer {
-  0%, 100% { opacity: 0.5; }
-  50% { opacity: 1; }
-}
-.seam-shimmer { animation: seam-shimmer 2.4s ease-in-out infinite; }

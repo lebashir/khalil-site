@@ -2,54 +2,110 @@ import contentJson from '@/content.json';
 
 export type Mode = 'gaming' | 'football';
 
-export interface ModeCopy {
+export interface ModeHeroCopy {
   tagline: string;
   bio: string;
+  cta: string;
+  vibe: string;
+}
+
+export interface ModeStats {
+  labels: [string, string, string, string];
+  values: [string, string, string, string];
+}
+
+export interface NowBlock {
+  playing: string;
+  watching: string;
+  reading: string;
+  listening: string;
+}
+
+export interface DesignThumb {
+  from: string;
+  to: string;
+  emoji: string;
+}
+
+export type VideoTier = 'LEGENDARY' | 'EPIC' | 'RARE' | 'COMMON';
+
+export type Mood = 'online' | 'on-fire' | 'streaming' | 'in-school' | 'sleeping';
+
+export interface VideoEditorial {
+  useDesignThumbForFeatured: boolean;
+  useDesignThumbsForRest: boolean;
+  designThumbs: DesignThumb[];
+  tiers: VideoTier[];
+  pinnedId: string | null;
 }
 
 export interface SiteContent {
   defaultMode: Mode;
-  hero: Record<Mode, ModeCopy>;
-  about: {
-    paragraph1: string;
-    paragraph2: string;
-  };
+  handle: string;
+  subs: { current: number; goal: number };
+  mood: Mood;
+  hero: Record<Mode, ModeHeroCopy>;
+  stats: Record<Mode, ModeStats>;
+  now: Record<Mode, NowBlock>;
+  about: string[];
   book: {
     visible: boolean;
     title: string;
+    subtitle: string;
     description: string;
+    chapter: string;
     status: string;
   };
-  socials: {
-    tiktok: string;
-    instagram: string;
-  };
+  videos: VideoEditorial;
+  socials: { tiktok: string; instagram: string };
 }
 
 // Per-field length rails — also used by the /edit form to enforce.
 export const FIELD_LIMITS = {
   tagline: 60,
   bio: 300,
+  cta: 32,
+  vibe: 40,
   aboutParagraph: 600,
   bookTitle: 80,
+  bookSubtitle: 120,
   bookDescription: 500,
   bookStatus: 40,
-  socialUrl: 200
+  bookChapter: 32,
+  socialUrl: 200,
+  handle: 40,
+  nowField: 80,
+  statValue: 12,
+  statLabel: 16
 } as const;
+
+const MOODS: Mood[] = ['online', 'on-fire', 'streaming', 'in-school', 'sleeping'];
 
 export const isMode = (value: unknown): value is Mode =>
   value === 'gaming' || value === 'football';
 
+export const isMood = (value: unknown): value is Mood =>
+  typeof value === 'string' && (MOODS as string[]).includes(value);
+
+// Default values for new schema fields. Used when the /edit form posts an
+// older shape — we merge the validated submission into the current content
+// so the new fields round-trip untouched.
+const DEFAULTS = {
+  handle: '@khalilgaming2020',
+  subs: { current: 744, goal: 1000 },
+  mood: 'online' as Mood,
+  cta: '▶ subscribe',
+  vibe: 'loadout ready'
+};
+
 export const getContent = (): SiteContent => contentJson as SiteContent;
 
-// Validates a partial content object posted from /edit. Returns the normalized
-// content on success, or an array of human-readable errors on failure.
 export type ValidationResult =
   | { ok: true; content: SiteContent }
   | { ok: false; errors: string[] };
 
 const isHttpUrl = (raw: string): boolean => {
-  if (!raw) return true; // empty is allowed — means "no link yet"
+  if (!raw) return true;
   try {
     const parsed = new URL(raw);
     return parsed.protocol === 'https:' || parsed.protocol === 'http:';
@@ -58,74 +114,116 @@ const isHttpUrl = (raw: string): boolean => {
   }
 };
 
-export const validateContent = (raw: unknown): ValidationResult => {
+const text = (val: unknown, label: string, max: number, errors: string[]): string => {
+  if (typeof val !== 'string') { errors.push(`${label} is missing.`); return ''; }
+  const trimmed = val.trim();
+  if (!trimmed) errors.push(`${label} can't be empty.`);
+  if (trimmed.length > max) errors.push(`${label} is too long (max ${max} chars).`);
+  return trimmed;
+};
+
+// Validates a submission against the current schema. Older /edit form
+// payloads (with `about: { paragraph1, paragraph2 }` and no `cta`/`vibe`)
+// are accepted: missing-but-required fields fall back to the values
+// already in content.json (`base`), so unrelated fields round-trip on save.
+export const validateContent = (raw: unknown, base?: SiteContent): ValidationResult => {
   const errors: string[] = [];
   if (!raw || typeof raw !== 'object') {
     return { ok: false, errors: ['Bad content payload.'] };
   }
-  const c = raw as Partial<SiteContent>;
+  const c = raw as Record<string, unknown>;
+  const current = base ?? getContent();
 
-  if (!isMode(c.defaultMode)) errors.push('Pick a default mode (gaming or football).');
+  // Default mode
+  const defaultMode = isMode(c.defaultMode) ? c.defaultMode : null;
+  if (!defaultMode) errors.push('Pick a default mode (gaming or football).');
 
-  const checkText = (val: unknown, label: string, max: number): string => {
-    if (typeof val !== 'string') { errors.push(`${label} is missing.`); return ''; }
-    const trimmed = val.trim();
-    if (!trimmed) errors.push(`${label} can't be empty.`);
-    if (trimmed.length > max) errors.push(`${label} is too long (max ${max} chars).`);
-    return trimmed;
+  // Hero per mode
+  const heroRaw = (c.hero ?? {}) as Record<string, Partial<ModeHeroCopy>>;
+  const buildHero = (mode: Mode): ModeHeroCopy => {
+    const src = heroRaw[mode] ?? {};
+    const fallback = current.hero[mode];
+    return {
+      tagline: text(src.tagline ?? fallback.tagline, `${mode} tagline`, FIELD_LIMITS.tagline, errors),
+      bio: text(src.bio ?? fallback.bio, `${mode} bio`, FIELD_LIMITS.bio, errors),
+      cta: text(src.cta ?? fallback.cta ?? DEFAULTS.cta, `${mode} CTA`, FIELD_LIMITS.cta, errors),
+      vibe: text(src.vibe ?? fallback.vibe ?? DEFAULTS.vibe, `${mode} vibe`, FIELD_LIMITS.vibe, errors)
+    };
   };
 
-  if (!c.hero || typeof c.hero !== 'object') {
-    errors.push('Hero copy is missing.');
+  // About — accept the new string[] shape OR the legacy {paragraph1, paragraph2}.
+  let aboutArr: string[];
+  if (Array.isArray(c.about)) {
+    aboutArr = c.about.map((p, i) => text(p, `About paragraph ${i + 1}`, FIELD_LIMITS.aboutParagraph, errors));
+  } else if (c.about && typeof c.about === 'object') {
+    const legacy = c.about as { paragraph1?: string; paragraph2?: string };
+    aboutArr = [
+      text(legacy.paragraph1 ?? current.about[0] ?? '', 'About paragraph 1', FIELD_LIMITS.aboutParagraph, errors),
+      text(legacy.paragraph2 ?? current.about[1] ?? '', 'About paragraph 2', FIELD_LIMITS.aboutParagraph, errors)
+    ];
+  } else {
+    aboutArr = current.about;
   }
-  const heroGaming = c.hero?.gaming;
-  const heroFootball = c.hero?.football;
-  if (!heroGaming || !heroFootball) errors.push('Both gaming and football hero copies are required.');
+  if (aboutArr.length === 0) errors.push('At least one About paragraph is required.');
 
-  if (!c.about) errors.push('About is missing.');
-  if (!c.book) errors.push('Book is missing.');
-  if (!c.socials) errors.push('Socials are missing.');
+  // Book
+  const bookRaw = (c.book ?? {}) as Partial<SiteContent['book']>;
+  const book: SiteContent['book'] = {
+    visible: typeof bookRaw.visible === 'boolean' ? bookRaw.visible : current.book.visible,
+    title: text(bookRaw.title ?? current.book.title, 'Book title', FIELD_LIMITS.bookTitle, errors),
+    subtitle: text(bookRaw.subtitle ?? current.book.subtitle, 'Book subtitle', FIELD_LIMITS.bookSubtitle, errors),
+    description: text(bookRaw.description ?? current.book.description, 'Book description', FIELD_LIMITS.bookDescription, errors),
+    chapter: text(bookRaw.chapter ?? current.book.chapter, 'Book chapter', FIELD_LIMITS.bookChapter, errors),
+    status: text(bookRaw.status ?? current.book.status, 'Book status', FIELD_LIMITS.bookStatus, errors)
+  };
 
-  if (c.socials) {
-    if (typeof c.socials.tiktok !== 'string' || !isHttpUrl(c.socials.tiktok)) {
-      errors.push('TikTok link should be a full https:// URL or empty.');
-    }
-    if (typeof c.socials.instagram !== 'string' || !isHttpUrl(c.socials.instagram)) {
-      errors.push('Instagram link should be a full https:// URL or empty.');
-    }
+  // Socials
+  const socialsRaw = (c.socials ?? {}) as { tiktok?: string; instagram?: string };
+  const tiktok = (socialsRaw.tiktok ?? current.socials.tiktok ?? '').trim();
+  const instagram = (socialsRaw.instagram ?? current.socials.instagram ?? '').trim();
+  if (!isHttpUrl(tiktok)) errors.push('TikTok link should be a full https:// URL or empty.');
+  if (!isHttpUrl(instagram)) errors.push('Instagram link should be a full https:// URL or empty.');
+
+  // Fields not in the legacy form — preserved from `current` unless the
+  // submission explicitly overrides them. Once /edit step 6 lands, these
+  // become editable; until then the merge keeps them stable.
+  const handle = typeof c.handle === 'string' && c.handle.trim()
+    ? text(c.handle, 'Handle', FIELD_LIMITS.handle, errors)
+    : current.handle;
+
+  let subs = current.subs;
+  if (c.subs && typeof c.subs === 'object') {
+    const s = c.subs as { current?: unknown; goal?: unknown };
+    const cur = typeof s.current === 'number' && s.current >= 0 ? Math.floor(s.current) : current.subs.current;
+    const goal = typeof s.goal === 'number' && s.goal > 0 ? Math.floor(s.goal) : current.subs.goal;
+    subs = { current: cur, goal };
   }
+
+  const mood: Mood = isMood(c.mood) ? c.mood : current.mood;
+
+  const stats = current.stats;
+  const now = current.now;
+  const videos = current.videos;
 
   if (errors.length > 0) return { ok: false, errors };
 
-  // At this point we've checked the top-level shape; do length checks and build the normalized object.
-  const normalized: SiteContent = {
-    defaultMode: c.defaultMode as Mode,
+  const content: SiteContent = {
+    defaultMode: defaultMode as Mode,
+    handle,
+    subs,
+    mood,
     hero: {
-      gaming: {
-        tagline: checkText(heroGaming!.tagline, 'Gaming tagline', FIELD_LIMITS.tagline),
-        bio: checkText(heroGaming!.bio, 'Gaming bio', FIELD_LIMITS.bio)
-      },
-      football: {
-        tagline: checkText(heroFootball!.tagline, 'Football tagline', FIELD_LIMITS.tagline),
-        bio: checkText(heroFootball!.bio, 'Football bio', FIELD_LIMITS.bio)
-      }
+      gaming: buildHero('gaming'),
+      football: buildHero('football')
     },
-    about: {
-      paragraph1: checkText(c.about!.paragraph1, 'About paragraph 1', FIELD_LIMITS.aboutParagraph),
-      paragraph2: checkText(c.about!.paragraph2, 'About paragraph 2', FIELD_LIMITS.aboutParagraph)
-    },
-    book: {
-      visible: Boolean(c.book!.visible),
-      title: checkText(c.book!.title, 'Book title', FIELD_LIMITS.bookTitle),
-      description: checkText(c.book!.description, 'Book description', FIELD_LIMITS.bookDescription),
-      status: checkText(c.book!.status, 'Book status', FIELD_LIMITS.bookStatus)
-    },
-    socials: {
-      tiktok: c.socials!.tiktok.trim(),
-      instagram: c.socials!.instagram.trim()
-    }
+    stats,
+    now,
+    about: aboutArr,
+    book,
+    videos,
+    socials: { tiktok, instagram }
   };
 
   if (errors.length > 0) return { ok: false, errors };
-  return { ok: true, content: normalized };
+  return { ok: true, content };
 };

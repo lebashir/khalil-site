@@ -7,8 +7,10 @@ import { useMode } from '@/components/ModeProvider';
 // We keep two <meta> tags in the document head (one per mode, gated by media query)
 // AND update a single dynamic <meta name="theme-color"> for browsers that don't
 // honor media-queried theme-color (most iOS Safari versions).
+// Mirror components/topbar/palette.ts. Picks the deepest bg shade per mode
+// so the iOS status bar bleeds into the page background.
 const COLORS = {
-  gaming: '#1a0a3a',
+  gaming: '#0e0030',
   football: '#001233'
 } as const;
 

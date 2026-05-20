@@ -36,20 +36,16 @@ export const About = ({ content }: Props) => (
       viewport={{ once: true, amount: 0.3 }}
       transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
     >
-      <motion.p
-        className="mb-4 text-base leading-[1.8] text-text sm:text-lg"
-        variants={paragraphVariants}
-        transition={{ duration: 0.4, delay: 0.08 }}
-      >
-        {renderBold(content.about.paragraph1)}
-      </motion.p>
-      <motion.p
-        className="text-base leading-[1.8] text-text sm:text-lg"
-        variants={paragraphVariants}
-        transition={{ duration: 0.4, delay: 0.16 }}
-      >
-        {renderBold(content.about.paragraph2)}
-      </motion.p>
+      {content.about.map((p, i) => (
+        <motion.p
+          key={i}
+          className={`${i < content.about.length - 1 ? 'mb-4 ' : ''}text-base leading-[1.8] text-text sm:text-lg`}
+          variants={paragraphVariants}
+          transition={{ duration: 0.4, delay: 0.08 + i * 0.08 }}
+        >
+          {renderBold(p)}
+        </motion.p>
+      ))}
     </motion.div>
   </section>
 );

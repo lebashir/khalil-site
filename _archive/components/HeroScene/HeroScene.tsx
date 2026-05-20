@@ -3,7 +3,8 @@
 import dynamic from 'next/dynamic';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useMode } from '@/components/ModeProvider';
-import type { Mode, SiteContent } from '@/lib/content';
+import { useModeFlipContext } from '@/components/topbar';
+import type { SiteContent } from '@/lib/content';
 import { usePrefersReducedMotion } from '@/components/ModeToggleBanner/usePrefersReducedMotion';
 import { ParticleBurst } from '@/components/ModeToggleBanner/ParticleBurst';
 import { SwipeHint, dismissSwipeHint } from './SwipeHint';
@@ -83,7 +84,8 @@ const useScrollProgress = (ref: React.RefObject<HTMLElement | null>): number => 
 const SWIPE_THRESHOLD = 60;
 
 export const HeroScene = ({ content }: Props) => {
-  const { mode, setMode } = useMode();
+  const { mode } = useMode();
+  const { flip, isTransitioning } = useModeFlipContext();
   const reducedMotion = usePrefersReducedMotion();
   const narrow = useIsNarrow();
   const sectionRef = useRef<HTMLElement | null>(null);
@@ -92,32 +94,17 @@ export const HeroScene = ({ content }: Props) => {
 
   const copy = content.hero[mode];
 
-  // Takeover state — direction of in-flight scene transition.
-  const [takeover, setTakeover] = useState<'g2f' | 'f2g' | null>(null);
-  const prevMode = useRef<Mode>(mode);
+  // The cinematic ModeFlipOverlay (mounted in <ModeFlipProvider>) owns the
+  // mode-change transition now. The R3F scene just snap-swaps behind the
+  // overlay slab — no internal takeover needed.
+  const takeover = null;
 
-  // Confetti DOM overlay on f-finale.
+  // Confetti DOM overlay when the kid is clicked.
   const [burstNonce, setBurstNonce] = useState(0);
   const [showCharacterBurst, setShowCharacterBurst] = useState(false);
-  const [showFinaleBurst, setShowFinaleBurst] = useState(false);
-
-  useEffect(() => {
-    if (mode === prevMode.current) return;
-    const dir = prevMode.current === 'gaming' ? 'g2f' : 'f2g';
-    prevMode.current = mode;
-    setTakeover(dir);
-    // Schedule confetti finale ~70% through f-direction takeover.
-    if (dir === 'g2f') {
-      const totalMs = reducedMotion ? 250 : narrow ? 1000 : 1500;
-      window.setTimeout(() => {
-        setBurstNonce((n) => n + 1);
-        setShowFinaleBurst(true);
-      }, totalMs * 0.72);
-    }
-  }, [mode, reducedMotion, narrow]);
 
   const onTakeoverDone = useCallback(() => {
-    setTakeover(null);
+    /* no-op — kept for the Scene's prop contract */
   }, []);
 
   const onCharacterClick = useCallback(() => {
@@ -125,7 +112,7 @@ export const HeroScene = ({ content }: Props) => {
     setShowCharacterBurst(true);
   }, []);
 
-  // Swipe handler — horizontal swipe toggles mode.
+  // Swipe handler — horizontal swipe over the hero triggers the cinematic flip.
   const touch = useRef<{ x: number; y: number; t: number } | null>(null);
   const onTouchStart = (e: React.TouchEvent) => {
     const t = e.touches[0];
@@ -142,11 +129,11 @@ export const HeroScene = ({ content }: Props) => {
     const dy = t.clientY - start.y;
     if (Math.abs(dx) < SWIPE_THRESHOLD) return;
     if (Math.abs(dy) > Math.abs(dx)) return;
-    if (takeover !== null) return;
-    const target: Mode = dx < 0 ? 'football' : 'gaming';
-    if (target !== mode) {
+    if (isTransitioning) return;
+    const wantsFootball = dx < 0;
+    if ((wantsFootball && mode === 'gaming') || (!wantsFootball && mode === 'football')) {
       dismissSwipeHint();
-      setMode(target);
+      flip();
     }
   };
 
@@ -241,20 +228,6 @@ export const HeroScene = ({ content }: Props) => {
             durationMs={700}
             particleCount={40}
             onDone={() => setShowCharacterBurst(false)}
-          />
-        </div>
-      )}
-
-      {/* G→F takeover finale confetti */}
-      {showFinaleBurst && (
-        <div key={`fin-${burstNonce}`} className="pointer-events-none absolute inset-0 z-20">
-          <ParticleBurst
-            kind="gold-confetti"
-            originX={0.5}
-            originY={0.5}
-            durationMs={900}
-            particleCount={narrow ? 50 : 90}
-            onDone={() => setShowFinaleBurst(false)}
           />
         </div>
       )}

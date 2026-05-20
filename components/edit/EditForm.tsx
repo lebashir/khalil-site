@@ -191,18 +191,18 @@ export const EditForm = ({ initialContent }: Props) => {
             <TextField
               label="First paragraph"
               hint="What people see first when they scroll to the About section. Wrap words in *stars* to make them bold."
-              value={content.about.paragraph1}
+              value={content.about[0] ?? ''}
               maxLength={FIELD_LIMITS.aboutParagraph}
               rows={5}
-              onChange={v => setContent(c => ({ ...c, about: { ...c.about, paragraph1: v } }))}
+              onChange={v => setContent(c => ({ ...c, about: c.about.length > 0 ? c.about.map((p, i) => i === 0 ? v : p) : [v] }))}
             />
             <TextField
               label="Second paragraph"
               hint="The second paragraph in the About section."
-              value={content.about.paragraph2}
+              value={content.about[1] ?? ''}
               maxLength={FIELD_LIMITS.aboutParagraph}
               rows={4}
-              onChange={v => setContent(c => ({ ...c, about: { ...c.about, paragraph2: v } }))}
+              onChange={v => setContent(c => ({ ...c, about: c.about.length > 1 ? c.about.map((p, i) => i === 1 ? v : p) : [...c.about, v] }))}
             />
           </Section>
 

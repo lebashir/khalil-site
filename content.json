@@ -1,27 +1,54 @@
 {
   "defaultMode": "gaming",
+  "handle": "@khalilgaming2020",
+  "subs": { "current": 744, "goal": 1000 },
+  "mood": "online",
   "hero": {
     "gaming": {
-      "tagline": "Streamer · Gamer · Goat",
-      "bio": "10 years old. Pro Fortnite W's, Roblox glitches, Brawl Stars trios — and the wildest reactions on YouTube. Smash that subscribe."
+      "tagline": "streamer · gamer · goat",
+      "bio": "10 years old. pro fortnite w's, roblox glitches, brawl stars trios — and the wildest reactions on youtube. smash that subscribe.",
+      "cta": "▶ subscribe",
+      "vibe": "loadout ready"
     },
     "football": {
-      "tagline": "Striker · Madridista · Author",
-      "bio": "10 years old. Real Madrid till I die, hat-tricks at recess, and I post every backyard golazo on YouTube. Hala Madrid y nada más."
+      "tagline": "striker · madridista · forever 7",
+      "bio": "10 years old. real madrid till i die, hat-tricks at recess, and i post every backyard golazo on youtube. hala madrid y nada más.",
+      "cta": "▶ subscribe",
+      "vibe": "boots laced"
     }
   },
-  "about": {
-    "paragraph1": "Yo! I'm *Khalil*, I'm 10, and YouTube is basically my whole vibe. I play *Fortnite*, *Roblox*, and *Brawl Stars*, and I post the clips that make my friends scream. When I'm not gaming I'm chasing a football around — biggest *Real Madrid* fan you'll ever meet, and yeah, I'm definitely Ronaldo when I grow up.",
-    "paragraph2": "I'm also writing my own book (more on that below) and trying to hit my first 1K subs. If you read this far you're a real one — go smash subscribe."
+  "stats": {
+    "gaming":   { "labels": ["K/D", "WINS", "STREAK", "RANK"],   "values": ["4.2", "128", "11", "GOAT"] },
+    "football": { "labels": ["GOALS", "CAPS", "TROPHIES", "XG"], "values": ["27", "34", "6", "0.71"] }
   },
+  "now": {
+    "gaming":   { "playing": "Fortnite — Zero Build",   "watching": "MrBeast challenges",          "reading": "Diary of a Wimpy Kid #18", "listening": "Bad Bunny" },
+    "football": { "playing": "FC 25 Career Mode",       "watching": "Champions League highlights", "reading": "Pelé: My Life",            "listening": "FIFA soundtrack 2002" }
+  },
+  "about": [
+    "yo. i'm khalil. i'm 10. i play *fortnite*, *roblox*, and *brawl stars*, and i post the clips that make my friends scream. when i'm not gaming i'm chasing a football around — biggest *real madrid* fan you'll ever meet, and yeah, i'm definitely ronaldo when i grow up.",
+    "i'm also writing my own book (more on that below) and trying to hit my first 1k subs. if you read this far you're a real one — go smash subscribe."
+  ],
   "book": {
     "visible": true,
     "title": "The Goat Chronicles",
+    "subtitle": "stories my grandma started and i'm finishing",
     "description": "My grandma started it with me last Christmas — now I'm finishing it myself. Stories, drawings, and the funniest stuff that happens at school. First copies dropping soon.",
-    "status": "Coming soon"
+    "chapter": "ch. 4 of 12",
+    "status": "first copies dropping soon"
   },
-  "socials": {
-    "tiktok": "",
-    "instagram": ""
-  }
+  "videos": {
+    "useDesignThumbForFeatured": false,
+    "useDesignThumbsForRest": false,
+    "designThumbs": [
+      { "from": "#5b3aa6", "to": "#1a0a3a", "emoji": "🎮" },
+      { "from": "#d97757", "to": "#7a2e1a", "emoji": "⭐" },
+      { "from": "#2a7d4f", "to": "#0e3a1f", "emoji": "🟩" },
+      { "from": "#1a3a8a", "to": "#000d33", "emoji": "⚽" },
+      { "from": "#b8527a", "to": "#3a0a1f", "emoji": "🐐" }
+    ],
+    "tiers": ["LEGENDARY", "EPIC", "RARE", "EPIC", "COMMON"],
+    "pinnedId": null
+  },
+  "socials": { "tiktok": "", "instagram": "" }
 }

@@ -62,12 +62,15 @@ export const PreviewPane = ({ content }: Props) => {
         {/* About */}
         <div className="mt-4 rounded-xl border border-card-border bg-card p-5">
           <div className="mb-2 text-[10px] uppercase tracking-[0.3em] text-text-dim">About me</div>
-          <p className="mb-2 text-xs leading-relaxed text-text">
-            {content.about.paragraph1 ? renderBold(content.about.paragraph1) : <span className="italic opacity-60">(empty)</span>}
-          </p>
-          <p className="text-xs leading-relaxed text-text">
-            {content.about.paragraph2 ? renderBold(content.about.paragraph2) : <span className="italic opacity-60">(empty)</span>}
-          </p>
+          {content.about.length > 0 ? (
+            content.about.map((p, i) => (
+              <p key={i} className={`text-xs leading-relaxed text-text${i < content.about.length - 1 ? ' mb-2' : ''}`}>
+                {p ? renderBold(p) : <span className="italic opacity-60">(empty)</span>}
+              </p>
+            ))
+          ) : (
+            <p className="text-xs leading-relaxed text-text"><span className="italic opacity-60">(empty)</span></p>
+          )}
         </div>
 
         {/* Book */}

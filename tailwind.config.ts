@@ -5,13 +5,18 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
+        // var(--display-font) swaps Bungee ↔ Russo One based on the html.gaming
+        // / html.football class. The role fonts below are direct refs.
         display: ['var(--display-font)', 'cursive'],
         body: ['Inter', 'system-ui', 'sans-serif'],
+        anton: ['Anton', 'sans-serif'],
         gaming: ['Bungee', 'cursive'],
-        football: ['"Russo One"', 'sans-serif']
+        football: ['"Russo One"', 'sans-serif'],
+        mono: ['"DM Mono"', 'ui-monospace', 'monospace'],
+        marker: ['"Permanent Marker"', 'cursive'],
+        caveat: ['Caveat', 'cursive']
       },
       colors: {
-        // CSS variables let us swap palettes by body class without re-rendering Tailwind classes.
         bg1: 'var(--bg-1)',
         bg2: 'var(--bg-2)',
         bg3: 'var(--bg-3)',
@@ -22,28 +27,26 @@ const config: Config = {
         'text-dim': 'var(--text-dim)',
         card: 'var(--card)',
         'card-border': 'var(--card-border)',
-        // Fixed palette refs for the toggle banner itself (always present regardless of active mode).
-        'gaming-bg-1': '#0a0420',
-        'gaming-bg-2': '#1a0a3a',
-        'gaming-bg-3': '#2a0f5a',
-        'gaming-accent': '#00b8ff',
-        'gaming-accent-2': '#b026ff',
-        'gaming-accent-3': '#ff2bd6',
-        'football-bg-1': '#001233',
-        'football-bg-2': '#002970',
-        'football-bg-3': '#0046b5',
-        'football-accent': '#ffffff',
-        'football-accent-2': '#ffd700',
+        // Fixed palette refs — mirror components/topbar/palette.ts. Used by
+        // components that need a specific mode color regardless of the
+        // currently-active mode.
+        'gaming-bg-a': '#0e0030',
+        'gaming-bg-b': '#3a0a5a',
+        'gaming-bg-c': '#5a14a0',
+        'gaming-accent': '#00f0ff',
+        'gaming-accent-2': '#ff2bd6',
+        'gaming-accent-3': '#ffe600',
+        'football-bg-a': '#001233',
+        'football-bg-b': '#003366',
+        'football-bg-c': '#0a4a2a',
+        'football-accent': '#ffd700',
+        'football-accent-2': '#ffffff',
         'football-accent-3': '#4d8fff'
       },
       boxShadow: {
         glow: 'var(--glow)'
       },
       keyframes: {
-        float: {
-          '0%, 100%': { transform: 'translateY(0) rotate(0deg)' },
-          '50%': { transform: 'translateY(-30px) rotate(15deg)' }
-        },
         idle: {
           '0%, 100%': { transform: 'translateY(0)' },
           '50%': { transform: 'translateY(-14px)' }
@@ -56,7 +59,6 @@ const config: Config = {
         blink: { '50%': { opacity: '0.55' } }
       },
       animation: {
-        float: 'float 14s ease-in-out infinite',
         idle: 'idle 3.5s ease-in-out infinite',
         pulse: 'pulse 4s ease-in-out infinite',
         'spin-slow': 'spin 22s linear infinite',
