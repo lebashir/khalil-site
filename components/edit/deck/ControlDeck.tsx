@@ -57,7 +57,9 @@ export const ControlDeck = ({ initialContent, videos }: ControlDeckProps) => {
   const { isPhone, isDesktop } = useViewport();
   const [content, setContent] = useState<SiteContent>(initialContent);
   const [mode, setMode] = useState<Mode>(initialContent.defaultMode);
-  const [tab, setTab] = useState<DeckTab>('inline');
+  // Default lands on the launch deck — that's the primary mission-control
+  // experience. The inline editor is one tab over.
+  const [tab, setTab] = useState<DeckTab>('deck');
 
   // Save flow
   const [saving, setSaving] = useState(false);
