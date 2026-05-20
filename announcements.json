@@ -1,6 +1,13 @@
 {
   "items": [
     {
+      "id": "7505427a-48c4-4a22-8843-b16ec953f858",
+      "firedAt": 1779301704320,
+      "message": "test",
+      "payload": "fire",
+      "fuse": "now"
+    },
+    {
       "id": "42fcb224-3dc0-408f-b2da-6914393fa39a",
       "firedAt": 1779301699902,
       "message": "test",
