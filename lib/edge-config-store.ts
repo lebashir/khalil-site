@@ -10,8 +10,9 @@
 // Required env vars:
 //   - EDGE_CONFIG          (auto-provisioned by Vercel when an Edge Config
 //                           is linked to the project — read connection URL)
-//   - VERCEL_API_TOKEN     (manually created at vercel.com/account/tokens —
-//                           used to write items via the Vercel REST API)
+//   - VERCEL_API_KEY       (manually created at vercel.com/account/tokens —
+//                           used to write items via the Vercel REST API.
+//                           VERCEL_API_TOKEN is accepted as a legacy alias.)
 //   - VERCEL_TEAM_ID       (only required when the Edge Config belongs to
 //                           a team; omit for personal accounts)
 //
@@ -41,7 +42,11 @@ const parseEdgeConfigId = (connectionUrl: string): string | null => {
 
 const getEnv = (): EdgeConfigEnv | { error: string } => {
   const edgeConfig = process.env.EDGE_CONFIG?.trim();
-  const apiToken = process.env.VERCEL_API_TOKEN?.trim();
+  // Accept either name — VERCEL_API_KEY is the canonical one in this
+  // project, VERCEL_API_TOKEN kept as a legacy alias so older docs still
+  // work.
+  const apiToken =
+    process.env.VERCEL_API_KEY?.trim() || process.env.VERCEL_API_TOKEN?.trim();
   const teamId = process.env.VERCEL_TEAM_ID?.trim() || null;
   if (!edgeConfig) {
     return {
@@ -52,7 +57,7 @@ const getEnv = (): EdgeConfigEnv | { error: string } => {
   if (!apiToken) {
     return {
       error:
-        'VERCEL_API_TOKEN is not set. Create one at vercel.com/account/tokens and add it as an env var.'
+        'VERCEL_API_KEY is not set. Create one at vercel.com/account/tokens and add it as an env var.'
     };
   }
   const edgeConfigId = parseEdgeConfigId(edgeConfig);
