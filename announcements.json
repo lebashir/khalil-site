@@ -1,6 +1,13 @@
 {
   "items": [
     {
+      "id": "7ee0c66c-ab17-40f8-9653-bb6966462214",
+      "firedAt": 1779355655984,
+      "message": "test",
+      "payload": "goal",
+      "fuse": "now"
+    },
+    {
       "id": "9f0127c5-a499-42ef-9517-c8ae15c1de32",
       "firedAt": 1779355627389,
       "message": "test",
@@ -73,13 +80,6 @@
     {
       "id": "9d11db9d-9632-45c1-b35a-0cb88bf87be0",
       "firedAt": 1779304826781,
-      "message": "Hi marcin I see you !!1",
-      "payload": "fire",
-      "fuse": "now"
-    },
-    {
-      "id": "14644c32-355e-4b21-b379-43747a5372cf",
-      "firedAt": 1779304787932,
       "message": "Hi marcin I see you !!1",
       "payload": "fire",
       "fuse": "now"
