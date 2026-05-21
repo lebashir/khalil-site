@@ -1,4 +1,5 @@
-export { TopBarMode } from './TopBarMode';
+export { TopBarMode, PEEK_EVENT } from './TopBarMode';
+export type { PeekDetail } from './TopBarMode';
 export { ModeFlipProvider, useModeFlipContext } from './ModeFlipProvider';
 export { ModeFlipOverlay } from './ModeFlipOverlay';
 export { useModeFlip } from './useModeFlip';

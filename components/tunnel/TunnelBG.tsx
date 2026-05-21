@@ -9,13 +9,28 @@ interface Props {
   size: ArenaSize;
 }
 
-// The corridor itself. Radial bg gradient (deep → mid), floor/ceiling
-// perspective lines that scroll forward with progress, vanishing-point
-// radials, and 12 particles drifting toward the camera.
+// §9 — depth-fix layer counts. Tuned so the BG sells "I am walking
+// inside a corridor" rather than reading as a flat horizon.
+const RADIAL_LINES = 20;
+const RECEDING_RINGS = 12;
+
+// The corridor itself. Layers, in render order:
+//   1. Radial bg gradient (deep → mid)
+//   2. Floor/ceiling horizon tints
+//   3. Floor + ceiling perspective lines, scrolling forward with progress
+//   4. §9 concentric receding rings — the "doorway after doorway" effect
+//   5. §9 brighter radial vanishing-point lines (20 around the clock)
+//   6. §9 radial vignette darkening the edges so the back wall reads
+//      as a tunnel opening
+//   7. Particles drifting toward the camera
+//
+// All SVG `<defs>` IDs are mode-suffixed so a hypothetical two-tunnel
+// page (or a transition layer over the top of another) doesn't collide.
 export const TunnelBG = ({ mode, theme, progress, size }: Props) => {
   const lineCount = size === 'desktop' ? 14 : 10;
   const floorId = `tn-floor-${mode}`;
   const ceilId = `tn-ceil-${mode}`;
+  const vignetteId = `tn-vignette-${mode}`;
 
   return (
     <div
@@ -41,10 +56,21 @@ export const TunnelBG = ({ mode, theme, progress, size }: Props) => {
             <stop offset="0%" stopColor={theme.wallTint} stopOpacity="0" />
             <stop offset="100%" stopColor={theme.wallTint} stopOpacity="1" />
           </linearGradient>
+          {/* §9 vignette — bright at the vanishing point (200,200), dark
+              at the edges. Sells depth without geometry. */}
+          <radialGradient id={vignetteId} cx="0.5" cy="0.5" r="0.7">
+            <stop offset="0%" stopColor="#000" stopOpacity="0" />
+            <stop offset="65%" stopColor="#000" stopOpacity="0" />
+            <stop offset="100%" stopColor="#000" stopOpacity="0.55" />
+          </radialGradient>
         </defs>
+
+        {/* Floor / ceiling horizon */}
         <rect x="0" y="200" width="400" height="200" fill={`url(#${floorId})`} opacity="0.6" />
         <rect x="0" y="0" width="400" height="200" fill={`url(#${ceilId})`} opacity="0.6" />
+
         <g opacity="0.55">
+          {/* Floor perspective lines */}
           {Array.from({ length: lineCount }).map((_, i) => {
             const dist = i / lineCount;
             const phase = (dist + progress * 1.2) % 1;
@@ -63,6 +89,7 @@ export const TunnelBG = ({ mode, theme, progress, size }: Props) => {
               />
             );
           })}
+          {/* Ceiling perspective lines */}
           {Array.from({ length: lineCount }).map((_, i) => {
             const dist = i / lineCount;
             const phase = (dist + progress * 1.2) % 1;
@@ -81,19 +108,59 @@ export const TunnelBG = ({ mode, theme, progress, size }: Props) => {
               />
             );
           })}
-          {[-3, -2, -1, 1, 2, 3].map((i) => (
-            <line
-              key={`r-${i}`}
-              x1={200}
-              y1={200}
-              x2={200 + i * 120}
-              y2={i % 2 === 0 ? 400 : 0}
-              stroke={i % 2 === 0 ? theme.accent : theme.accent2}
-              strokeWidth="0.4"
-              opacity="0.25"
-            />
-          ))}
+
+          {/* §9 — concentric receding rings. 12 rectangle outlines that
+              compress toward the vanishing point and expand outward
+              over time. Their scale uses phase² so they bunch up near
+              the center (selling acceleration through the doorway) and
+              spread as they approach the camera. */}
+          {Array.from({ length: RECEDING_RINGS }).map((_, i) => {
+            const dist = i / RECEDING_RINGS;
+            const phase = (dist + progress * 1.4) % 1;
+            const scaled = phase * phase; // ease-in growth
+            const half = 12 + scaled * 380;
+            const stroke = i % 2 === 0 ? theme.accent : theme.accent2;
+            return (
+              <rect
+                key={`ring-${i}`}
+                x={200 - half}
+                y={200 - half}
+                width={half * 2}
+                height={half * 2}
+                fill="none"
+                stroke={stroke}
+                strokeWidth={0.4 + phase * 1.2}
+                opacity={1 - phase * 0.85}
+              />
+            );
+          })}
+
+          {/* §9 — brighter, more-spread radial lines around the clock.
+              Previously 6 diagonal pairs at 0.25 opacity; now 20 evenly
+              distributed so the back wall reads as an enclosed mouth. */}
+          {Array.from({ length: RADIAL_LINES }).map((_, i) => {
+            const angle = (i / RADIAL_LINES) * Math.PI * 2;
+            const x2 = 200 + Math.cos(angle) * 600;
+            const y2 = 200 + Math.sin(angle) * 600;
+            const stroke = i % 2 === 0 ? theme.accent : theme.accent2;
+            return (
+              <line
+                key={`r-${i}`}
+                x1={200}
+                y1={200}
+                x2={x2}
+                y2={y2}
+                stroke={stroke}
+                strokeWidth={0.4}
+                opacity={0.42}
+              />
+            );
+          })}
         </g>
+
+        {/* §9 — radial vignette on top of all line layers so the
+            corner darkening doesn't fight the perspective. */}
+        <rect x="0" y="0" width="400" height="400" fill={`url(#${vignetteId})`} />
       </svg>
 
       {/* Particles drifting toward camera */}

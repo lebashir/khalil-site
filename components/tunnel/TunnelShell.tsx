@@ -199,6 +199,53 @@ export const TunnelShell = ({ content, videos }: Props) => {
             <TunnelNav theme={theme} size={size} progress={progress} />
           </div>
 
+          {/* §9 — first-load onboarding card. Visible only while
+              progress < 0.04 (very start of the scroll). Fast fade so
+              the user sees it on landing, then it gets out of the way
+              within ~120 viewport-px of scroll. Layered above the
+              smaller "↓ KEEP WALKING" pill (zIndex 65). */}
+          <div
+            style={{
+              position: 'absolute',
+              bottom: 92,
+              left: 0,
+              right: 0,
+              display: 'flex',
+              justifyContent: 'center',
+              opacity: clamp((0.04 - progress) * 25, 0, 1),
+              pointerEvents: 'none',
+              zIndex: 66
+            }}
+          >
+            <div
+              style={{
+                padding: '14px 22px',
+                background: 'rgba(0,0,0,0.7)',
+                border: `1px solid ${theme.accent}`,
+                borderRadius: 6,
+                fontFamily: "'DM Mono', ui-monospace, monospace",
+                fontSize: size === 'desktop' ? 12 : 10,
+                color: theme.accent,
+                letterSpacing: 2,
+                textAlign: 'center',
+                lineHeight: 1.55,
+                boxShadow: `0 0 22px ${theme.accent}55, inset 0 0 12px rgba(0,0,0,0.6)`
+              }}
+            >
+              <div style={{ opacity: 0.7, marginBottom: 4 }}>· STAND BY ·</div>
+              <div>SCROLL TO WALK</div>
+              <div style={{ marginBottom: 4 }}>THROUGH THE TUNNEL</div>
+              <div
+                style={{
+                  fontSize: size === 'desktop' ? 18 : 14,
+                  animation: 'k-bob-s 1.4s ease-in-out infinite'
+                }}
+              >
+                ↓
+              </div>
+            </div>
+          </div>
+
           {/* Layer 5 — bottom scroll cue (fades out as we reach destination) */}
           <div
             style={{

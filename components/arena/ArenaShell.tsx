@@ -1,10 +1,10 @@
 'use client';
 
-import { useEffect } from 'react';
-import type { SiteContent } from '@/lib/content';
+import { useEffect, useState } from 'react';
+import type { Mode, SiteContent } from '@/lib/content';
 import type { VideoItem } from '@/lib/youtube';
 import { useModeFlipContext } from '@/components/topbar';
-import { TopBarMode } from '@/components/topbar';
+import { TopBarMode, PEEK_EVENT, type PeekDetail } from '@/components/topbar';
 import { startStadiumAmbient, stopStadiumAmbient } from '@/lib/audio/sounds';
 import { THEMES } from './theme';
 import { useArenaSize } from './useArenaSize';
@@ -30,9 +30,28 @@ interface Props {
 // agree on the current mode. Re-renders when the mode swaps at t=400ms
 // behind the overlay slab.
 export const ArenaShell = ({ content, videos, videoError }: Props) => {
-  const { mode } = useModeFlipContext();
+  const { mode, isTransitioning } = useModeFlipContext();
   const size = useArenaSize();
   const theme = THEMES[mode];
+
+  // §8 — mode-peek hover preview. Hovering the IDLE half of TopBarMode
+  // dispatches a 'khalil:peek' event with the would-be-target mode. We
+  // render a soft accent wash from the top so the page hints at what
+  // the other mode would look like, then clear when pointer leaves.
+  const [peekMode, setPeekMode] = useState<Mode | null>(null);
+  useEffect(() => {
+    const onPeek = (e: Event) => {
+      const detail = (e as CustomEvent<PeekDetail>).detail;
+      setPeekMode(detail?.mode ?? null);
+    };
+    window.addEventListener(PEEK_EVENT, onPeek);
+    return () => window.removeEventListener(PEEK_EVENT, onPeek);
+  }, []);
+  // Don't paint while a flip is in flight, and never peek the active
+  // mode against itself (would just be a no-op wash on the current
+  // accent color).
+  const peekActive = peekMode !== null && peekMode !== mode && !isTransitioning;
+  const peekTheme = peekActive && peekMode ? THEMES[peekMode] : null;
 
   // Stadium crowd ambient — only when football mode is active on the
   // homepage. Fades in/out smoothly on mode flip; stops on unmount so
@@ -75,8 +94,33 @@ export const ArenaShell = ({ content, videos, videoError }: Props) => {
         <Foot theme={theme} size={size} socials={content.socials} />
       </div>
 
+      {/* §8 — mode-peek overlay. Painted only while the user hovers
+          the idle topbar half (and the active mode differs from the
+          peek target). pointer-events: none so it never intercepts
+          clicks; mix-blend-mode: screen layers it like a sweep light
+          on top of the page. */}
+      {peekTheme && (
+        <div
+          aria-hidden
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            height: '60vh',
+            pointerEvents: 'none',
+            zIndex: 70,
+            mixBlendMode: 'screen',
+            background: `linear-gradient(180deg, ${peekTheme.accent}55 0%, ${peekTheme.accent}22 40%, transparent 100%)`,
+            opacity: 0.85,
+            transition: 'opacity .25s ease',
+            animation: 'k-peek-in .22s ease-out both'
+          }}
+        />
+      )}
+
       {/* Site-wide announcement overlay — polls /api/announcement every
-          ~15s and pops a fullscreen burst when Khalil fires the plunger
+          ~3s and pops a fullscreen burst when Khalil fires the plunger
           from /edit. */}
       <AnnouncementOverlay />
     </div>

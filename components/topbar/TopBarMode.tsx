@@ -122,11 +122,14 @@ interface HalfProps {
   isActive: boolean;
   flex: number;
   onClick: () => void;
+  /** Fires when the user hovers the IDLE side. The arena listens and
+   *  paints a soft accent wash to preview the other mode. */
+  onPeek: (mode: Mode | null) => void;
   size: Size;
   side: 'left' | 'right';
 }
 
-const Half = ({ paint, isActive, flex, onClick, size, side }: HalfProps) => {
+const Half = ({ paint, isActive, flex, onClick, onPeek, size, side }: HalfProps) => {
   const isDesktop = size === 'desktop';
   const isPhone = size === 'phone';
 
@@ -150,10 +153,20 @@ const Half = ({ paint, isActive, flex, onClick, size, side }: HalfProps) => {
       ? 26
       : 22;
 
+  // Mode this half represents. Used by the peek broadcast.
+  const halfMode: Mode = paint.label === 'GAMING' ? 'gaming' : 'football';
+
   return (
     <div
       className={`tb-half ${isActive ? 'tb-active' : 'tb-idle'}`}
       onClick={onClick}
+      onPointerEnter={() => {
+        // Only the IDLE half peeks — hovering the already-active half is
+        // a no-op so we don't trigger a wash for the current mode.
+        if (!isActive) onPeek(halfMode);
+      }}
+      onPointerLeave={() => onPeek(null)}
+      onPointerCancel={() => onPeek(null)}
       style={{
         position: 'relative',
         flex: `${flex} 1 0`,
@@ -280,10 +293,27 @@ const Half = ({ paint, isActive, flex, onClick, size, side }: HalfProps) => {
 // The full-width mode toggle. Sticky to the top of the page.
 // Three trigger paths: click idle half, pointer drag past threshold,
 // ←/→ keys when focused.
+// Event name dispatched on `window` when the user hovers the idle topbar
+// half. ArenaShell (and any other consumer) listens and renders a soft
+// accent wash to preview that mode. Suppressed during transitions.
+export const PEEK_EVENT = 'khalil:peek';
+
+export interface PeekDetail {
+  mode: Mode | null;
+}
+
 export const TopBarMode = () => {
   const { mode, flip, isTransitioning } = useModeFlipContext();
   const size = useTopbarSize();
   const height = HEIGHT_BY_SIZE[size];
+
+  const broadcastPeek = (next: Mode | null) => {
+    if (typeof window === 'undefined') return;
+    // Drop peeks while the cinematic flip is in flight — the wash would
+    // fight the transition overlay.
+    const target = isTransitioning ? null : next;
+    window.dispatchEvent(new CustomEvent<PeekDetail>(PEEK_EVENT, { detail: { mode: target } }));
+  };
 
   const hostRef = useRef<HTMLDivElement | null>(null);
   const dragState = useRef({ active: false, startX: 0, dx: 0, pointerId: -1 });
@@ -384,6 +414,7 @@ export const TopBarMode = () => {
         onClick={() => {
           if (!isGaming && !isTransitioning) flip();
         }}
+        onPeek={broadcastPeek}
         size={size}
         side="left"
       />
@@ -412,6 +443,7 @@ export const TopBarMode = () => {
         onClick={() => {
           if (isGaming && !isTransitioning) flip();
         }}
+        onPeek={broadcastPeek}
         size={size}
         side="right"
       />

@@ -291,6 +291,13 @@ a {
   100% { translate: 0 0;     rotate: var(--rot, 0deg); scale: 1; }
 }
 
+/* §8 mode-peek overlay fade-in. Fast (.22s) so the wash feels
+   responsive to the hover, not laggy. */
+@keyframes k-peek-in {
+  0%   { opacity: 0; }
+  100% { opacity: 0.85; }
+}
+
 /* ── Edit / Control Deck keyframes ────────────────────────────────────────
    Ported from design/directions/edit.jsx. Drive the LED blinks, plunger
    press, missile shake, CRT scan beam, and message-stamp explosion in
