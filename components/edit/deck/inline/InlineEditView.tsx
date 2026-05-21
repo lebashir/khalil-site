@@ -28,6 +28,8 @@ import { ReplaysPreview } from './ReplaysPreview';
 import { AboutPreview } from './AboutPreview';
 import { BookPreview } from './BookPreview';
 import { FooterPreview } from './FooterPreview';
+import { ImagesPreview } from './ImagesPreview';
+import { ImageDropzone } from './ImageDropzone';
 
 type PinKey =
   | 'handle'
@@ -88,6 +90,15 @@ export const InlineEditView = ({
   const setSocials = (socials: SiteContent['socials']) => setContent({ ...content, socials });
   const setVideos = (videos: SiteContent['videos']) => setContent({ ...content, videos });
   const setDefaultMode = (defaultMode: Mode) => setContent({ ...content, defaultMode });
+  // Immutable per-slot image update — pass null to remove. The dropzones
+  // and the BOOK pin's cover field both call this; book-cover stays in
+  // sync because they share the slot id.
+  const setImage = (slotId: string, url: string | null) => {
+    const next = { ...content.images };
+    if (url) next[slotId] = url;
+    else delete next[slotId];
+    setContent({ ...content, images: next });
+  };
 
   const drawer = renderDrawer(lastPin, {
     mode,
@@ -104,7 +115,8 @@ export const InlineEditView = ({
     setBook,
     setSocials,
     setVideos,
-    setDefaultMode
+    setDefaultMode,
+    setImage
   });
 
   return (
@@ -176,6 +188,7 @@ export const InlineEditView = ({
       <AboutPreview about={content.about} onEdit={(k) => open(k)} />
       <BookPreview book={content.book} onEdit={(k) => open(k)} />
       <FooterPreview socials={content.socials} onEdit={(k) => open(k)} />
+      <ImagesPreview images={content.images} videos={videos} setImage={setImage} />
 
       {/* Boot mode + escape hatches */}
       <div
@@ -261,6 +274,7 @@ interface DrawerCtx {
   setSocials: (s: SiteContent['socials']) => void;
   setVideos: (v: SiteContent['videos']) => void;
   setDefaultMode: (m: Mode) => void;
+  setImage: (slotId: string, url: string | null) => void;
 }
 
 interface DrawerView {
@@ -354,9 +368,16 @@ function renderDrawer(pin: PinKey | null, ctx: DrawerCtx): DrawerView | null {
     case 'book':
       return {
         title: 'BOOK',
-        kicker: '// title + subtitle + description',
+        kicker: '// title + subtitle + description + cover',
         accent: ED.pink,
-        content: <BookEditor book={ctx.content.book} onChange={ctx.setBook} />
+        content: (
+          <BookEditor
+            book={ctx.content.book}
+            onChange={ctx.setBook}
+            coverUrl={ctx.content.images['book-cover'] ?? null}
+            onCoverChange={(url) => ctx.setImage('book-cover', url)}
+          />
+        )
       };
     case 'socials':
       return {
@@ -505,15 +526,28 @@ const StatsEditor = ({
 
 const BookEditor = ({
   book,
-  onChange
+  onChange,
+  coverUrl,
+  onCoverChange
 }: {
   book: SiteContent['book'];
   onChange: (b: SiteContent['book']) => void;
+  coverUrl: string | null;
+  onCoverChange: (url: string | null) => void;
 }) => {
   const update = <K extends keyof SiteContent['book']>(key: K, val: SiteContent['book'][K]) =>
     onChange({ ...book, [key]: val });
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+      {/* Cover photo (shares slot with the IMAGES section's BOOK COVER) */}
+      <ImageDropzone
+        slotId="book-cover"
+        label="COVER PHOTO"
+        currentUrl={coverUrl}
+        onUploaded={(url) => onCoverChange(url)}
+        onRemoved={() => onCoverChange(null)}
+        aspect="3 / 4"
+      />
       {/* Visible toggle */}
       <div
         style={{
