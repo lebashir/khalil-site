@@ -116,6 +116,24 @@ export const VideoCard = ({ video, theme, tier, big = false, useDesignThumb, des
           opacity: 0.7
         }}
       />
+      {/* LEGENDARY tier — animated sheen sweep on top of the static
+          foil. Other tiers don't get this so LEGENDARY remains the
+          visually loudest. backgroundImage (not the shorthand) so the
+          paired backgroundSize isn't reset by a late re-render. */}
+      {tier === 'LEGENDARY' && (
+        <span
+          aria-hidden
+          style={{
+            position: 'absolute',
+            inset: 0,
+            backgroundImage: `linear-gradient(110deg, transparent 0%, transparent 40%, rgba(255,255,255,0.53) 47%, ${tc[0]}cc 50%, rgba(255,255,255,0.53) 53%, transparent 60%, transparent 100%)`,
+            backgroundSize: '300% 100%',
+            mixBlendMode: 'screen',
+            pointerEvents: 'none',
+            animation: 'k-legend-sweep 3.4s ease-in-out infinite'
+          }}
+        />
+      )}
       {/* Emoji placeholder (when design art is selected) */}
       {showDesignArt && thumb && (
         <div

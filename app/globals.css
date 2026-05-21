@@ -183,6 +183,16 @@ a {
   100% { transform: translate(var(--dx), var(--dy)) rotate(var(--dr)); opacity: 0; }
 }
 
+/* LEGENDARY tier holographic sweep — only attached to the LEGENDARY
+   video tile so EPIC/RARE/COMMON stay visually distinct. Background-
+   position animation is GPU-friendly. Paired with backgroundSize: 300%
+   on the consuming element. */
+@keyframes k-legend-sweep {
+  0%, 18%   { background-position: -120% 0; }
+  45%, 55%  { background-position: 50% 0; }
+  82%, 100% { background-position: 220% 0; }
+}
+
 /* ── Edit / Control Deck keyframes ────────────────────────────────────────
    Ported from design/directions/edit.jsx. Drive the LED blinks, plunger
    press, missile shake, CRT scan beam, and message-stamp explosion in
