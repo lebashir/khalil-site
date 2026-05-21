@@ -58,7 +58,25 @@ export interface SiteContent {
   };
   videos: VideoEditorial;
   socials: { tiktok: string; instagram: string };
+  /** Slot-id → public Blob URL. The actual binaries live in Vercel Blob;
+   *  this map is the slot-to-asset wiring. Edits flow through
+   *  POST /api/edit/image/upload + the standard /api/edit/save path. */
+  images: Record<string, string>;
 }
+
+// Well-known image slots. Video tile slots (`replay-{videoId}`) are
+// dynamic and not listed here. Any unknown slot ID is rejected by the
+// upload API. */
+export const STATIC_IMAGE_SLOTS = ['portrait-gaming', 'portrait-football', 'book-cover'] as const;
+export type StaticImageSlot = (typeof STATIC_IMAGE_SLOTS)[number];
+
+// Pattern for dynamic per-video thumbnail slots.
+const REPLAY_SLOT_RE = /^replay-[A-Za-z0-9_-]{3,40}$/;
+
+export const isValidImageSlotId = (id: string): boolean => {
+  if ((STATIC_IMAGE_SLOTS as readonly string[]).includes(id)) return true;
+  return REPLAY_SLOT_RE.test(id);
+};
 
 // Per-field length rails — also used by the /edit form to enforce.
 export const FIELD_LIMITS = {
@@ -312,6 +330,23 @@ export const validateContent = (raw: unknown, base?: SiteContent): ValidationRes
 
   if (errors.length > 0) return { ok: false, errors };
 
+  // Images map — slot-id → URL. Accept only known/well-formed slot IDs and
+  // https URLs. Unknown keys are silently dropped (they're either typos or
+  // stale slots from a previous schema). Missing entries inherit from base.
+  const imagesRaw = (c.images ?? current.images ?? {}) as Record<string, unknown>;
+  const images: Record<string, string> = {};
+  for (const [key, val] of Object.entries(imagesRaw)) {
+    if (typeof val !== 'string') continue;
+    const trimmed = val.trim();
+    if (!trimmed) continue;
+    if (!isValidImageSlotId(key)) continue;
+    if (!isHttpUrl(trimmed)) {
+      errors.push(`Image slot "${key}" must be an https URL.`);
+      continue;
+    }
+    images[key] = trimmed;
+  }
+
   const content: SiteContent = {
     defaultMode: defaultMode as Mode,
     handle,
@@ -326,7 +361,8 @@ export const validateContent = (raw: unknown, base?: SiteContent): ValidationRes
     about: aboutArr,
     book,
     videos,
-    socials: { tiktok, instagram }
+    socials: { tiktok, instagram },
+    images
   };
 
   if (errors.length > 0) return { ok: false, errors };

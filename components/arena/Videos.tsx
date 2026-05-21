@@ -13,6 +13,8 @@ interface Props {
   size: ArenaSize;
   videos: VideoItem[];
   editorial: SiteContent['videos'];
+  /** Slot-id → URL map. Per-video override is keyed `replay-${video.id}`. */
+  images: SiteContent['images'];
   error: string | null;
 }
 
@@ -72,7 +74,7 @@ const EmptyState = ({ theme }: { theme: ArenaTheme }) => (
   </div>
 );
 
-export const Videos = ({ mode, theme, size, videos, editorial, error }: Props) => {
+export const Videos = ({ mode, theme, size, videos, editorial, images, error }: Props) => {
   const isDesktop = size === 'desktop';
   const isTablet = size === 'tablet';
   const ordered = orderVideos(videos, editorial.pinnedId);
@@ -86,6 +88,11 @@ export const Videos = ({ mode, theme, size, videos, editorial, error }: Props) =
         ? editorial.designThumbs[i % editorial.designThumbs.length] ?? null
         : null
   });
+
+  // Custom thumbnail uploaded for this specific video id (slot:
+  // `replay-${id}`). When present it wins over both the YouTube
+  // thumbnail and the design-thumb fallback. */
+  const customThumbFor = (id: string): string | null => images[`replay-${id}`] ?? null;
 
   const headerRow = (
     <Reveal>
@@ -162,6 +169,7 @@ export const Videos = ({ mode, theme, size, videos, editorial, error }: Props) =
           <Reveal>
             <VideoCard
               video={featured}
+              customThumbUrl={customThumbFor(featured.id)}
               theme={theme}
               tier={featuredSlot.tier}
               big
@@ -177,6 +185,7 @@ export const Videos = ({ mode, theme, size, videos, editorial, error }: Props) =
                 <Reveal key={v.id} delay={(i + 1) * 60}>
                   <VideoCard
                     video={v}
+                    customThumbUrl={customThumbFor(v.id)}
                     theme={theme}
                     tier={s.tier}
                     useDesignThumb={editorial.useDesignThumbsForRest}
@@ -202,6 +211,7 @@ export const Videos = ({ mode, theme, size, videos, editorial, error }: Props) =
                   <Reveal key={v.id} delay={(i + 3) * 60}>
                     <VideoCard
                       video={v}
+                      customThumbUrl={customThumbFor(v.id)}
                       theme={theme}
                       tier={s.tier}
                       useDesignThumb={editorial.useDesignThumbsForRest}
@@ -220,6 +230,7 @@ export const Videos = ({ mode, theme, size, videos, editorial, error }: Props) =
             <div style={{ marginBottom: 10 }}>
               <VideoCard
                 video={featured}
+                customThumbUrl={customThumbFor(featured.id)}
                 theme={theme}
                 tier={featuredSlot.tier}
                 big
@@ -236,6 +247,7 @@ export const Videos = ({ mode, theme, size, videos, editorial, error }: Props) =
                 <Reveal key={v.id} delay={(i + 1) * 60}>
                   <VideoCard
                     video={v}
+                    customThumbUrl={customThumbFor(v.id)}
                     theme={theme}
                     tier={s.tier}
                     useDesignThumb={editorial.useDesignThumbsForRest}
@@ -253,6 +265,7 @@ export const Videos = ({ mode, theme, size, videos, editorial, error }: Props) =
             <div style={{ marginBottom: 8 }}>
               <VideoCard
                 video={featured}
+                customThumbUrl={customThumbFor(featured.id)}
                 theme={theme}
                 tier={featuredSlot.tier}
                 big
@@ -269,6 +282,7 @@ export const Videos = ({ mode, theme, size, videos, editorial, error }: Props) =
                 <Reveal key={v.id} delay={(i + 1) * 60}>
                   <VideoCard
                     video={v}
+                    customThumbUrl={customThumbFor(v.id)}
                     theme={theme}
                     tier={s.tier}
                     useDesignThumb={editorial.useDesignThumbsForRest}

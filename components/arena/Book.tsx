@@ -12,11 +12,15 @@ interface Props {
   book: SiteContent['book'];
   theme: ArenaTheme;
   size: ArenaSize;
+  /** Optional uploaded cover photo. Layered on top of the gradient
+   *  cover when present so a real cover replaces the gradient. */
+  coverPhotoUrl?: string | null;
 }
 
-export const Book = ({ book, theme, size }: Props) => {
+export const Book = ({ book, theme, size, coverPhotoUrl }: Props) => {
   if (!book.visible) return null;
   const isDesktop = size === 'desktop';
+  const hasCoverPhoto = Boolean(coverPhotoUrl);
   return (
     <section id="book" style={{ padding: isDesktop ? '32px 64px 32px' : '4px 14px 16px' }}>
       <Reveal>
@@ -149,7 +153,13 @@ export const Book = ({ book, theme, size }: Props) => {
                     width: '100%',
                     height: '100%',
                     borderRadius: '2px 6px 6px 2px',
-                    background: `linear-gradient(135deg, ${theme.coverA} 0%, ${theme.coverB} 100%)`,
+                    // Custom uploaded photo (when present) replaces the
+                    // gradient cover. Image is layered as a real
+                    // background-image so the title text on top stays
+                    // legible against a subtle dark overlay.
+                    background: hasCoverPhoto
+                      ? `linear-gradient(135deg, rgba(0,0,0,0.35), rgba(0,0,0,0.55)), url(${coverPhotoUrl}) center/cover`
+                      : `linear-gradient(135deg, ${theme.coverA} 0%, ${theme.coverB} 100%)`,
                     boxShadow: `-12px 14px 30px rgba(0,0,0,0.5), inset 4px 0 0 rgba(0,0,0,0.45), 0 0 30px ${theme.accent}50`,
                     padding: isDesktop ? 20 : 11,
                     display: 'flex',

@@ -56,9 +56,22 @@ export const ArenaShell = ({ content, videos, videoError }: Props) => {
         <Hero mode={mode} theme={theme} size={size} content={content} />
         <SubsHud subs={content.subs} theme={theme} size={size} />
         <NowDock mode={mode} now={content.now} theme={theme} size={size} />
-        <Videos mode={mode} theme={theme} size={size} videos={videos} editorial={content.videos} error={videoError} />
+        <Videos
+          mode={mode}
+          theme={theme}
+          size={size}
+          videos={videos}
+          editorial={content.videos}
+          images={content.images}
+          error={videoError}
+        />
         <About paragraphs={content.about} theme={theme} size={size} />
-        <Book book={content.book} theme={theme} size={size} />
+        <Book
+          book={content.book}
+          theme={theme}
+          size={size}
+          coverPhotoUrl={content.images['book-cover'] ?? null}
+        />
         <Foot theme={theme} size={size} socials={content.socials} />
       </div>
 

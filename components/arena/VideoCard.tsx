@@ -15,6 +15,10 @@ interface Props {
   useDesignThumb: boolean;
   designThumb: DesignThumb | null;
   mode: Mode;
+  /** Custom uploaded thumbnail for this video (slot: `replay-${video.id}`).
+   *  When present it wins over both the YouTube thumbnail and the design
+   *  thumb fallback. */
+  customThumbUrl?: string | null;
 }
 
 const TIER_COLORS: Record<VideoTier, [string, string]> = {
@@ -39,14 +43,22 @@ const youTubeUrl = (id: string) => `https://www.youtube.com/watch?v=${id}`;
 // sheen, info plate. Background is either:
 //   1) the live YouTube thumbnail (default)
 //   2) the design's gradient + emoji (when useDesignThumb)
-export const VideoCard = ({ video, theme, tier, big = false, useDesignThumb, designThumb, mode }: Props) => {
+export const VideoCard = ({ video, theme, tier, big = false, useDesignThumb, designThumb, mode, customThumbUrl }: Props) => {
   const tc = TIER_COLORS[tier];
   const duration = formatDuration(video.durationSeconds);
   const views = video.isLive ? 'LIVE NOW' : formatViews(video.viewCount);
   const ago = video.publishedAt ? formatRelative(video.publishedAt) : '';
   const tagText = (mode === 'gaming' ? 'GAMING' : 'FOOTBALL');
-  const showDesignArt = useDesignThumb && designThumb !== null;
+
+  // Priority order:
+  //   1. Custom uploaded thumbnail (always wins, even over editor's
+  //      "use design thumb" toggle)
+  //   2. Design thumb (when the editor toggled it on)
+  //   3. YouTube thumbnail (default)
+  const hasCustomThumb = Boolean(customThumbUrl);
+  const showDesignArt = !hasCustomThumb && useDesignThumb && designThumb !== null;
   const thumb = showDesignArt ? designThumb : null;
+  const showYoutubeThumb = !hasCustomThumb && !showDesignArt;
 
   const ytThumbSrc = video.thumbnails.large || video.thumbnails.high || video.thumbnails.medium;
   const ytThumbSrcSet = `${video.thumbnails.medium} 320w, ${video.thumbnails.high} 480w, ${video.thumbnails.large} 1280w`;
@@ -67,15 +79,19 @@ export const VideoCard = ({ video, theme, tier, big = false, useDesignThumb, des
         aspectRatio: big ? '16/10' : '16/12',
         clipPath:
           'polygon(8px 0, calc(100% - 8px) 0, 100% 8px, 100% calc(100% - 8px), calc(100% - 8px) 100%, 8px 100%, 0 calc(100% - 8px), 0 8px)',
-        background: showDesignArt && thumb
-          ? `linear-gradient(135deg, ${thumb.from}, ${thumb.to})`
-          : 'linear-gradient(135deg, #1a0838, #0a0420)',
+        // Layer priority (computed above): custom upload → design thumb → fallback
+        background: hasCustomThumb
+          ? `url(${customThumbUrl}) center/cover`
+          : showDesignArt && thumb
+            ? `linear-gradient(135deg, ${thumb.from}, ${thumb.to})`
+            : 'linear-gradient(135deg, #1a0838, #0a0420)',
         boxShadow: `0 12px 24px rgba(0,0,0,0.55), 0 0 0 1px ${tc[0]}55, 0 0 24px ${tc[0]}33`,
         textDecoration: 'none'
       }}
     >
-      {/* YouTube thumbnail (when design art isn't selected) */}
-      {!showDesignArt && ytThumbSrc && (
+      {/* YouTube thumbnail (only when neither design art nor a custom
+          upload has been chosen). */}
+      {showYoutubeThumb && ytThumbSrc && (
         <Image
           src={ytThumbSrc}
           alt={video.title}
@@ -163,7 +179,9 @@ export const VideoCard = ({ video, theme, tier, big = false, useDesignThumb, des
           pointerEvents: 'none'
         }}
       />
-      {/* Dim overlay so the title plate reads over YouTube thumbnails */}
+      {/* Dim overlay so the title plate stays legible over the photo
+          background. Applied for both YouTube thumbs AND custom uploads
+          (the design-thumb emoji path already has its own gradient). */}
       {!showDesignArt && (
         <span
           aria-hidden

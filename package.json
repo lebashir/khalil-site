@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@react-three/fiber": "^9.6.1",
+    "@vercel/blob": "^2.4.0",
     "@vercel/edge-config": "^1.4.3",
     "framer-motion": "^11.15.0",
     "gsap": "^3.15.0",

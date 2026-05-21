@@ -27,6 +27,8 @@ export const Hero = ({ mode, theme, size, content }: Props) => {
   const titleB = isDesktop ? 160 : isTablet ? 112 : 64;
   const bioSize = isDesktop ? 20 : isTablet ? 17 : 14;
 
+  const portraitPhotoUrl = content.images[`portrait-${mode}`] ?? null;
+
   const characterPanel = (
     <div
       style={{
@@ -39,7 +41,12 @@ export const Hero = ({ mode, theme, size, content }: Props) => {
         margin: isDesktop ? 0 : '24px 0 0'
       }}
     >
-      <PolaroidStack mode={mode} theme={theme} size={size} />
+      <PolaroidStack
+        mode={mode}
+        theme={theme}
+        size={size}
+        portraitPhotoUrl={portraitPhotoUrl}
+      />
 
       <FloatingTag
         label="SUBS"
