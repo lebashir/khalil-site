@@ -82,7 +82,7 @@
     "designThumbs": [
       {
         "from": "#5b3aa6",
-        "to": "",
+        "to": "#1a0a3a",
         "emoji": "🎮"
       },
       {
@@ -120,6 +120,6 @@
     "instagram": ""
   },
   "images": {
-    "book-cover": "https://mnwygrgbow2moyxx.public.blob.vercel-storage.com/images/book-cover-1779372195674.jpg"
+    "book-cover": "https://mnwygrgbow2moyxx.public.blob.vercel-storage.com/images/book-cover-1779372249226.jpg"
   }
 }
