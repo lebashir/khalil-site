@@ -5,6 +5,7 @@ import type { DesignThumb, Mode, VideoTier } from '@/lib/content';
 import type { VideoItem } from '@/lib/youtube';
 import { formatViews, formatRelative } from '@/lib/youtube';
 import type { ArenaTheme } from './theme';
+import { Pressable } from '@/components/fx';
 
 interface Props {
   video: VideoItem;
@@ -52,16 +53,17 @@ export const VideoCard = ({ video, theme, tier, big = false, useDesignThumb, des
   const ytThumbSizes = big ? '(max-width: 880px) 100vw, 720px' : '(max-width: 880px) 50vw, 360px';
 
   return (
-    <a
+    <Pressable
+      tag="a"
       href={youTubeUrl(video.id)}
       target="_blank"
       rel="noopener noreferrer"
       aria-label={video.title}
+      rippleColor={`${tc[0]}aa`}
+      ringColor={tc[0]}
       style={{
-        position: 'relative',
         display: 'block',
         borderRadius: 4,
-        overflow: 'hidden',
         aspectRatio: big ? '16/10' : '16/12',
         clipPath:
           'polygon(8px 0, calc(100% - 8px) 0, 100% 8px, 100% calc(100% - 8px), calc(100% - 8px) 100%, 8px 100%, 0 calc(100% - 8px), 0 8px)',
@@ -69,7 +71,6 @@ export const VideoCard = ({ video, theme, tier, big = false, useDesignThumb, des
           ? `linear-gradient(135deg, ${thumb.from}, ${thumb.to})`
           : 'linear-gradient(135deg, #1a0838, #0a0420)',
         boxShadow: `0 12px 24px rgba(0,0,0,0.55), 0 0 0 1px ${tc[0]}55, 0 0 24px ${tc[0]}33`,
-        transition: 'transform .2s, box-shadow .2s',
         textDecoration: 'none'
       }}
     >
@@ -310,6 +311,6 @@ export const VideoCard = ({ video, theme, tier, big = false, useDesignThumb, des
           )}
         </div>
       </div>
-    </a>
+    </Pressable>
   );
 };

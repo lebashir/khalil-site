@@ -1,9 +1,12 @@
+'use client';
+
 import type { Mode } from '@/lib/content';
 import type { ArenaTheme } from './theme';
 import type { ArenaSize } from './useArenaSize';
 import { CardEmblem } from './cards/CardEmblem';
 import { CardPortrait } from './cards/CardPortrait';
 import { CardNote } from './cards/CardNote';
+import { useHoverTilt } from '@/components/fx';
 
 interface Props {
   mode: Mode;
@@ -19,6 +22,10 @@ export const PolaroidStack = ({ mode, theme, size, portraitPhotoUrl }: Props) =>
   const w = size === 'desktop' ? 240 : size === 'tablet' ? 200 : 160;
   const h = size === 'desktop' ? 300 : size === 'tablet' ? 250 : 200;
 
+  // Whole-stack 3D tilt on mousemove. Hook handles SSR, touch, and
+  // reduced-motion guards internally.
+  const tiltRef = useHoverTilt<HTMLDivElement>({ max: 6, scale: 1.02 });
+
   const emblem =
     mode === 'gaming'
       ? { label: 'GAMERTAG', sub: '@khalilgaming2020' }
@@ -33,7 +40,18 @@ export const PolaroidStack = ({ mode, theme, size, portraitPhotoUrl }: Props) =>
       : "i'm khalil.\nthe ball does\nwhat i tell it.";
 
   return (
-    <div style={{ position: 'relative', width: w * 1.5, height: h * 1.45 }}>
+    <div
+      ref={tiltRef}
+      style={{
+        position: 'relative',
+        width: w * 1.5,
+        height: h * 1.45,
+        // The hook sets transform inline on mousemove — ensure a sane
+        // transition so the tilt feels organic rather than snappy.
+        transition: 'transform .15s ease-out',
+        transformStyle: 'preserve-3d'
+      }}
+    >
       <CardEmblem
         label={emblem.label}
         sub={emblem.sub}

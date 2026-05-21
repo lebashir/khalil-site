@@ -193,6 +193,34 @@ a {
   82%, 100% { background-position: 220% 0; }
 }
 
+/* ── Interaction primitives (components/fx/) ───────────────────────────
+   .k-pressable handles the hover-lift. The press scale comes from an
+   inline `transform: scale(.97)` set by the Pressable component when
+   isPressed is true — inline styles win over the :hover rule so the
+   two compose visually.
+
+   .k-pressable--no-lift opts out of hover-lift (touch-primary devices
+   and `lift={false}` callers). */
+.k-pressable {
+  transition: transform .15s ease, box-shadow .2s ease;
+}
+.k-pressable:not(.k-pressable--no-lift):hover {
+  transform: translateY(-3px);
+}
+
+@keyframes k-press-ripple {
+  0%   { width: 0; height: 0; opacity: 0.55; }
+  100% { width: 320px; height: 320px; opacity: 0; }
+}
+
+@keyframes k-jiggle {
+  0%   { transform: rotate(0); }
+  25%  { transform: rotate(-7deg); }
+  55%  { transform: rotate(5deg); }
+  78%  { transform: rotate(-2deg); }
+  100% { transform: rotate(0); }
+}
+
 /* ── Edit / Control Deck keyframes ────────────────────────────────────────
    Ported from design/directions/edit.jsx. Drive the LED blinks, plunger
    press, missile shake, CRT scan beam, and message-stamp explosion in

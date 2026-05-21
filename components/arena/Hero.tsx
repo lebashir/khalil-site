@@ -6,6 +6,7 @@ import type { ArenaSize } from './useArenaSize';
 import { Reveal } from './Reveal';
 import { PolaroidStack } from './PolaroidStack';
 import { FloatingTag } from './FloatingTag';
+import { Pressable, Jiggleable } from '@/components/fx';
 
 interface Props {
   mode: Mode;
@@ -147,12 +148,14 @@ export const Hero = ({ mode, theme, size, content }: Props) => {
 
       <Reveal delay={380}>
         <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap' }}>
-          <a
+          <Pressable
+            tag="a"
             href={YT_URL}
             target="_blank"
             rel="noopener noreferrer"
+            rippleColor={`${theme.accent}88`}
+            ringColor={theme.accent}
             style={{
-              position: 'relative',
               fontFamily: "'Anton', 'Bungee', sans-serif",
               fontSize: isDesktop ? 24 : 18,
               letterSpacing: 1,
@@ -168,9 +171,12 @@ export const Hero = ({ mode, theme, size, content }: Props) => {
             }}
           >
             {m.cta.toUpperCase()}
-          </a>
-          <a
+          </Pressable>
+          <Pressable
+            tag="a"
             href="#replays"
+            rippleColor={`${theme.accent}88`}
+            ringColor={theme.accent}
             style={{
               fontFamily: "'Anton', 'Bungee', sans-serif",
               fontSize: isDesktop ? 18 : 14,
@@ -186,7 +192,7 @@ export const Hero = ({ mode, theme, size, content }: Props) => {
             }}
           >
             WATCH →
-          </a>
+          </Pressable>
         </div>
       </Reveal>
 
@@ -201,7 +207,7 @@ export const Hero = ({ mode, theme, size, content }: Props) => {
           }}
         >
           {stats.labels.map((label, i) => (
-            <div
+            <Jiggleable
               key={label}
               style={{
                 padding: isDesktop ? '14px 8px' : '8px 6px',
@@ -209,7 +215,8 @@ export const Hero = ({ mode, theme, size, content }: Props) => {
                 border: `1px solid ${theme.cardBorder}`,
                 borderRadius: 6,
                 textAlign: 'center',
-                animation: `k-pop-in .4s cubic-bezier(.2,1.4,.4,1) ${i * 60}ms both`
+                animation: `k-pop-in .4s cubic-bezier(.2,1.4,.4,1) ${i * 60}ms both`,
+                cursor: 'pointer'
               }}
             >
               <div
@@ -234,7 +241,7 @@ export const Hero = ({ mode, theme, size, content }: Props) => {
               >
                 {stats.values[i]}
               </div>
-            </div>
+            </Jiggleable>
           ))}
         </div>
       </Reveal>
