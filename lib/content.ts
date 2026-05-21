@@ -116,7 +116,12 @@ const DEFAULTS = {
   vibe: 'loadout ready'
 };
 
-export const getContent = (): SiteContent => contentJson as SiteContent;
+// `as unknown as SiteContent` rather than a direct cast: TypeScript
+// can't infer tuple types (e.g. [string, string, string, string]) from
+// JSON imports — it widens them to string[]. The schema enforces the
+// tuple constraint at the validator layer; this cast lets the static
+// JSON shape stand in for the runtime contract.
+export const getContent = (): SiteContent => contentJson as unknown as SiteContent;
 
 export type ValidationResult =
   | { ok: true; content: SiteContent }
