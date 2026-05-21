@@ -51,27 +51,44 @@ export const TunnelShell = ({ content, videos }: Props) => {
   // ── Audio: ambient hum + scene-engage thunks + ENTER chime ──────────────
 
   // Start the ambient hum on the user's first gesture (browser autoplay
-  // policy requires it). Stop on unmount.
+  // policy requires it). Stop on unmount AND on pagehide/visibility
+  // changes — Safari (especially on macOS) may freeze the page into
+  // bfcache before React's cleanup runs, leaving the AudioContext alive
+  // and the oscillators audible. We stop synchronously on every "this
+  // page is leaving" signal we can subscribe to.
   useEffect(() => {
     let started = false;
     const onGesture = () => {
       if (started) return;
       started = true;
       startIntroHum();
-      detach();
+      detachGesture();
     };
-    const detach = () => {
+    const detachGesture = () => {
       window.removeEventListener('scroll', onGesture);
       window.removeEventListener('pointerdown', onGesture);
       window.removeEventListener('keydown', onGesture);
       window.removeEventListener('touchstart', onGesture);
     };
+    const onPageHide = () => {
+      stopIntroHum();
+    };
+    const onVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') stopIntroHum();
+    };
+
     window.addEventListener('scroll', onGesture, { passive: true });
     window.addEventListener('pointerdown', onGesture);
     window.addEventListener('keydown', onGesture);
     window.addEventListener('touchstart', onGesture, { passive: true });
+    // pagehide fires for both normal nav AND bfcache freeze on Safari.
+    // beforeunload doesn't fire reliably in Safari, so we lean on pagehide.
+    window.addEventListener('pagehide', onPageHide);
+    document.addEventListener('visibilitychange', onVisibilityChange);
     return () => {
-      detach();
+      detachGesture();
+      window.removeEventListener('pagehide', onPageHide);
+      document.removeEventListener('visibilitychange', onVisibilityChange);
       stopIntroHum();
     };
   }, []);

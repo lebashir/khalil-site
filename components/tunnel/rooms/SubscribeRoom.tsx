@@ -5,6 +5,7 @@ import type { ArenaSize } from '@/components/arena/useArenaSize';
 import type { TunnelTheme } from '../theme';
 import { SceneTag } from './SceneTag';
 import { setIntroSeenCookie } from '@/lib/intro-cookie';
+import { stopIntroHum } from '@/lib/audio/sounds';
 
 interface Props {
   mode: Mode;
@@ -150,6 +151,11 @@ export const SubscribeRoom = ({ mode, theme, lockT, size, subs, socials }: Props
   const subsLeft = Math.max(0, subs.goal - subs.current);
 
   const onEnter = () => {
+    // Stop the ambient hum BEFORE navigation. TunnelShell's pagehide
+    // listener does this too, but on Safari the bfcache can capture the
+    // page before either pagehide or React cleanup runs reliably. Calling
+    // it here guarantees the oscillators are disconnected first.
+    stopIntroHum();
     setIntroSeenCookie();
     window.location.href = '/';
   };

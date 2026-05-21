@@ -364,22 +364,49 @@ export const startIntroHum = (): void => {
   humNodes = { osc1, osc2, lfo, gain };
 };
 
+// Aggressive teardown: snap the gain to zero with only a ~40ms taper (just
+// enough to dodge a click), stop oscillators within 80ms, and disconnect
+// the gain from the master destination so even if Safari pauses scheduling
+// (bfcache, tab-hide), no signal can reach the speakers. Also null out
+// humNodes synchronously so a re-mount via startIntroHum picks up a fresh
+// graph instead of leaking the old one.
 export const stopIntroHum = (): void => {
   if (!humNodes) return;
+  const nodes = humNodes;
+  humNodes = null;
   const ctx = ensureCtx();
   if (!ctx) {
-    humNodes = null;
+    try {
+      nodes.osc1.stop();
+      nodes.osc2.stop();
+      nodes.lfo.stop();
+      nodes.gain.disconnect();
+    } catch {
+      // Nodes may already be stopped/disconnected — ignore
+    }
     return;
   }
-  const t0 = safeNow(ctx);
-  const { osc1, osc2, lfo, gain } = humNodes;
-  gain.gain.cancelScheduledValues(t0);
-  gain.gain.setValueAtTime(gain.gain.value, t0);
-  gain.gain.linearRampToValueAtTime(0, t0 + 0.3);
-  osc1.stop(t0 + 0.35);
-  osc2.stop(t0 + 0.35);
-  lfo.stop(t0 + 0.35);
-  humNodes = null;
+  const t0 = ctx.currentTime;
+  const stopAt = t0 + 0.08;
+  try {
+    nodes.gain.gain.cancelScheduledValues(t0);
+    nodes.gain.gain.setValueAtTime(nodes.gain.gain.value, t0);
+    nodes.gain.gain.linearRampToValueAtTime(0, t0 + 0.04);
+    nodes.osc1.stop(stopAt);
+    nodes.osc2.stop(stopAt);
+    nodes.lfo.stop(stopAt);
+  } catch {
+    // If oscillator was already stopped, ignore
+  }
+  // Hard-disconnect the gain after the brief fade so even a frozen audio
+  // graph cannot emit. setTimeout fires regardless of AudioContext state.
+  setTimeout(() => {
+    try {
+      nodes.gain.disconnect();
+    } catch {
+      // Already disconnected — ignore
+    }
+  }, 120);
 };
 
 export const playRoomEngage = (): void => {
