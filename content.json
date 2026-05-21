@@ -109,8 +109,8 @@
     "tiers": [
       "LEGENDARY",
       "EPIC",
-      "RARE",
       "EPIC",
+      "RARE",
       "COMMON"
     ],
     "pinnedId": null
