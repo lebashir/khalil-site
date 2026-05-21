@@ -77,8 +77,8 @@
     "status": "first copies dropping soon"
   },
   "videos": {
-    "useDesignThumbForFeatured": true,
-    "useDesignThumbsForRest": true,
+    "useDesignThumbForFeatured": false,
+    "useDesignThumbsForRest": false,
     "designThumbs": [
       {
         "from": "#5b3aa6",
@@ -115,18 +115,8 @@
     ],
     "pinnedId": null
   },
-  "videos": {
-    "useDesignThumbForFeatured": false,
-    "useDesignThumbsForRest": false,
-    "designThumbs": [
-      { "from": "#5b3aa6", "to": "#1a0a3a", "emoji": "🎮" },
-      { "from": "#d97757", "to": "#7a2e1a", "emoji": "⭐" },
-      { "from": "#2a7d4f", "to": "#0e3a1f", "emoji": "🟩" },
-      { "from": "#1a3a8a", "to": "#000d33", "emoji": "⚽" },
-      { "from": "#b8527a", "to": "#3a0a1f", "emoji": "🐐" }
-    ],
-    "tiers": ["LEGENDARY", "EPIC", "RARE", "EPIC", "COMMON"],
-    "pinnedId": null
-  },
-  "socials": { "tiktok": "", "instagram": "" }
+  "socials": {
+    "tiktok": "",
+    "instagram": ""
+  }
 }
