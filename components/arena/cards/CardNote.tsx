@@ -8,15 +8,29 @@ interface Props {
   theme: ArenaTheme;
   size: ArenaSize;
   style?: CSSProperties;
+  /** Pass-throughs to Polaroid for stack-level interactivity (§5). */
+  rotate?: number;
+  bobDelay?: number;
+  spreadX?: number;
+  spreadY?: number;
+  onTap?: () => void;
 }
 
 // Front card — handwritten note on lined paper with red margin, Caveat
 // font, and a signature swoosh in the bottom right.
-export const CardNote = ({ text, theme, size, style }: Props) => {
+export const CardNote = ({ text, theme, size, style, rotate, bobDelay, spreadX, spreadY, onTap }: Props) => {
   const isDesktop = size === 'desktop';
   const textFs = isDesktop ? 26 : size === 'tablet' ? 22 : 18;
   return (
-    <Polaroid style={{ ...style, padding: 14, background: '#fef9e6' }} tapeColor="#7ec6c2">
+    <Polaroid
+      style={{ ...style, padding: 14, background: '#fef9e6' }}
+      tapeColor="#7ec6c2"
+      rotate={rotate}
+      bobDelay={bobDelay}
+      spreadX={spreadX}
+      spreadY={spreadY}
+      onTap={onTap}
+    >
       {/* Lined paper */}
       <div
         aria-hidden

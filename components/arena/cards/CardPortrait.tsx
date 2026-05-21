@@ -14,15 +14,43 @@ interface Props {
   style?: CSSProperties;
   /** Optional real photo URL; falls back to the emoji icon when absent. */
   photoUrl?: string | null;
+  /** Pass-throughs to Polaroid for stack-level interactivity (§5). */
+  rotate?: number;
+  bobDelay?: number;
+  spreadX?: number;
+  spreadY?: number;
+  onTap?: () => void;
 }
 
 // Middle card — circular portrait frame holding either a real photo (when
 // available) or an emoji placeholder. Caption strip + polaroid label.
-export const CardPortrait = ({ icon, label, sub, mode, theme, size, style, photoUrl }: Props) => {
+export const CardPortrait = ({
+  icon,
+  label,
+  sub,
+  mode,
+  theme,
+  size,
+  style,
+  photoUrl,
+  rotate,
+  bobDelay,
+  spreadX,
+  spreadY,
+  onTap
+}: Props) => {
   const isDesktop = size === 'desktop';
   const iconFs = isDesktop ? 90 : size === 'tablet' ? 70 : 60;
   return (
-    <Polaroid style={style} tapeColor="#ffb8b8">
+    <Polaroid
+      style={style}
+      tapeColor="#ffb8b8"
+      rotate={rotate}
+      bobDelay={bobDelay}
+      spreadX={spreadX}
+      spreadY={spreadY}
+      onTap={onTap}
+    >
       <div
         style={{
           position: 'relative',

@@ -11,15 +11,41 @@ interface Props {
   theme: ArenaTheme;
   size: ArenaSize;
   style?: CSSProperties;
+  /** Pass-throughs to Polaroid for stack-level interactivity (§5). */
+  rotate?: number;
+  bobDelay?: number;
+  spreadX?: number;
+  spreadY?: number;
+  onTap?: () => void;
 }
 
 // Back card in the polaroid stack. Big "7" numeral on a mode-tinted
 // gradient, halftone dots, corner brackets. Caption strip below.
-export const CardEmblem = ({ label, sub, mode, theme, size, style }: Props) => {
+export const CardEmblem = ({
+  label,
+  sub,
+  mode,
+  theme,
+  size,
+  style,
+  rotate,
+  bobDelay,
+  spreadX,
+  spreadY,
+  onTap
+}: Props) => {
   const isDesktop = size === 'desktop';
   const numberFs = isDesktop ? 240 : size === 'tablet' ? 180 : 140;
   return (
-    <Polaroid style={style} tapeColor="#a9d4ff">
+    <Polaroid
+      style={style}
+      tapeColor="#a9d4ff"
+      rotate={rotate}
+      bobDelay={bobDelay}
+      spreadX={spreadX}
+      spreadY={spreadY}
+      onTap={onTap}
+    >
       <div
         style={{
           position: 'relative',

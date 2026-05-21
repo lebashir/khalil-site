@@ -221,6 +221,76 @@ a {
   100% { transform: rotate(0); }
 }
 
+/* ── Polaroid stack interactivity (§5) ─────────────────────────────────
+   The inner card uses the modern translate/rotate/scale longhand
+   properties (separate from `transform`) so hover, fan-out, and tap-pop
+   all compose with the static rotation rather than overwriting it.
+   --rot, --spread-x, --spread-y are set inline by Polaroid.tsx. */
+
+.k-polaroid-card {
+  rotate: var(--rot, 0deg);
+  transition:
+    translate .35s cubic-bezier(.4, 1.2, .4, 1),
+    scale .25s ease,
+    box-shadow .25s ease;
+}
+
+/* Per-card hover lift. Pull the card forward and brighten its shadow. */
+.k-polaroid-card:hover {
+  translate: 0 -7px;
+  scale: 1.025;
+  box-shadow: 0 26px 50px rgba(0, 0, 0, 0.7), 0 6px 14px rgba(0, 0, 0, 0.35);
+  transition:
+    translate .35s cubic-bezier(.4, 1.2, .4, 1),
+    scale .25s ease,
+    box-shadow .25s ease;
+}
+
+/* Lift the OUTER wrapper's z-index when its inner card is hovered, so
+   the lift visually clears its sibling cards. The inner's CSS hover
+   z-index can't escape its outer's stacking context — :has() lets us
+   reach up. Modern browsers only (Safari 15.4+, Chrome 105+); without
+   :has() the lift still happens, it just stays in its original layer. */
+.k-polaroid-outer:has(> .k-polaroid-card:hover) {
+  z-index: 50;
+}
+
+/* No hover-lift on touch-primary devices. Tap-to-pop and fan-out still
+   work because those use JS state. */
+@media (hover: none) {
+  .k-polaroid-card:hover {
+    translate: 0 0;
+    scale: 1;
+    z-index: auto;
+  }
+}
+
+/* Stack fan-out — desktop trigger is the container's :hover; touch
+   trigger is the .fan-out class added by PolaroidStack for ~1.4s after
+   a tap. Each card's --spread-x / --spread-y comes from its inline
+   style (PolaroidStack hardcodes per-card vectors). */
+.k-polaroid-stack:hover .k-polaroid-card,
+.k-polaroid-stack.fan-out .k-polaroid-card {
+  translate: var(--spread-x, 0) var(--spread-y, 0);
+}
+
+/* Hovering a card inside a fanned stack: keep the fan offset but also
+   lift the card vertically. Composes via calc on the y component. */
+.k-polaroid-stack:hover .k-polaroid-card:hover,
+.k-polaroid-stack.fan-out .k-polaroid-card:hover {
+  translate: var(--spread-x, 0) calc(var(--spread-y, 0px) - 7px);
+}
+
+/* Tap-pop. Inline animation override (set via animation-restart trick
+   in Polaroid.tsx) plays this. The keyframe sets translate/scale/rotate
+   directly so it temporarily wins over the :hover and :fan rules. */
+@keyframes k-polaroid-pop {
+  0%   { translate: 0 0;     rotate: var(--rot, 0deg); scale: 1; }
+  35%  { translate: 0 -18px; rotate: 0deg;             scale: 1.075; }
+  70%  { translate: 0 -2px;  rotate: var(--rot, 0deg); scale: 1.01; }
+  100% { translate: 0 0;     rotate: var(--rot, 0deg); scale: 1; }
+}
+
 /* ── Edit / Control Deck keyframes ────────────────────────────────────────
    Ported from design/directions/edit.jsx. Drive the LED blinks, plunger
    press, missile shake, CRT scan beam, and message-stamp explosion in
