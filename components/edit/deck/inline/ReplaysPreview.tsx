@@ -1,5 +1,6 @@
 'use client';
 
+import type { SiteContent } from '@/lib/content';
 import type { VideoItem } from '@/lib/youtube';
 import { ED, FONT } from '../constants';
 import { EditPin } from './EditPin';
@@ -7,14 +8,25 @@ import { EditPin } from './EditPin';
 interface ReplaysPreviewProps {
   videos: VideoItem[];
   pinnedId: string | null;
+  /** Slot-id → URL map. Looked up per video as `replay-${video.id}`. */
+  images: SiteContent['images'];
   onEdit: (key: 'pinned-video' | 'thumb-style') => void;
 }
+
+// Returns the upload URL when the editor has set a custom thumb for this
+// video, otherwise the YouTube thumbnail. Mirrors VideoCard's priority
+// order so the inline preview matches what the homepage actually shows.
+const thumbSrcFor = (video: VideoItem, images: SiteContent['images']): string => {
+  const custom = images[`replay-${video.id}`];
+  if (custom) return custom;
+  return video.thumbnails.medium;
+};
 
 const PREVIEW_BG = 'linear-gradient(180deg, rgba(255,255,255,0.04), rgba(0,0,0,0.4))';
 
 // Mini-mockup of the replays/videos section.
 // Shows pinned video first (larger), then a strip of the rest.
-export const ReplaysPreview = ({ videos, pinnedId, onEdit }: ReplaysPreviewProps) => {
+export const ReplaysPreview = ({ videos, pinnedId, images, onEdit }: ReplaysPreviewProps) => {
   const pinned = pinnedId ? videos.find((v) => v.id === pinnedId) : null;
   const rest = videos.filter((v) => v.id !== pinnedId).slice(0, 4);
 
@@ -90,11 +102,12 @@ export const ReplaysPreview = ({ videos, pinnedId, onEdit }: ReplaysPreviewProps
             video={pinned ?? videos[0]!}
             tag={pinned ? 'PINNED' : 'LATEST'}
             tagColor={pinned ? ED.amber : ED.blue}
+            images={images}
           />
           {/* Mini list */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
             {rest.map((v) => (
-              <MiniRow key={v.id} video={v} />
+              <MiniRow key={v.id} video={v} images={images} />
             ))}
           </div>
         </div>
@@ -116,7 +129,17 @@ export const ReplaysPreview = ({ videos, pinnedId, onEdit }: ReplaysPreviewProps
   );
 };
 
-const ThumbCard = ({ video, tag, tagColor }: { video: VideoItem; tag: string; tagColor: string }) => (
+const ThumbCard = ({
+  video,
+  tag,
+  tagColor,
+  images
+}: {
+  video: VideoItem;
+  tag: string;
+  tagColor: string;
+  images: SiteContent['images'];
+}) => (
   <div
     style={{
       position: 'relative',
@@ -129,7 +152,7 @@ const ThumbCard = ({ video, tag, tagColor }: { video: VideoItem; tag: string; ta
   >
     {/* eslint-disable-next-line @next/next/no-img-element */}
     <img
-      src={video.thumbnails.medium}
+      src={thumbSrcFor(video, images)}
       alt=""
       loading="lazy"
       style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
@@ -174,7 +197,7 @@ const ThumbCard = ({ video, tag, tagColor }: { video: VideoItem; tag: string; ta
   </div>
 );
 
-const MiniRow = ({ video }: { video: VideoItem }) => (
+const MiniRow = ({ video, images }: { video: VideoItem; images: SiteContent['images'] }) => (
   <div
     style={{
       display: 'flex',
@@ -197,7 +220,7 @@ const MiniRow = ({ video }: { video: VideoItem }) => (
     >
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
-        src={video.thumbnails.medium}
+        src={thumbSrcFor(video, images)}
         alt=""
         loading="lazy"
         style={{ width: '100%', height: '100%', objectFit: 'cover' }}

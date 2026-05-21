@@ -6,13 +6,16 @@ import { EditPin } from './EditPin';
 
 interface BookPreviewProps {
   book: SiteContent['book'];
+  /** Uploaded cover photo URL. When present, replaces the gradient cover
+   *  in the preview so the editor sees the actual asset that's live. */
+  coverUrl: string | null;
   onEdit: (key: 'book') => void;
 }
 
 const PREVIEW_BG = 'linear-gradient(180deg, rgba(255,255,255,0.04), rgba(0,0,0,0.4))';
 
 // Mini-mockup of the Book card on the homepage.
-export const BookPreview = ({ book, onEdit }: BookPreviewProps) => (
+export const BookPreview = ({ book, coverUrl, onEdit }: BookPreviewProps) => (
   <div
     style={{
       position: 'relative',
@@ -69,20 +72,26 @@ export const BookPreview = ({ book, onEdit }: BookPreviewProps) => (
         gap: 12
       }}
     >
-      {/* Faux cover */}
+      {/* Faux cover — shows the uploaded photo when present, otherwise the
+          gradient placeholder + chapter text. Same priority order as the
+          arena Book component so the inline editor matches the live site. */}
       <div
         style={{
           width: 64,
           minHeight: 92,
           flexShrink: 0,
           borderRadius: 3,
-          backgroundImage: `linear-gradient(135deg, ${ED.pink}, ${ED.amber})`,
+          backgroundImage: coverUrl
+            ? `linear-gradient(180deg, transparent 60%, rgba(0,0,0,0.7)), url(${coverUrl})`
+            : `linear-gradient(135deg, ${ED.pink}, ${ED.amber})`,
+          backgroundSize: coverUrl ? 'cover' : undefined,
+          backgroundPosition: coverUrl ? 'center' : undefined,
           display: 'flex',
           alignItems: 'flex-end',
           padding: 6,
           fontFamily: FONT.stencil,
           fontSize: 9,
-          color: '#1a0a0a',
+          color: coverUrl ? '#fff' : '#1a0a0a',
           letterSpacing: 1,
           textTransform: 'uppercase',
           lineHeight: 1.1,

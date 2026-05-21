@@ -183,10 +183,15 @@ export const InlineEditView = ({
       <ReplaysPreview
         videos={videos}
         pinnedId={content.videos.pinnedId}
+        images={content.images}
         onEdit={(k) => open(k)}
       />
       <AboutPreview about={content.about} onEdit={(k) => open(k)} />
-      <BookPreview book={content.book} onEdit={(k) => open(k)} />
+      <BookPreview
+        book={content.book}
+        coverUrl={content.images['book-cover'] ?? null}
+        onEdit={(k) => open(k)}
+      />
       <FooterPreview socials={content.socials} onEdit={(k) => open(k)} />
       <ImagesPreview images={content.images} videos={videos} setImage={setImage} />
 
