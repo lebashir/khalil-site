@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Mode, Mood, NowBlock, SiteContent } from '@/lib/content';
 import type { VideoItem } from '@/lib/youtube';
 import { playPlunger } from '@/lib/audio/sounds';
@@ -82,6 +82,10 @@ export const ControlDeck = ({ initialContent, videos }: ControlDeckProps) => {
   const [launching, setLaunching] = useState(false);
   const [launchNonce, setLaunchNonce] = useState(0);
 
+  // Ref for the LaunchWindow's wrapper — used on mobile/tablet to scroll
+  // the CRT into view when the user fires, so they always see the burst.
+  const crtRef = useRef<HTMLDivElement | null>(null);
+
   const onSave = useCallback(async () => {
     setSaving(true);
     setErrors([]);
@@ -123,9 +127,15 @@ export const ControlDeck = ({ initialContent, videos }: ControlDeckProps) => {
     // Plunger sound fires first; the LaunchWindow useEffect plays the
     // matching payload sound when launchNonce bumps a beat later.
     playPlunger();
-    // Animate the in-deck CRT immediately — visual feedback shouldn't wait
-    // on a network round-trip.
-    setLaunchNonce((n) => n + 1);
+    // On mobile/tablet the CRT and the plunger don't both fit on screen,
+    // so we scroll the CRT into view first and delay the visual burst
+    // until the scroll has had a beat to settle.
+    const needsScroll = !isDesktop && crtRef.current !== null;
+    if (needsScroll) {
+      crtRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    const burstDelay = needsScroll ? 380 : 0;
+    window.setTimeout(() => setLaunchNonce((n) => n + 1), burstDelay);
     try {
       const res = await fetch(ANNOUNCE_URL, {
         method: 'POST',
@@ -148,7 +158,7 @@ export const ControlDeck = ({ initialContent, videos }: ControlDeckProps) => {
         // payload or fuse without retyping.
       }, LAUNCH_ANIM_MS);
     }
-  }, [launching, msg, payload, fuse]);
+  }, [launching, msg, payload, fuse, isDesktop]);
 
   // Focused setters for non-inline modules in the LAUNCH tab
   const setMood = (mood: Mood) => setContent({ ...content, mood });
@@ -222,6 +232,7 @@ export const ControlDeck = ({ initialContent, videos }: ControlDeckProps) => {
             setSocials={setSocials}
             setVideos={setVideos}
             setDefaultMode={setDefaultMode}
+            crtRef={crtRef}
           />
         )}
       </main>
@@ -318,6 +329,7 @@ interface LaunchTabProps {
   setSocials: (s: SiteContent['socials']) => void;
   setVideos: (v: SiteContent['videos']) => void;
   setDefaultMode: (m: Mode) => void;
+  crtRef: React.RefObject<HTMLDivElement | null>;
 }
 
 const LaunchTab = ({
@@ -343,16 +355,12 @@ const LaunchTab = ({
   setPinnedId,
   setSocials,
   setVideos,
-  setDefaultMode
-}: LaunchTabProps) => (
-  <div
-    style={{
-      display: 'grid',
-      gap: 14,
-      gridTemplateColumns: isDesktop ? '1.15fr 1fr' : '1fr'
-    }}
-  >
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 14, minWidth: 0 }}>
+  setDefaultMode,
+  crtRef
+}: LaunchTabProps) => {
+  // Reusable nodes — same instances rendered in either layout
+  const launchWindow = (
+    <div ref={crtRef}>
       <LaunchWindow
         mode={mode}
         setMode={setMode}
@@ -363,50 +371,95 @@ const LaunchTab = ({
         isPhone={isPhone}
         isDesktop={isDesktop}
       />
-      <Panel title="LIVE STATUS" kicker="// goes out next save" accent={ED.green}>
-        <div
-          style={{
-            display: 'grid',
-            gap: 12,
-            gridTemplateColumns: isPhone ? '1fr' : '1fr 1fr'
-          }}
-        >
-          <StatusModule hideHeader mood={content.mood} setMood={setMood} />
-          <SubsModule hideHeader subs={content.subs} setSubs={setSubs} />
-        </div>
-      </Panel>
-      <NowPlayingModule mode={mode} now={content.now[mode]} setNow={setNow} />
     </div>
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 14, minWidth: 0 }}>
-      <MessageLauncher
-        msg={msg}
-        setMsg={setMsg}
-        payload={payload}
-        setPayload={setPayload}
-        fuse={fuse}
-        setFuse={setFuse}
-        onFire={onFire}
-        launching={launching}
-        isPhone={isPhone}
-        isDesktop={isDesktop}
-      />
-      <PinnedVideoModule
-        videos={videos}
-        pinnedId={content.videos.pinnedId}
-        setPinnedId={setPinnedId}
-      />
-      <ThumbStyleModule videos={content.videos} setVideos={setVideos} />
-      <AboutModule about={content.about} setAbout={setAbout} />
+  );
+  const messageLauncher = (
+    <MessageLauncher
+      msg={msg}
+      setMsg={setMsg}
+      payload={payload}
+      setPayload={setPayload}
+      fuse={fuse}
+      setFuse={setFuse}
+      onFire={onFire}
+      launching={launching}
+      isPhone={isPhone}
+      isDesktop={isDesktop}
+    />
+  );
+  const liveStatusPanel = (
+    <Panel title="LIVE STATUS" kicker="// goes out next save" accent={ED.green}>
       <div
         style={{
           display: 'grid',
-          gap: 14,
+          gap: 12,
           gridTemplateColumns: isPhone ? '1fr' : '1fr 1fr'
         }}
       >
-        <DefaultModeModule defaultMode={content.defaultMode} setDefaultMode={setDefaultMode} />
-        <SocialsModule socials={content.socials} setSocials={setSocials} />
+        <StatusModule hideHeader mood={content.mood} setMood={setMood} />
+        <SubsModule hideHeader subs={content.subs} setSubs={setSubs} />
+      </div>
+    </Panel>
+  );
+  const nowPlaying = (
+    <NowPlayingModule mode={mode} now={content.now[mode]} setNow={setNow} />
+  );
+  const pinnedVideo = (
+    <PinnedVideoModule
+      videos={videos}
+      pinnedId={content.videos.pinnedId}
+      setPinnedId={setPinnedId}
+    />
+  );
+  const thumbStyle = <ThumbStyleModule videos={content.videos} setVideos={setVideos} />;
+  const about = <AboutModule about={content.about} setAbout={setAbout} />;
+  const bootAndSocialsRow = (
+    <div
+      style={{
+        display: 'grid',
+        gap: 14,
+        gridTemplateColumns: isPhone ? '1fr' : '1fr 1fr'
+      }}
+    >
+      <DefaultModeModule defaultMode={content.defaultMode} setDefaultMode={setDefaultMode} />
+      <SocialsModule socials={content.socials} setSocials={setSocials} />
+    </div>
+  );
+
+  // Mobile / tablet: linear stack with CRT and missile-launcher adjacent so
+  // the user can see the burst the moment they fire. Auto-scroll in onFire
+  // catches the case where they've scrolled past the CRT to reach the plunger.
+  if (!isDesktop) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+        {launchWindow}
+        {messageLauncher}
+        {liveStatusPanel}
+        {nowPlaying}
+        {pinnedVideo}
+        {thumbStyle}
+        {about}
+        {bootAndSocialsRow}
+      </div>
+    );
+  }
+
+  // Desktop: two columns, CRT/status/now on the left and launcher/modules on
+  // the right. Both are visible at the same time, so no scroll-into-view need.
+  return (
+    <div style={{ display: 'grid', gap: 14, gridTemplateColumns: '1.15fr 1fr' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 14, minWidth: 0 }}>
+        {launchWindow}
+        {liveStatusPanel}
+        {nowPlaying}
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 14, minWidth: 0 }}>
+        {messageLauncher}
+        {pinnedVideo}
+        {thumbStyle}
+        {about}
+        {bootAndSocialsRow}
       </div>
     </div>
-  </div>
-);
+  );
+};
