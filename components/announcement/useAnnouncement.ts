@@ -3,7 +3,11 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { Announcement } from '@/lib/announcement';
 
-const POLL_MS = 15000;
+// 3s feels live — combined with the 2s CDN cache + Edge Config's ~1-2s
+// write propagation, a freshly fired announcement reaches visitors in
+// ~3-5s worst-case. Polling /api/announcement is cheap (cached at CDN +
+// Edge Config read is sub-15ms) so this fits easily within free-tier limits.
+const POLL_MS = 3000;
 const SEEN_COOKIE_PREFIX = 'khalil_ann_';
 const SEEN_COOKIE_MAX_AGE_S = 7 * 24 * 60 * 60; // 7 days
 

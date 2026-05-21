@@ -53,5 +53,5 @@ export const POST = async (req: Request) => {
     );
   }
 
-  return NextResponse.json({ ok: true, announcement, commitSha: commit.commitSha });
+  return NextResponse.json({ ok: true, announcement });
 };
