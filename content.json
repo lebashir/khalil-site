@@ -125,7 +125,15 @@
       "mode": "random",
       "fixedKey": "storm",
       "pool": [
-        "neon"
+        "storm",
+        "deep",
+        "paper",
+        "ice",
+        "mono",
+        "lava",
+        "toxic",
+        "neon",
+        "crt"
       ]
     }
   }
