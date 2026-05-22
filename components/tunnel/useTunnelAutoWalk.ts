@@ -82,6 +82,12 @@ export const useTunnelAutoWalk = (): AutoWalkResult => {
   // transitions to dwelling. The transition flips phase AFTER the final
   // frame so consumers that key off `phase` (like the TAP TO CONTINUE
   // pill) get a clean handoff.
+  //
+  // We walk to `lockEnd`, not `lockStart`. Scenes use a `lockT` ramp
+  // (0 at lockStart → 1 at lockEnd) to fade their content in; dwelling
+  // at lockStart would leave every room invisible (lockT=0). Dwelling
+  // at lockEnd gives lockT=1 — the scene's fully-revealed climax — which
+  // is what the visitor came here to see.
   const startWalk = useCallback((targetIndex: number, fromProgress: number): void => {
     const target = SCENES[targetIndex];
     if (!target) return;
@@ -90,7 +96,7 @@ export const useTunnelAutoWalk = (): AutoWalkResult => {
     cancelDwell();
 
     walkFromRef.current = fromProgress;
-    walkToRef.current = target.lockStart;
+    walkToRef.current = target.lockEnd;
     walkStartRef.current = performance.now();
     setSceneIndex(targetIndex);
     setPhase('walking');
@@ -127,7 +133,9 @@ export const useTunnelAutoWalk = (): AutoWalkResult => {
       }
       const fromScene = SCENES[sceneIndex];
       if (!fromScene) return;
-      startWalk(next, fromScene.lockStart);
+      // Walk starts from where we just dwelled (lockEnd of the current
+      // scene) — that's the visitor's current view position.
+      startWalk(next, fromScene.lockEnd);
     }, ms);
 
     return () => {
@@ -171,7 +179,8 @@ export const useTunnelAutoWalk = (): AutoWalkResult => {
     }
     const fromScene = SCENES[sceneIndex];
     if (!fromScene) return;
-    startWalk(next, fromScene.lockStart);
+    // Walk starts from where we just were (lockEnd of the current scene).
+    startWalk(next, fromScene.lockEnd);
   }, [phase, sceneIndex, startWalk]);
 
   return { progress, phase, sceneIndex, advance };
