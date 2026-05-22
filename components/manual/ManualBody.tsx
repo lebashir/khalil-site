@@ -222,7 +222,8 @@ export const ManualBody = ({ mode, theme, size, content }: Props) => {
         <Prose>
           <p style={{ margin: 0 }}>
             the tunnel is your <strong>walk-in intro</strong>. five scenes.
-            scroll forward = walk forward.
+            the camera moves itself — visitors just watch (or tap to skip
+            ahead).
           </p>
         </Prose>
 
@@ -239,25 +240,49 @@ export const ManualBody = ({ mode, theme, size, content }: Props) => {
           />
         </Panel>
 
+        <Panel label="◇ THE TIMING" theme={theme}>
+          <Prose>
+            <ul style={{ margin: 0, paddingLeft: 18 }}>
+              <li>camera walks <strong>~1.6 seconds</strong> between rooms</li>
+              <li>holds at each room <strong>~3.5 seconds</strong> so visitors can read it</li>
+              <li>the first room holds a touch longer (4.5s) — visitors are still getting their bearings</li>
+              <li>at the destination it just stops — the <strong>▶ ENTER</strong> button is the only way out from there</li>
+            </ul>
+          </Prose>
+        </Panel>
+
+        <Panel label="◇ HOW TO SPEED IT UP" theme={theme}>
+          <KsRows
+            rows={[
+              ['TAP', 'tap anywhere in the corridor → jumps to the next room'],
+              ['SCROLL / SWIPE', 'same as tap (power-user shortcut)'],
+              ['KEYBOARD', '↓ / → / space / enter — same as tap'],
+              ['THE PILL', 'a small "▶ TAP TO CONTINUE" pill appears at the bottom during each hold — it\'s the visual hint that you can skip ahead']
+            ]}
+            theme={theme}
+          />
+        </Panel>
+
+        <Notebook>
+          a small <strong>▶ SKIP INTRO →</strong> link sits in the top-right
+          of the tunnel. tap it and you go straight to the arena (it
+          remembers you so you don't have to re-skip on the next visit).
+        </Notebook>
+
         <Panel label="◇ SOUNDS WHILE WALKING" theme={theme}>
           <Prose>
             <ul style={{ margin: 0, paddingLeft: 18 }}>
-              <li>a <strong>low rumble</strong> starts on the first scroll (the engine hum)</li>
-              <li>each scene <strong>thunks</strong> when you reach it</li>
+              <li>a <strong>low rumble</strong> starts on the first sound-enabling tap (the engine hum)</li>
+              <li>each scene <strong>thunks</strong> when the camera locks onto it</li>
               <li>the last scene gets a <strong>bell chord chime</strong></li>
             </ul>
           </Prose>
         </Panel>
 
-        <Notebook>
-          the first time someone lands, a "<strong>· STAND BY · SCROLL TO WALK ·</strong>"
-          card pops up so they know what to do.
-        </Notebook>
-
         <Tldr>
-          scrolling the tunnel = walking forward. sound is part of it. the
-          ENTER button at the bottom takes them into the arena and remembers
-          them.
+          the tunnel auto-walks the visitor through 5 rooms, holding ~3.5
+          seconds at each. tap to skip ahead. ▶ SKIP INTRO bails out to
+          the arena. ▶ ENTER finishes the walk normally.
         </Tldr>
       </Part>
 

@@ -148,8 +148,8 @@ book, videos, socials, mood).
 
 # PART 3 ◇ THE TUNNEL
 
-the tunnel is your **walk-in intro**. five scenes. scroll forward =
-walk forward.
+the tunnel is your **walk-in intro**. five scenes. the camera moves
+itself — visitors just watch (or tap to skip ahead).
 
 ```
   ┌──────────────────────────────────────────────┐
@@ -170,17 +170,38 @@ walk forward.
   └──────────────────────────────────────────────┘
 ```
 
-while walking:
-- a **low rumble** starts on the first scroll (the engine hum)
-- each scene **thunks** when you reach it
+### the timing
+
+- camera walks ~1.6 seconds between rooms
+- holds at each room ~3.5 seconds so visitors can read it
+- first room holds a touch longer (4.5s) — visitors are still
+  getting their bearings
+- at the destination it just stops — the ▶ ENTER button is the
+  only way out from there
+
+### how visitors can speed it up
+
+- **tap anywhere** in the corridor → jumps to the next room
+- **scroll / swipe** → same as tap (works for power users)
+- **arrow keys / space / enter** → same as tap (accessibility)
+- a small **▶ TAP TO CONTINUE** pill appears at the bottom during
+  each hold so it's obvious you can skip ahead
+
+### how visitors can bail entirely
+
+a small **▶ SKIP INTRO →** link sits in the top-right of the tunnel.
+tap it and you go straight to the arena (it remembers you so you
+don't have to re-skip on the next visit).
+
+### sounds while walking
+
+- a **low rumble** starts as soon as the first sound-enabling tap happens (the engine hum)
+- each scene **thunks** when the camera locks onto it
 - the last scene gets a **bell chord chime**
 
-the first time someone lands, a "**· STAND BY · SCROLL TO WALK ·**"
-card pops up so they know what to do.
-
-**tl;dr** — scrolling the tunnel = walking forward. sound is part of
-it. the ENTER button at the bottom takes them into the arena and
-remembers them.
+**tl;dr** — the tunnel auto-walks the visitor through 5 rooms,
+holding ~3.5 seconds at each. tap to skip ahead. ▶ SKIP INTRO bails
+out straight to the arena. ▶ ENTER finishes the walk normally.
 
 ---
 
