@@ -12,11 +12,14 @@ interface Props {
   setImage: (slotId: string, url: string | null) => void;
 }
 
-// IMAGES section in the inline editor. Lists all of Khalil's editable
-// image slots as drop-zones, grouped by surface. Uploads happen
-// immediately via /api/edit/image/upload; the slot-id → URL mapping
-// flows through setImage into content.images and is persisted on the
-// next /api/edit/save commit.
+// IMAGES section in the on-site editor. Every editable image slot in
+// one uniform auto-fit grid so book-cover, portraits and replay thumbs
+// all read at the same compact size instead of the book cover hogging
+// the full row.
+//
+// Uploads happen immediately via /api/edit/image/upload; the slot-id →
+// URL mapping flows through setImage into content.images and is
+// persisted on the next /api/edit/save commit.
 //
 // Each slot here writes to the SAME content.images map that the BOOK
 // pin's cover field also writes to — uploads done from either place
@@ -38,7 +41,7 @@ export const ImagesPreview = ({ images, videos, setImage }: Props) => {
         borderRadius: 4,
         display: 'flex',
         flexDirection: 'column',
-        gap: 10
+        gap: 12
       }}
     >
       <div
@@ -46,7 +49,8 @@ export const ImagesPreview = ({ images, videos, setImage }: Props) => {
           display: 'flex',
           alignItems: 'baseline',
           justifyContent: 'space-between',
-          gap: 8
+          gap: 8,
+          flexWrap: 'wrap'
         }}
       >
         <div
@@ -68,12 +72,20 @@ export const ImagesPreview = ({ images, videos, setImage }: Props) => {
             letterSpacing: 1
           }}
         >
-          // photos that replace placeholder art
+          // photos that replace placeholder art · click any slot to upload
         </div>
       </div>
 
-      {/* Portraits — two per-mode slots side by side */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+      {/* Hero shots — portraits + book cover share one compact 3-up grid.
+          auto-fit/minmax keeps slots at ~160-220px so the book cover never
+          dominates the page like it did before. */}
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
+          gap: 10
+        }}
+      >
         <ImageDropzone
           slotId="portrait-gaming"
           label="PORTRAIT · GAMING"
@@ -90,19 +102,19 @@ export const ImagesPreview = ({ images, videos, setImage }: Props) => {
           onRemoved={handleRemove('portrait-football')}
           aspect="4 / 5"
         />
+        <ImageDropzone
+          slotId="book-cover"
+          label="BOOK COVER"
+          currentUrl={get('book-cover')}
+          onUploaded={handleUpload('book-cover')}
+          onRemoved={handleRemove('book-cover')}
+          aspect="3 / 4"
+        />
       </div>
 
-      {/* Book cover — shares the same slot as the BOOK pin's cover field */}
-      <ImageDropzone
-        slotId="book-cover"
-        label="BOOK COVER"
-        currentUrl={get('book-cover')}
-        onUploaded={handleUpload('book-cover')}
-        onRemoved={handleRemove('book-cover')}
-        aspect="3 / 4"
-      />
-
-      {/* Replay thumbnails — one slot per visible video */}
+      {/* Replay thumbnails — auto-pulled from YouTube (10-min cache). The
+          list refreshes whenever Khalil uploads new videos — no manual
+          step needed here. */}
       {visibleVideos.length > 0 && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           <div
@@ -114,9 +126,15 @@ export const ImagesPreview = ({ images, videos, setImage }: Props) => {
               textTransform: 'uppercase'
             }}
           >
-            // replay thumbnails
+            // replay thumbnails · auto-synced with youtube
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
+              gap: 10
+            }}
+          >
             {visibleVideos.map((video, i) => {
               const slot = `replay-${video.id}`;
               return (
@@ -128,7 +146,7 @@ export const ImagesPreview = ({ images, videos, setImage }: Props) => {
                   currentUrl={get(slot)}
                   onUploaded={handleUpload(slot)}
                   onRemoved={handleRemove(slot)}
-                  aspect="16 / 12"
+                  aspect="16 / 9"
                 />
               );
             })}

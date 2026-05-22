@@ -107,7 +107,8 @@ export const InlineEditView = ({
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-      {/* Mode + tip strip */}
+      {/* Mode + tip strip — wraps on phone so the chips never get squashed
+          underneath the hint copy. */}
       <div
         style={{
           display: 'flex',
@@ -117,7 +118,8 @@ export const InlineEditView = ({
           padding: '10px 12px',
           background: 'rgba(0,0,0,0.4)',
           border: `1px solid ${ED.line}`,
-          borderRadius: 4
+          borderRadius: 4,
+          flexWrap: 'wrap'
         }}
       >
         <div
@@ -126,13 +128,15 @@ export const InlineEditView = ({
             fontSize: 10,
             color: ED.inkDim,
             letterSpacing: 1.4,
-            textTransform: 'uppercase'
+            textTransform: 'uppercase',
+            flex: '1 1 220px',
+            minWidth: 0
           }}
         >
           // tap an <span style={{ color: ED.amber }}>EDIT</span> pin to open the
           field inspector
         </div>
-        <div style={{ display: 'flex', gap: 6 }}>
+        <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
           <ToggleChip
             active={mode === 'gaming'}
             color={ED.amber}
@@ -175,12 +179,13 @@ export const InlineEditView = ({
       <ImagesPreview images={content.images} videos={videos} setImage={setImage} />
 
       {/* Boot mode + escape hatches — niche site-level toggles that don't
-          deserve their own preview row. */}
+          deserve their own preview row. auto-fit so the row stacks to a
+          single column on narrow phones. */}
       <div
         style={{
           display: 'grid',
           gap: 10,
-          gridTemplateColumns: '1fr 1fr',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
           padding: '10px 12px',
           background: 'rgba(0,0,0,0.4)',
           border: `1px solid ${ED.line}`,

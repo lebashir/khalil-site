@@ -27,6 +27,11 @@ interface Props {
 //
 // Both call sites edit the SAME slot id, so updates are visible to
 // each other through the parent's content state.
+//
+// Layout: header row → preview/dropzone surface → status row. When an
+// image is loaded, two overlay buttons appear on the preview itself
+// (REPLACE bottom-left, × bottom-right) so the most useful actions are
+// thumb-reachable on touch devices. Tap targets are ≥36px tall.
 export const ImageDropzone = ({
   slotId,
   label,
@@ -103,24 +108,27 @@ export const ImageDropzone = ({
   return (
     <div
       style={{
-        padding: 10,
+        padding: 8,
         background: 'rgba(0,0,0,0.4)',
         border: `1px dashed ${borderColor}`,
         borderRadius: 4,
         display: 'flex',
         flexDirection: 'column',
-        gap: 8,
+        gap: 6,
         transition: 'border-color .15s ease'
       }}
     >
-      <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 8 }}>
+      <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 6, minHeight: 14 }}>
         <div
           style={{
             fontFamily: FONT.mono,
-            fontSize: 10,
+            fontSize: 9,
             color: ED.amber,
-            letterSpacing: 1.4,
-            textTransform: 'uppercase'
+            letterSpacing: 1.3,
+            textTransform: 'uppercase',
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis'
           }}
         >
           {label}
@@ -129,10 +137,10 @@ export const ImageDropzone = ({
           <div
             style={{
               fontFamily: FONT.mono,
-              fontSize: 9,
+              fontSize: 8,
               color: ED.inkDim,
-              letterSpacing: 1,
-              maxWidth: '60%',
+              letterSpacing: 0.8,
+              maxWidth: '55%',
               overflow: 'hidden',
               textOverflow: 'ellipsis',
               whiteSpace: 'nowrap'
@@ -181,28 +189,29 @@ export const ImageDropzone = ({
           <div
             style={{
               fontFamily: FONT.mono,
-              fontSize: 10,
+              fontSize: 9,
               color: isDragging ? ED.amber : ED.inkDim,
-              letterSpacing: 1.4,
+              letterSpacing: 1.3,
               textTransform: 'uppercase',
               textAlign: 'center',
-              padding: 12,
+              padding: 8,
+              lineHeight: 1.4,
               pointerEvents: 'none'
             }}
           >
-            {isDragging ? '◇ DROP IT' : '+ DROP OR CLICK TO UPLOAD'}
+            {isDragging ? '◇ DROP IT' : '+ TAP TO UPLOAD'}
           </div>
         )}
         {isUploading && (
           <div
             style={{
               fontFamily: FONT.mono,
-              fontSize: 10,
+              fontSize: 9,
               color: ED.amber,
-              letterSpacing: 1.4,
+              letterSpacing: 1.3,
               textTransform: 'uppercase',
               background: 'rgba(0,0,0,0.7)',
-              padding: '6px 12px',
+              padding: '5px 10px',
               border: `1px solid ${ED.amber}`,
               borderRadius: 3
             }}
@@ -210,25 +219,106 @@ export const ImageDropzone = ({
             ◐ UPLOADING…
           </div>
         )}
+
+        {/* "LIVE" badge — corner ribbon, doesn't compete with action buttons */}
         {currentUrl && !isUploading && (
           <div
             aria-hidden
             style={{
               position: 'absolute',
-              top: 6,
-              left: 6,
-              padding: '3px 7px',
+              top: 5,
+              left: 5,
+              padding: '2px 6px',
               fontFamily: FONT.mono,
-              fontSize: 8,
+              fontSize: 7,
               color: ED.green,
-              background: 'rgba(0,0,0,0.7)',
+              background: 'rgba(0,0,0,0.75)',
               border: `1px solid ${ED.green}`,
               borderRadius: 2,
-              letterSpacing: 1.4,
-              textTransform: 'uppercase'
+              letterSpacing: 1.2,
+              textTransform: 'uppercase',
+              fontWeight: 700
             }}
           >
-            ✓ LIVE ON SITE
+            ✓ LIVE
+          </div>
+        )}
+
+        {/* Action overlays appear once an image is loaded. REPLACE on the
+            bottom-left, REMOVE on the bottom-right — both ≥36px tall so
+            they're easy to hit on phone. Background gradient ensures the
+            buttons stay legible even on light/busy photos. */}
+        {currentUrl && !isUploading && (
+          <div
+            style={{
+              position: 'absolute',
+              left: 0,
+              right: 0,
+              bottom: 0,
+              display: 'flex',
+              alignItems: 'flex-end',
+              justifyContent: 'space-between',
+              gap: 6,
+              padding: 6,
+              backgroundImage: 'linear-gradient(180deg, transparent, rgba(0,0,0,0.65))',
+              pointerEvents: 'none'
+            }}
+          >
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onPick();
+              }}
+              aria-label={`Replace ${label} image`}
+              style={{
+                pointerEvents: 'auto',
+                minHeight: 36,
+                padding: '8px 12px',
+                background: 'rgba(0,0,0,0.7)',
+                border: `1px solid ${ED.amber}`,
+                borderRadius: 3,
+                fontFamily: FONT.mono,
+                fontSize: 10,
+                color: ED.amber,
+                letterSpacing: 1.4,
+                cursor: 'pointer',
+                textTransform: 'uppercase',
+                fontWeight: 700,
+                backdropFilter: 'blur(4px)',
+                WebkitBackdropFilter: 'blur(4px)'
+              }}
+            >
+              ↻ REPLACE
+            </button>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onRemoved();
+              }}
+              aria-label={`Remove ${label} image`}
+              style={{
+                pointerEvents: 'auto',
+                minHeight: 36,
+                minWidth: 36,
+                padding: '8px 12px',
+                background: 'rgba(0,0,0,0.7)',
+                border: `1px solid ${ED.red}`,
+                borderRadius: 3,
+                fontFamily: FONT.mono,
+                fontSize: 10,
+                color: ED.red,
+                letterSpacing: 1.4,
+                cursor: 'pointer',
+                textTransform: 'uppercase',
+                fontWeight: 700,
+                backdropFilter: 'blur(4px)',
+                WebkitBackdropFilter: 'blur(4px)'
+              }}
+            >
+              ✕ REMOVE
+            </button>
           </div>
         )}
       </div>
@@ -249,45 +339,24 @@ export const ImageDropzone = ({
         style={{ display: 'none' }}
       />
 
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+      {/* Status line — only renders something when there's actually an
+          error to surface or an upload in flight. Empty when idle so it
+          doesn't add visual noise to every slot. */}
+      {(error || isUploading) && (
         <div
           style={{
             fontFamily: FONT.mono,
             fontSize: 9,
             color: error ? ED.pink : ED.inkDim,
             letterSpacing: 1,
-            maxWidth: '70%',
             overflow: 'hidden',
             textOverflow: 'ellipsis',
             whiteSpace: 'nowrap'
           }}
         >
-          {error ? `! ${error}` : isUploading ? 'uploading…' : currentUrl ? 'click to replace' : ' '}
+          {error ? `! ${error}` : 'uploading…'}
         </div>
-        {currentUrl && !isUploading && (
-          <button
-            type="button"
-            onClick={(e) => {
-              e.stopPropagation();
-              onRemoved();
-            }}
-            style={{
-              padding: '3px 9px',
-              background: 'rgba(0,0,0,0.5)',
-              border: `1px solid ${ED.line}`,
-              borderRadius: 2,
-              fontFamily: FONT.mono,
-              fontSize: 9,
-              color: ED.inkDim,
-              letterSpacing: 1.2,
-              cursor: 'pointer',
-              textTransform: 'uppercase'
-            }}
-          >
-            × remove
-          </button>
-        )}
-      </div>
+      )}
     </div>
   );
 };
