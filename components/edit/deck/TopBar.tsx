@@ -134,7 +134,7 @@ export const TopBar = ({ tab, setTab, onExit, onSave, saving, isPhone }: Props) 
 
       <div style={{ display: 'flex', gap: 0 }}>
         <Tab active={tab === 'deck'} onClick={() => setTab('deck')}>
-          ⌬ CONTROL DECK
+          ⌬ MISSION CONTROL
         </Tab>
         <Tab active={tab === 'inline'} onClick={() => setTab('inline')}>
           ✎ ON-SITE EDITOR

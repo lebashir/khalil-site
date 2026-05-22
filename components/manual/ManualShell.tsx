@@ -104,8 +104,8 @@ const TOC_ROWS: ReadonlyArray<readonly [string, string]> = [
   ['PART 3', 'the tunnel · the walk-in intro'],
   ['PART 4', 'the arena · your homepage layout'],
   ['PART 5', 'secret door (/edit) · where you change stuff'],
-  ['PART 6', 'mission control · LAUNCH tab · fire messages'],
-  ['PART 7', 'control deck · INLINE tab · edit fields'],
+  ['PART 6', 'mission control · broadcast deck · fire messages'],
+  ['PART 7', 'on-site editor · edit the site content + identity'],
   ['PART 8', 'image uploads · drop your own photos'],
   ['PART 9', 'save & fire · how stuff goes live'],
   ['PART 10', 'troubleshooting · when something looks wrong']

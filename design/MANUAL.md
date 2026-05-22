@@ -26,8 +26,8 @@ PART 2  ◇  THE TWO MODES         ← gaming vs football
 PART 3  ◇  THE TUNNEL            ← the walk-in intro
 PART 4  ◇  THE ARENA             ← your homepage
 PART 5  ◇  SECRET DOOR (/edit)   ← where you change stuff
-PART 6  ◇  MISSION CONTROL       ← the LAUNCH tab · fire messages
-PART 7  ◇  CONTROL DECK          ← the INLINE tab · edit fields
+PART 6  ◇  MISSION CONTROL       ← broadcast deck · fire messages
+PART 7  ◇  ON-SITE EDITOR        ← edit the site's content + identity
 PART 8  ◇  IMAGE UPLOADS         ← drop your own photos
 PART 9  ◇  SAVE & FIRE           ← how stuff goes live
 PART 10 ◇  TROUBLESHOOTING       ← when something looks wrong
@@ -248,23 +248,28 @@ go to **khalil2020.vercel.app/edit** and type your password.
 once you're in, the top bar swaps to:
 
 ```
-  ┌──────────────────────────────────────────────┐
-  │ KHALIL.OPS  [LAUNCH][INLINE]  ⊕ SAVE  × EXIT │
-  └──────────────────────────────────────────────┘
+  ┌──────────────────────────────────────────────────┐
+  │ KHALIL.OPS  [MISSION CONTROL][ON-SITE EDITOR]    │
+  │             ⊕ SAVE  × EXIT                       │
+  └──────────────────────────────────────────────────┘
 ```
 
-two tabs. both edit the **same site**. pick whichever feels right for
-what you're trying to do:
+two tabs. they edit **different parts** of the same site. each thing
+you can change lives in **exactly one** tab so you never have to
+remember "where did I edit that?":
 
-- **LAUNCH** ← mission control. the big plunger + side modules. use it
-  when you want to **fire a message** or quickly tweak status /
-  now-playing / pinned video.
-- **INLINE** ← control deck. mini-mockups of the site with pins on
-  every editable field. use it when you want to see what each part will
-  look like as you change it.
+- **MISSION CONTROL** ← the broadcast deck. the big plunger + the
+  live-state modules. use it for stuff that changes **session to
+  session** — what you're playing right now, your mood, your sub
+  count, which video is pinned, which color theme is on, and any
+  message you want to fire.
+- **ON-SITE EDITOR** ← mini-mockups of the homepage with pins on
+  every editable field. use it for stuff that defines **what the site
+  IS** — your handle, hero copy, stats, the about paragraphs, the
+  book, your social links, your replay style.
 
-anything you change in one tab shows up in the other. **they share the
-same memory.** no "switching loses my work" — it's the same canvas.
+both tabs share the same memory, so unsaved edits in one tab are
+still there when you flip to the other.
 
 ### the two action buttons
 
@@ -283,17 +288,21 @@ inside `/edit`, in the top-right corner of the top bar, there's a
 don't lose your edit session. you can also just go to
 khalil2020.vercel.app/manual any time.
 
-**tl;dr** — `/edit` is the only locked page. two tabs, both edit the
-same content. SAVE pushes everything live (except messages). EXIT
+**tl;dr** — `/edit` is the only locked page. two tabs: **MISSION
+CONTROL** handles live stuff (mood, now, theme, messages), **ON-SITE
+EDITOR** handles the site's permanent content (handle, hero, about,
+book, socials). SAVE pushes everything live (except messages). EXIT
 logs out. the 📖 MANUAL link in the top-right opens this manual in a
 new tab.
 
 ---
 
-# PART 6 ◇ MISSION CONTROL (the LAUNCH tab)
+# PART 6 ◇ MISSION CONTROL
 
-this is your **message launcher**. the headline feature: send a
-real-time message to anyone who's on the site right now.
+this tab is your **broadcast deck**. the headline feature: a big red
+plunger that fires a real-time message to anyone who's on the site
+right now. around it sit the live-state modules — the things about
+you that change session to session.
 
 ```
   ┌──────────────────────────────────────────────┐
@@ -336,18 +345,19 @@ plunger goes **ka-CHUNK** and the payload sound plays as it lands.
 
 ### the side modules (always visible)
 
-these edit things directly — no need to switch tabs:
+everything here is **live-state** — the stuff that changes from one
+session to the next:
 
 | module           | edits                                              |
 |------------------|----------------------------------------------------|
 | **LIVE STATUS**  | mood LED + sub count (current + goal)              |
 | **NOW · EQUIPPED / STARTING XI** | what you're playing/watching/reading/listening (per mode) |
 | **PINNED REPLAY** | which video shows up first in the REPLAYS section |
-| **REPLAY STYLE** | youtube vs designed thumbnails, card rarities, palette |
 | **THEME · GAMING** | which color palette gaming mode uses (9 to pick from). also turn on RANDOM to give each visitor a different one. |
-| **ABOUT**        | the paragraphs at the bottom of the site           |
-| **BOOT MODE**    | whether new visitors land in gaming or football    |
-| **SOCIALS**      | tiktok + instagram links in the footer             |
+
+things like your handle, hero copy, about paragraphs, book, socials,
+replay style and boot mode are the **permanent identity** of the site
+— those live in the **ON-SITE EDITOR** tab.
 
 ### messages vs everything else
 
@@ -366,15 +376,17 @@ the new stuff.
 
 **tl;dr** — the plunger sends a message that pops on the homepage
 within seconds. the SAVE button updates the actual site (slower but it
-stays). both live in the LAUNCH tab — different buttons.
+stays). both live in MISSION CONTROL — different buttons.
 
 ---
 
-# PART 7 ◇ CONTROL DECK (the INLINE tab)
+# PART 7 ◇ ON-SITE EDITOR
 
 this tab shows **mini-mockups** of every part of the homepage. each
 section has small **EDIT pins** floating on it — tap a pin to slide a
-**drawer** in with a form for that exact field.
+**drawer** in with a form for that exact field. everything here is the
+**permanent identity** of the site (the stuff that's the same every
+time you visit).
 
 ```
   ┌──────────────────────────────────────────────┐
@@ -390,12 +402,8 @@ section has small **EDIT pins** floating on it — tap a pin to slide a
   │ │                        └──────────┘  │   │ │
   │ └──────────────────────────────────────┘   │ │
   │ ┌──────────────────────────────────────┐   │ │
-  │ │ STATUS PREVIEW                       │   │ │
-  │ │   mood + now + subs                  │   │ │
-  │ └──────────────────────────────────────┘   │ │
-  │ ┌──────────────────────────────────────┐   │ │
   │ │ REPLAYS PREVIEW                      │   │ │
-  │ │   pinned + 4 mini thumbs             │   │ │
+  │ │   thumbnails + STYLE pin             │   │ │
   │ └──────────────────────────────────────┘   │ │
   │ ┌──────────────────────────────────────┐   │ │
   │ │ ABOUT / BOOK / FOOTER / IMAGES       │   │ │
@@ -411,21 +419,20 @@ section has small **EDIT pins** floating on it — tap a pin to slide a
 | **HANDLE**     | your @ username (max 40 letters)                      |
 | **HERO**       | tagline + bio + button text + vibe (per mode)         |
 | **STATS**      | the 4 stat cells (label + value, per mode)            |
-| **MOOD**       | the blinking LED next to your handle                  |
-| **SUBS**       | current + goal numbers                                |
-| **NOW**        | equipped / starting XI block (per mode)               |
-| **PINNED**     | which video pins to the top of REPLAYS                |
 | **STYLE**      | youtube vs designed thumbnails + tier rarities + palette |
 | **ABOUT**      | the paragraphs at the bottom                          |
 | **BOOK**       | title + subtitle + description + status + **cover photo** |
 | **SOCIALS**    | tiktok + instagram links                              |
 | **BOOT MODE**  | default mode for new visitors                         |
 
+looking for **MOOD · SUBS · NOW · PINNED · THEME**? those are all
+session-level controls — flip over to **MISSION CONTROL**.
+
 ### per-mode editing
 
-HERO, STATS, and NOW are **different in gaming vs football**. the mode
-toggle at the top of the inline tab tells the preview which one you're
-looking at. flip it before editing those fields.
+HERO and STATS are **different in gaming vs football**. the mode
+toggle at the top of the editor tab tells the preview which one
+you're looking at. flip it before editing those fields.
 
 ### the drawer
 
@@ -433,16 +440,17 @@ tap a pin → a drawer slides in from the right with the form. make your
 changes → the preview updates live → close the drawer → press SAVE at
 the top to push everything live.
 
-**tl;dr** — INLINE is the precision editor. see the site in miniature,
-tap an EDIT pin to open the field, type, close, save.
+**tl;dr** — ON-SITE EDITOR is the precision tab for the site's
+identity. see the site in miniature, tap an EDIT pin to open the
+field, type, close, save.
 
 ---
 
 # PART 8 ◇ IMAGE UPLOADS
 
-scroll to the bottom of the **INLINE tab**. you'll see the **◇ IMAGES**
-section. this is where you replace placeholder art with your own
-photos.
+scroll to the bottom of the **ON-SITE EDITOR** tab. you'll see the
+**◇ IMAGES** section. this is where you replace placeholder art with
+your own photos.
 
 ### the 8 slots
 

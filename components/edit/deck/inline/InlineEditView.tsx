@@ -5,25 +5,18 @@ import type {
   Mode,
   ModeHeroCopy,
   ModeStats,
-  Mood,
-  NowBlock,
   SiteContent
 } from '@/lib/content';
 import type { VideoItem } from '@/lib/youtube';
 import { FIELD_LIMITS } from '@/lib/content';
 import { ED, FONT } from '../constants';
 import { Field, ToggleChip, editInput } from '../primitives';
-import { StatusModule } from '../modules/StatusModule';
-import { SubsModule } from '../modules/SubsModule';
-import { NowPlayingModule } from '../modules/NowPlayingModule';
-import { PinnedVideoModule } from '../modules/PinnedVideoModule';
 import { AboutModule } from '../modules/AboutModule';
 import { SocialsModule } from '../modules/SocialsModule';
 import { ThumbStyleModule } from '../modules/ThumbStyleModule';
 import { DefaultModeModule } from '../modules/DefaultModeModule';
 import { PinEditor } from './PinEditor';
 import { HeroPreview } from './HeroPreview';
-import { StatusPreview } from './StatusPreview';
 import { ReplaysPreview } from './ReplaysPreview';
 import { AboutPreview } from './AboutPreview';
 import { BookPreview } from './BookPreview';
@@ -31,14 +24,14 @@ import { FooterPreview } from './FooterPreview';
 import { ImagesPreview } from './ImagesPreview';
 import { ImageDropzone } from './ImageDropzone';
 
+// PinKey covers ONLY on-site-editor sections (the site's permanent
+// identity + content). Session-level pins (mood, subs, now, pinned
+// video, theme) live on MISSION CONTROL instead — see the tab split
+// note in ControlDeck.tsx.
 type PinKey =
   | 'handle'
   | 'hero'
   | 'stats'
-  | 'mood'
-  | 'now'
-  | 'subs'
-  | 'pinned-video'
   | 'thumb-style'
   | 'about'
   | 'book'
@@ -53,9 +46,13 @@ interface InlineEditViewProps {
   videos: VideoItem[];
 }
 
-// The full "INLINE" tab view. Lays out all editable sections as
-// mini-previews with EditPin overlays. Clicking a pin opens the
-// PinEditor drawer with the matching module or inline editor.
+// The "ON-SITE EDITOR" tab. Lays out every editable section of the
+// public site as a mini-preview with EditPin overlays. Clicking a pin
+// opens the PinEditor drawer with the matching module or inline editor.
+//
+// Anything that's session-state (live mood, subs, now playing, pinned
+// replay, theme vibe) lives on MISSION CONTROL — this tab is the
+// permanent identity of the site.
 export const InlineEditView = ({
   mode,
   setMode,
@@ -79,12 +76,6 @@ export const InlineEditView = ({
     setContent({ ...content, hero: { ...content.hero, [mode]: hero } });
   const setStats = (stats: ModeStats) =>
     setContent({ ...content, stats: { ...content.stats, [mode]: stats } });
-  const setMood = (mood: Mood) => setContent({ ...content, mood });
-  const setSubs = (subs: SiteContent['subs']) => setContent({ ...content, subs });
-  const setNow = (now: NowBlock) =>
-    setContent({ ...content, now: { ...content.now, [mode]: now } });
-  const setPinnedId = (pinnedId: string | null) =>
-    setContent({ ...content, videos: { ...content.videos, pinnedId } });
   const setAbout = (about: string[]) => setContent({ ...content, about });
   const setBook = (book: SiteContent['book']) => setContent({ ...content, book });
   const setSocials = (socials: SiteContent['socials']) => setContent({ ...content, socials });
@@ -103,14 +94,9 @@ export const InlineEditView = ({
   const drawer = renderDrawer(lastPin, {
     mode,
     content,
-    videos,
     setHandle,
     setHero,
     setStats,
-    setMood,
-    setSubs,
-    setNow,
-    setPinnedId,
     setAbout,
     setBook,
     setSocials,
@@ -164,20 +150,13 @@ export const InlineEditView = ({
         </div>
       </div>
 
-      {/* Previews stack */}
+      {/* Previews stack — site identity, top to bottom in page order */}
       <HeroPreview
         mode={mode}
         handle={content.handle}
         hero={content.hero[mode]}
         stats={content.stats[mode]}
         mood={content.mood}
-        onEdit={(k) => open(k)}
-      />
-      <StatusPreview
-        mode={mode}
-        mood={content.mood}
-        now={content.now[mode]}
-        subs={content.subs}
         onEdit={(k) => open(k)}
       />
       <ReplaysPreview
@@ -195,7 +174,8 @@ export const InlineEditView = ({
       <FooterPreview socials={content.socials} onEdit={(k) => open(k)} />
       <ImagesPreview images={content.images} videos={videos} setImage={setImage} />
 
-      {/* Boot mode + escape hatches */}
+      {/* Boot mode + escape hatches — niche site-level toggles that don't
+          deserve their own preview row. */}
       <div
         style={{
           display: 'grid',
@@ -266,14 +246,9 @@ const hatchBtn: React.CSSProperties = {
 interface DrawerCtx {
   mode: Mode;
   content: SiteContent;
-  videos: VideoItem[];
   setHandle: (h: string) => void;
   setHero: (h: ModeHeroCopy) => void;
   setStats: (s: ModeStats) => void;
-  setMood: (m: Mood) => void;
-  setSubs: (s: SiteContent['subs']) => void;
-  setNow: (n: NowBlock) => void;
-  setPinnedId: (id: string | null) => void;
   setAbout: (a: string[]) => void;
   setBook: (b: SiteContent['book']) => void;
   setSocials: (s: SiteContent['socials']) => void;
@@ -319,48 +294,6 @@ function renderDrawer(pin: PinKey | null, ctx: DrawerCtx): DrawerView | null {
         accent: ED.ink,
         content: (
           <StatsEditor stats={ctx.content.stats[ctx.mode]} onChange={ctx.setStats} />
-        )
-      };
-    case 'mood':
-      return {
-        title: 'STATUS · MOOD',
-        kicker: '// what shows next to your name',
-        accent: ED.green,
-        content: <StatusModule hideHeader mood={ctx.content.mood} setMood={ctx.setMood} />
-      };
-    case 'subs':
-      return {
-        title: 'SUBSCRIBERS',
-        kicker: `// goal · ${ctx.content.subs.goal}`,
-        accent: ED.pink,
-        content: <SubsModule hideHeader subs={ctx.content.subs} setSubs={ctx.setSubs} />
-      };
-    case 'now':
-      return {
-        title: `NOW · ${ctx.mode === 'gaming' ? 'EQUIPPED' : 'STARTING XI'}`,
-        kicker: `// this week's ${ctx.mode}`,
-        accent: ED.blue,
-        content: (
-          <NowPlayingModule
-            hideHeader
-            mode={ctx.mode}
-            now={ctx.content.now[ctx.mode]}
-            setNow={ctx.setNow}
-          />
-        )
-      };
-    case 'pinned-video':
-      return {
-        title: 'PINNED REPLAY',
-        kicker: '// shows first in REPLAYS.',
-        accent: ED.amber,
-        content: (
-          <PinnedVideoModule
-            hideHeader
-            videos={ctx.videos}
-            pinnedId={ctx.content.videos.pinnedId}
-            setPinnedId={ctx.setPinnedId}
-          />
         )
       };
     case 'about':

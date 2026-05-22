@@ -7,10 +7,15 @@ import { EditPin } from './EditPin';
 
 interface ReplaysPreviewProps {
   videos: VideoItem[];
+  /**
+   * Read-only here — the actual PINNED control lives on MISSION CONTROL.
+   * We accept the id so we can highlight the pinned card in the mockup,
+   * but there's no pin to edit it from this tab.
+   */
   pinnedId: string | null;
   /** Slot-id → URL map. Looked up per video as `replay-${video.id}`. */
   images: SiteContent['images'];
-  onEdit: (key: 'pinned-video' | 'thumb-style') => void;
+  onEdit: (key: 'thumb-style') => void;
 }
 
 // Returns the upload URL when the editor has set a custom thumb for this
@@ -24,8 +29,10 @@ const thumbSrcFor = (video: VideoItem, images: SiteContent['images']): string =>
 
 const PREVIEW_BG = 'linear-gradient(180deg, rgba(255,255,255,0.04), rgba(0,0,0,0.4))';
 
-// Mini-mockup of the replays/videos section.
-// Shows pinned video first (larger), then a strip of the rest.
+// Mini-mockup of the replays/videos section. Site-identity preview only:
+// the STYLE pin opens the thumbnail + rarity tag editor. The "PINNED"
+// session control lives on MISSION CONTROL so the choice can change
+// week-to-week without leaving the broadcast deck.
 export const ReplaysPreview = ({ videos, pinnedId, images, onEdit }: ReplaysPreviewProps) => {
   const pinned = pinnedId ? videos.find((v) => v.id === pinnedId) : null;
   const rest = videos.filter((v) => v.id !== pinnedId).slice(0, 4);
@@ -46,7 +53,7 @@ export const ReplaysPreview = ({ videos, pinnedId, images, onEdit }: ReplaysPrev
           alignItems: 'center',
           justifyContent: 'space-between',
           marginBottom: 12,
-          paddingRight: 110
+          paddingRight: 90
         }}
       >
         <div
@@ -114,16 +121,10 @@ export const ReplaysPreview = ({ videos, pinnedId, images, onEdit }: ReplaysPrev
       )}
 
       <EditPin
-        label="PINNED"
-        accent={ED.amber}
-        onClick={() => onEdit('pinned-video')}
-        style={{ top: 10, right: 10 }}
-      />
-      <EditPin
         label="STYLE"
         accent={ED.pink}
         onClick={() => onEdit('thumb-style')}
-        style={{ top: 10, right: 130 }}
+        style={{ top: 10, right: 10 }}
       />
     </div>
   );

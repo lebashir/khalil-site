@@ -329,34 +329,34 @@ export const ManualBody = ({ mode, theme, size, content }: Props) => {
 
         <Terminal style={{ marginTop: 12 }}>
           <div style={{ color: theme.fg }}>
-            <span style={{ color: theme.accent }}>KHALIL.OPS</span>{'   '}
-            <span style={{ color: theme.accent2 }}>[LAUNCH][INLINE]</span>{'   '}
-            <span style={{ color: '#3df562' }}>⊕ SAVE</span>{'   '}
+            <span style={{ color: theme.accent }}>KHALIL.OPS</span>{'  '}
+            <span style={{ color: theme.accent2 }}>[MISSION CONTROL][ON-SITE EDITOR]</span>{'  '}
+            <span style={{ color: '#3df562' }}>⊕ SAVE</span>{'  '}
             <span style={{ color: '#ff3a3a' }}>× EXIT</span>
           </div>
         </Terminal>
 
         <Prose style={{ marginTop: 18 }}>
           <p style={{ margin: 0 }}>
-            two tabs. both edit the <strong>same site</strong>. pick whichever
-            feels right for what you're trying to do:
+            two tabs. they edit <strong>different parts</strong> of the same
+            site. each thing you can change lives in <strong>exactly one</strong>
+            {' '}tab so you never have to remember "where did I edit that?":
           </p>
         </Prose>
 
         <Panel label="◇ THE TWO TABS" theme={theme}>
           <KsRows
             rows={[
-              ['LAUNCH', 'mission control. the big plunger + side modules. use it when you want to fire a message or quickly tweak status / now / pinned video.'],
-              ['INLINE', 'control deck. mini-mockups of your site with pins on every field you can edit. use it when you want to see what each part will look like as you change it.']
+              ['MISSION CONTROL', 'the broadcast deck. the big plunger + the live-state modules. use it for stuff that changes session to session — what you\'re playing now, your mood, your sub count, which video is pinned, which color theme is on, and any message you want to fire.'],
+              ['ON-SITE EDITOR', 'mini-mockups of the homepage with pins on every field. use it for stuff that defines what the site IS — your handle, hero copy, stats, the about paragraphs, the book, your social links, your replay style.']
             ]}
             theme={theme}
           />
         </Panel>
 
         <Notebook>
-          anything you change in one tab shows up in the other.{' '}
-          <strong>they share the same memory.</strong> no "switching loses my
-          work" — it's the same canvas.
+          both tabs share the same memory, so unsaved edits in one tab are
+          still there when you flip to the other.
         </Notebook>
 
         <Panel label="◇ THE TWO ACTION BUTTONS" theme={theme}>
@@ -370,18 +370,22 @@ export const ManualBody = ({ mode, theme, size, content }: Props) => {
         </Panel>
 
         <Tldr>
-          /edit is the only locked page. two tabs, both edit the same content.
-          SAVE pushes everything live (except messages). EXIT logs out.
+          /edit is the only locked page. <strong>MISSION CONTROL</strong> handles
+          live stuff (mood, now, theme, messages). <strong>ON-SITE EDITOR</strong>
+          handles the site's permanent content (handle, hero, about, book,
+          socials). SAVE pushes everything live (except messages). EXIT logs out.
         </Tldr>
       </Part>
 
       {/* ─── PART 6 ────────────────────────────────────────────── */}
-      <Part n={6} tag="◇ PART SIX" title="MISSION CONTROL · LAUNCH" theme={theme} size={size}>
+      <Part n={6} tag="◇ PART SIX" title="MISSION CONTROL" theme={theme} size={size}>
         <Prose>
           <p style={{ margin: 0 }}>
-            this is your <strong>message launcher</strong>. the headline
-            feature: send a real-time message to anyone who's on the site right
-            now. <strong>try the plunger below</strong> — it really works
+            this tab is your <strong>broadcast deck</strong>. the headline
+            feature: a big red plunger that fires a real-time message to
+            anyone who's on the site right now. around it sit the live-state
+            modules — the things about you that change session to session.
+            <strong> try the plunger below</strong> — it really works
             (locally, in this demo).
           </p>
         </Prose>
@@ -411,20 +415,21 @@ export const ManualBody = ({ mode, theme, size, content }: Props) => {
           </Prose>
         </Panel>
 
-        <Panel label="◇ SIDE MODULES (always visible in LAUNCH)" theme={theme}>
+        <Panel label="◇ SIDE MODULES (the live-state stuff)" theme={theme}>
           <KsRows
             rows={[
               ['LIVE STATUS', 'mood LED + sub count (current + goal)'],
               ['NOW', "what you're playing / watching / reading / listening (per mode)"],
               ['PINNED REPLAY', 'which video shows up first in REPLAYS'],
-              ['REPLAY STYLE', 'youtube vs designed thumbnails, card rarities, palette'],
-              ['THEME · GAMING', '9 color palettes to pick from. fixed (everyone sees one) or random (surprise per visitor).'],
-              ['ABOUT', 'the about paragraphs at the bottom of the site'],
-              ['BOOT MODE', 'whether new visitors land in gaming or football'],
-              ['SOCIALS', 'tiktok + instagram links in the footer']
+              ['THEME · GAMING', '9 color palettes to pick from. fixed (everyone sees one) or random (surprise per visitor).']
             ]}
             theme={theme}
           />
+          <Notebook>
+            things like your handle, hero copy, about paragraphs, book,
+            socials, replay style and boot mode are the permanent identity
+            of the site — those live in <strong>ON-SITE EDITOR</strong>.
+          </Notebook>
         </Panel>
 
         <SaveFireQuickCompare theme={theme} size={size} />
@@ -439,18 +444,20 @@ export const ManualBody = ({ mode, theme, size, content }: Props) => {
         <Tldr>
           the plunger sends a message that pops on the homepage within
           seconds. the SAVE button updates the actual site (slower but it
-          stays). both live in the LAUNCH tab — different buttons.
+          stays). both live in MISSION CONTROL — different buttons.
         </Tldr>
       </Part>
 
       {/* ─── PART 7 ────────────────────────────────────────────── */}
-      <Part n={7} tag="◇ PART SEVEN" title="CONTROL DECK · INLINE" theme={theme} size={size}>
+      <Part n={7} tag="◇ PART SEVEN" title="ON-SITE EDITOR" theme={theme} size={size}>
         <Prose>
           <p style={{ margin: 0 }}>
             this tab shows <strong>mini-mockups</strong> of every part of the
             homepage. each section has small <strong>EDIT pins</strong>
             {' '}floating on it — tap a pin to slide a drawer in from the right
-            with a form for that exact field.
+            with a form for that exact field. everything here is the
+            <strong> permanent identity</strong> of the site (the stuff that's
+            the same every time you visit).
           </p>
         </Prose>
 
@@ -459,9 +466,15 @@ export const ManualBody = ({ mode, theme, size, content }: Props) => {
         </Panel>
 
         <Notebook>
-          HERO, STATS, and NOW are{' '}
+          looking for <strong>MOOD · SUBS · NOW · PINNED · THEME</strong>? those
+          are all session-level controls — flip over to <strong>MISSION
+          CONTROL</strong>.
+        </Notebook>
+
+        <Notebook>
+          HERO and STATS are{' '}
           <strong>different in gaming vs football</strong>. the mode toggle at
-          the top of the inline tab tells the preview which one you're looking
+          the top of the editor tab tells the preview which one you're looking
           at. flip it before editing those fields.
         </Notebook>
 
@@ -476,8 +489,9 @@ export const ManualBody = ({ mode, theme, size, content }: Props) => {
         </Panel>
 
         <Tldr>
-          INLINE is the precision editor. see the site in miniature, tap an
-          EDIT pin to open the field, type, close, save.
+          ON-SITE EDITOR is the precision tab for the site's identity. see the
+          site in miniature, tap an EDIT pin to open the field, type, close,
+          save.
         </Tldr>
       </Part>
 
@@ -485,9 +499,9 @@ export const ManualBody = ({ mode, theme, size, content }: Props) => {
       <Part n={8} tag="◇ PART EIGHT" title="IMAGE UPLOADS" theme={theme} size={size}>
         <Prose>
           <p style={{ margin: 0 }}>
-            scroll to the bottom of the <strong>INLINE tab</strong>. you'll
-            see the <strong>◇ IMAGES</strong> section. this is where you
-            replace placeholder art with your own photos.
+            scroll to the bottom of the <strong>ON-SITE EDITOR</strong> tab.
+            you'll see the <strong>◇ IMAGES</strong> section. this is where
+            you replace placeholder art with your own photos.
           </p>
         </Prose>
 
@@ -763,10 +777,6 @@ const PINS = [
   ['HANDLE', 'your @ username (max 40 letters)'],
   ['HERO', 'tagline + bio + button text + vibe (per mode)'],
   ['STATS', 'the 4 stat cells (label + value, per mode)'],
-  ['MOOD', 'the blinking LED next to your handle'],
-  ['SUBS', 'current + goal numbers'],
-  ['NOW', 'equipped / starting XI block (per mode)'],
-  ['PINNED', 'which video pins to the top of REPLAYS'],
   ['STYLE', 'youtube vs designed thumbs + tier rarities + palette'],
   ['ABOUT', 'the paragraphs at the bottom'],
   ['BOOK', 'title + subtitle + description + status + cover photo'],

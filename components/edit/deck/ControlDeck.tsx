@@ -13,10 +13,6 @@ import { StatusModule } from './modules/StatusModule';
 import { SubsModule } from './modules/SubsModule';
 import { NowPlayingModule } from './modules/NowPlayingModule';
 import { PinnedVideoModule } from './modules/PinnedVideoModule';
-import { AboutModule } from './modules/AboutModule';
-import { SocialsModule } from './modules/SocialsModule';
-import { ThumbStyleModule } from './modules/ThumbStyleModule';
-import { DefaultModeModule } from './modules/DefaultModeModule';
 import { ThemeModule } from './modules/ThemeModule';
 import { InlineEditView } from './inline/InlineEditView';
 
@@ -59,10 +55,15 @@ const useViewport = (): Viewport => {
   return vp;
 };
 
-// The /edit experience root. Owns content state, save flow, the two tabs,
-// and the launch instrument (message + payload + fuse + plunger). Save
-// posts the full SiteContent JSON to the same /api/edit/save endpoint the
-// legacy EditForm hit, so the API contract is unchanged.
+// The /edit experience root. Owns content state, save flow, the two tabs.
+//
+// Tab split (one home per field — see docs/HANDOFF_THEMES_CC.md +
+// the reorg conversation):
+//   MISSION CONTROL — broadcast deck + live status (what's happening now)
+//   ON-SITE EDITOR  — site content + identity (what the site IS)
+//
+// Save posts the full SiteContent JSON to /api/edit/save so the API
+// contract is unchanged regardless of which tab made the edits.
 export const ControlDeck = ({ initialContent, videos }: ControlDeckProps) => {
   const { isPhone, isDesktop } = useViewport();
   const [content, setContent] = useState<SiteContent>(initialContent);
@@ -161,17 +162,15 @@ export const ControlDeck = ({ initialContent, videos }: ControlDeckProps) => {
     }
   }, [launching, msg, payload, fuse, isDesktop]);
 
-  // Focused setters for non-inline modules in the LAUNCH tab
+  // Setters used by MISSION CONTROL only (live/now fields). On-site
+  // editor uses setContent directly and computes its own setters
+  // locally — it doesn't share with this tab.
   const setMood = (mood: Mood) => setContent({ ...content, mood });
   const setSubs = (subs: SiteContent['subs']) => setContent({ ...content, subs });
   const setNow = (now: NowBlock) =>
     setContent({ ...content, now: { ...content.now, [mode]: now } });
-  const setAbout = (about: string[]) => setContent({ ...content, about });
   const setPinnedId = (pinnedId: string | null) =>
     setContent({ ...content, videos: { ...content.videos, pinnedId } });
-  const setSocials = (socials: SiteContent['socials']) => setContent({ ...content, socials });
-  const setVideos = (videos: SiteContent['videos']) => setContent({ ...content, videos });
-  const setDefaultMode = (defaultMode: Mode) => setContent({ ...content, defaultMode });
   const setThemeSettings = (gaming: GamingThemeSettings) =>
     setContent({
       ...content,
@@ -233,11 +232,7 @@ export const ControlDeck = ({ initialContent, videos }: ControlDeckProps) => {
             setMood={setMood}
             setSubs={setSubs}
             setNow={setNow}
-            setAbout={setAbout}
             setPinnedId={setPinnedId}
-            setSocials={setSocials}
-            setVideos={setVideos}
-            setDefaultMode={setDefaultMode}
             setThemeSettings={setThemeSettings}
             crtRef={crtRef}
           />
@@ -310,7 +305,15 @@ export const ControlDeck = ({ initialContent, videos }: ControlDeckProps) => {
   );
 };
 
-// ── LaunchTab — composes LaunchWindow + MessageLauncher + 5 modules ────────
+// ── LaunchTab (MISSION CONTROL) — broadcast deck + live status ────────────
+//
+// Five modules + the message launcher. Everything here changes session-
+// to-session: what you're doing right now (NOW), your current mood, your
+// sub count, the video you want featured, the theme vibe, and any
+// announcement you want to broadcast.
+//
+// Anything that defines the SITE (handle, hero copy, stats, about, book,
+// images, socials, boot mode, replay style) lives in ON-SITE EDITOR.
 
 interface LaunchTabProps {
   mode: Mode;
@@ -331,11 +334,7 @@ interface LaunchTabProps {
   setMood: (m: Mood) => void;
   setSubs: (s: SiteContent['subs']) => void;
   setNow: (n: NowBlock) => void;
-  setAbout: (a: string[]) => void;
   setPinnedId: (id: string | null) => void;
-  setSocials: (s: SiteContent['socials']) => void;
-  setVideos: (v: SiteContent['videos']) => void;
-  setDefaultMode: (m: Mode) => void;
   setThemeSettings: (t: GamingThemeSettings) => void;
   crtRef: React.RefObject<HTMLDivElement | null>;
 }
@@ -359,11 +358,7 @@ const LaunchTab = ({
   setMood,
   setSubs,
   setNow,
-  setAbout,
   setPinnedId,
-  setSocials,
-  setVideos,
-  setDefaultMode,
   setThemeSettings,
   crtRef
 }: LaunchTabProps) => {
@@ -420,27 +415,13 @@ const LaunchTab = ({
       setPinnedId={setPinnedId}
     />
   );
-  const thumbStyle = <ThumbStyleModule videos={content.videos} setVideos={setVideos} />;
   const themePicker = (
     <ThemeModule theme={content.theme?.gaming} setTheme={setThemeSettings} />
   );
-  const about = <AboutModule about={content.about} setAbout={setAbout} />;
-  const bootAndSocialsRow = (
-    <div
-      style={{
-        display: 'grid',
-        gap: 14,
-        gridTemplateColumns: isPhone ? '1fr' : '1fr 1fr'
-      }}
-    >
-      <DefaultModeModule defaultMode={content.defaultMode} setDefaultMode={setDefaultMode} />
-      <SocialsModule socials={content.socials} setSocials={setSocials} />
-    </div>
-  );
 
-  // Mobile / tablet: linear stack with CRT and missile-launcher adjacent so
-  // the user can see the burst the moment they fire. Auto-scroll in onFire
-  // catches the case where they've scrolled past the CRT to reach the plunger.
+  // Mobile / tablet: linear stack. The CRT-then-launcher pairing stays
+  // adjacent so the user sees the burst as soon as they fire (autoscroll
+  // in onFire handles the case where they've scrolled past the CRT).
   if (!isDesktop) {
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
@@ -449,16 +430,13 @@ const LaunchTab = ({
         {liveStatusPanel}
         {nowPlaying}
         {pinnedVideo}
-        {thumbStyle}
         {themePicker}
-        {about}
-        {bootAndSocialsRow}
       </div>
     );
   }
 
-  // Desktop: two columns, CRT/status/now on the left and launcher/modules on
-  // the right. Both are visible at the same time, so no scroll-into-view need.
+  // Desktop: two columns. CRT + live state on the left, launcher + the
+  // session knobs on the right. Roughly balanced module counts.
   return (
     <div style={{ display: 'grid', gap: 14, gridTemplateColumns: '1.15fr 1fr' }}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 14, minWidth: 0 }}>
@@ -469,10 +447,7 @@ const LaunchTab = ({
       <div style={{ display: 'flex', flexDirection: 'column', gap: 14, minWidth: 0 }}>
         {messageLauncher}
         {pinnedVideo}
-        {thumbStyle}
         {themePicker}
-        {about}
-        {bootAndSocialsRow}
       </div>
     </div>
   );
