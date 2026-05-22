@@ -122,9 +122,11 @@
   "images": {},
   "theme": {
     "gaming": {
-      "mode": "fixed",
+      "mode": "random",
       "fixedKey": "storm",
-      "pool": []
+      "pool": [
+        "neon"
+      ]
     }
   }
 }
