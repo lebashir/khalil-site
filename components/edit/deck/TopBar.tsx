@@ -100,6 +100,29 @@ export const TopBar = ({ tab, setTab, onExit, onSave, saving, isPhone }: Props) 
             </>
           )}
           {isPhone && <Pill value={time} color={ED.green} />}
+          <a
+            href="/manual"
+            target="_blank"
+            rel="noopener"
+            aria-label="Open operator manual in a new tab"
+            style={{
+              fontFamily: FONT.mono,
+              fontSize: 10,
+              letterSpacing: 1.5,
+              fontWeight: 700,
+              color: ED.blue,
+              background: 'transparent',
+              border: `1px solid ${ED.blue}66`,
+              padding: '5px 10px',
+              borderRadius: 3,
+              cursor: 'pointer',
+              textTransform: 'uppercase',
+              textDecoration: 'none',
+              whiteSpace: 'nowrap'
+            }}
+          >
+            {isPhone ? '📖' : '📖 Manual'}
+          </a>
           <BarButton onClick={onSave} disabled={saving} color={ED.green}>
             {saving ? 'Saving…' : 'Save'}
           </BarButton>

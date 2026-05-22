@@ -12,55 +12,58 @@
 ╚══════════════════════════════════════════════╝
 ```
 
-Yo Khalil. This is the manual for your own site. Read it once, then keep
-it around for when you forget what a button does. Every section ends with
-a **TL;DR** so you can skim if you're in a hurry.
+yo khalil. this is the manual for your own site. read it once, then keep
+it around for when you forget what a button does. every part ends with a
+**tl;dr** so you can skim if you're in a hurry.
 
 ---
 
-## TABLE OF CONTENTS
+## table of contents
 
 ```
-PART 1  ◇  THE SITE              ← what visitors see
+PART 1  ◇  THE SITE              ← four pages visitors can see
 PART 2  ◇  THE TWO MODES         ← gaming vs football
-PART 3  ◇  THE TUNNEL            ← the entry sequence
-PART 4  ◇  THE ARENA             ← the homepage layout
-PART 5  ◇  SECRET DOOR (/edit)   ← where you control everything
-PART 6  ◇  MISSION CONTROL       ← LAUNCH tab — fire messages
-PART 7  ◇  CONTROL DECK          ← INLINE tab — edit fields
+PART 3  ◇  THE TUNNEL            ← the walk-in intro
+PART 4  ◇  THE ARENA             ← your homepage
+PART 5  ◇  SECRET DOOR (/edit)   ← where you change stuff
+PART 6  ◇  MISSION CONTROL       ← the LAUNCH tab · fire messages
+PART 7  ◇  CONTROL DECK          ← the INLINE tab · edit fields
 PART 8  ◇  IMAGE UPLOADS         ← drop your own photos
 PART 9  ◇  SAVE & FIRE           ← how stuff goes live
 PART 10 ◇  TROUBLESHOOTING       ← when something looks wrong
+
+(the same manual also lives at /manual on the site, with the working
+plunger demo and the live mode toggle.)
 ```
 
 ---
 
 # PART 1 ◇ THE SITE
 
-Your site lives at **khalil2020.vercel.app**.
+your site lives at **khalil2020.vercel.app**.
 
-Anyone in the world can visit. They'll see:
+anyone in the world can visit. they'll see four pages:
 
 ```
+  /            ← the arena (your real homepage)
   /intro       ← the tunnel walk (first-time visitors)
-  /            ← the arena (the actual homepage)
   /edit        ← YOUR SECRET DOOR (locked unless you have the password)
+  /manual      ← this manual (you're reading it right now)
 ```
 
-When someone visits for the first time, they get dropped into the
-**tunnel** at `/intro`. Once they hit the **▶ ENTER THE ARENA** button at
-the end, a cookie gets baked into their browser and from then on they
-land straight at `/` — the actual site.
+first-timers land in the **tunnel** at `/intro`. when they hit the
+**▶ ENTER THE ARENA** button at the end, their browser remembers them.
+next time, they go straight to `/`.
 
-**TL;DR** — First-timers walk through the tunnel. Repeat visitors skip
-straight to the arena. You can always visit `/intro` directly if you
-want to see the walk again.
+**tl;dr** — first-timers walk the tunnel. everyone else jumps straight
+to the arena. you can visit `/intro` any time you want to see the walk
+again.
 
 ---
 
 # PART 2 ◇ THE TWO MODES
 
-Your site has **two personalities** that swap with one tap:
+your site has **two personalities** that swap with one tap:
 
 ```
   ┌──────────────────────────────────────────────┐
@@ -70,51 +73,51 @@ Your site has **two personalities** that swap with one tap:
   └──────────────────────────────────────────────┘
 ```
 
-### How to flip modes
+### how to flip modes
 
-| Device  | How                                            |
+| device  | how                                            |
 |---------|------------------------------------------------|
-| Desktop | Click the smaller half of the top bar          |
-| Desktop | OR press ← / → arrow keys                       |
-| Mobile  | Swipe horizontally anywhere on the page        |
-| Mobile  | OR tap the smaller half of the top bar         |
+| desktop | click the smaller half of the top bar          |
+| desktop | OR press ← / → arrow keys                       |
+| mobile  | swipe sideways anywhere on the page            |
+| mobile  | OR tap the smaller half of the top bar         |
 
-### Mode-peek (desktop only)
+### mode-peek (desktop only)
 
-If you just **hover** the smaller (idle) half without clicking, the page
-gets a soft glow in the other mode's color — like a sneak peek. Move your
-mouse away and it disappears. It's a hint, not a flip.
+if you just **hover** the smaller half without clicking, the page gets a
+soft glow in the other mode's color. like a sneak peek. move your mouse
+away and it disappears. it's a hint, not a flip.
 
-### What changes when you flip
+### what changes when you flip
 
-- The **whole color palette** (neon pink/purple vs stadium green/gold)
-- The **hero title** (KHALIL THE GOAT vs KHALIL THE GOAT — same text, different font weights)
-- Your **stats grid** (K/D + WINS + STREAK + HRS vs GOALS + CAPS + TROPHIES + ROBONA)
-- Your **NOW block** (gaming: equipped loadout. football: starting XI)
-- The **video tags** on each replay tile (GAMING vs FOOTBALL)
-- The **background art** (gaming grid vs stadium grass)
-- Stadium crowd ambient hum (football only — keep your volume up if you
+- the **whole color palette** (neon pink/purple vs stadium green/gold)
+- the **hero title** look (same words, different vibe)
+- your **stats grid** — gaming shows things like K/D · WINS · STREAK · HRS,
+  football shows things like GOALS · CAPS · TROPHIES · ROBONA
+- your **NOW block** — gaming = equipped loadout. football = starting XI.
+- the **video tags** on each replay tile (GAMING vs FOOTBALL)
+- the **background art** (gaming grid vs stadium grass)
+- a **stadium crowd hum** in football mode (keep your volume up if you
   want the vibe)
 
-### What does NOT change between modes
+### what does NOT change between modes
 
-- Your subscriber count
-- The book section
-- The video list itself
-- Your mood / status LED
-- Socials links
+- your subscriber count
+- the book section
+- the video list itself
+- your mood / status LED
+- socials links
 
-**TL;DR** — One toggle swaps the entire color world. Some stuff is per-mode
-(hero copy, stats, now block). Some stuff is shared across both (subs, book,
-videos, socials, mood).
+**tl;dr** — one toggle swaps the entire color world. some stuff is
+per-mode (hero copy, stats, now block). some stuff is shared (subs,
+book, videos, socials, mood).
 
 ---
 
 # PART 3 ◇ THE TUNNEL
 
-The tunnel is the **cinematic intro**. Five scenes, scrolled through in
-order. The math is: scroll progress 0 → 1 walks the camera through the
-corridor.
+the tunnel is your **walk-in intro**. five scenes. scroll forward =
+walk forward.
 
 ```
   ┌──────────────────────────────────────────────┐
@@ -135,22 +138,23 @@ corridor.
   └──────────────────────────────────────────────┘
 ```
 
-While walking:
-- A **low rumble** starts on the first scroll (the engine hum)
-- Each scene **thunks** as you approach it
-- The destination scene gets a **bell chord chime**
+while walking:
+- a **low rumble** starts on the first scroll (the engine hum)
+- each scene **thunks** when you reach it
+- the last scene gets a **bell chord chime**
 
-There's also a "**· STAND BY · SCROLL TO WALK ·**" card the first time
-you land, so visitors know to scroll.
+the first time someone lands, a "**· STAND BY · SCROLL TO WALK ·**"
+card pops up so they know what to do.
 
-**TL;DR** — Scrolling the tunnel = walking forward. Sound is part of it.
-The ENTER button at the bottom takes you into the arena and remembers you.
+**tl;dr** — scrolling the tunnel = walking forward. sound is part of
+it. the ENTER button at the bottom takes them into the arena and
+remembers them.
 
 ---
 
 # PART 4 ◇ THE ARENA
 
-The arena is the actual homepage. Top to bottom:
+the arena is your real homepage. top to bottom:
 
 ```
   ╔══════════════════════════════════════════════╗
@@ -184,41 +188,40 @@ The arena is the actual homepage. Top to bottom:
   ╚══════════════════════════════════════════════╝
 ```
 
-### Things that move on the homepage
+### things that move on the homepage
 
-- The **polaroid stack** breathes (slight up/down bob), tilts when you
-  hover, and **fans out** when hovered (desktop) or tapped (mobile).
-  Tap any card → it pops forward briefly. Each card carries its own
-  little rotation.
-- The **subscribe button** + **watch button** lift slightly on hover and
-  ripple from the click point. Stat tiles do a tiny jiggle when tapped.
-- Video tiles have a **holographic sheen** — gold/orange ones (LEGENDARY)
-  get an extra bright sweep on loop. Other tiers stay calm.
-- The **mood LED** next to your handle blinks softly based on your
-  current mood (online / on-fire / streaming / in-school / sleeping).
+- the **polaroid stack** breathes (gentle up/down bob). it tilts when
+  you hover and **fans out** when you hover (desktop) or tap (mobile).
+  tap any card → it pops forward for a second.
+- the **subscribe button** + **watch button** lift a bit when you
+  hover and ripple from where you click. stat tiles jiggle when tapped.
+- video tiles have a **shiny rainbow sheen**. the gold/orange ones
+  (LEGENDARY) get an extra bright sweep on loop. the others stay calm.
+- the **mood LED** next to your handle blinks softly based on your
+  mood (online / on-fire / streaming / in-school / sleeping).
 
-### Sounds on the homepage
+### sounds on the homepage
 
-- Football mode plays a **stadium crowd ambient** — subtle, always on
-  while football is the active mode
-- Gaming mode is silent ambient (no constant sound)
-- Flipping modes plays a **whoosh** (gaming) or **crowd cheer + horn**
-  (football)
-- A **plunger ka-CHUNK** + your chosen payload sound when an announcement
-  fires (from /edit)
+- football mode plays a **stadium crowd hum** in the background.
+  always on while football is the active mode.
+- gaming mode is quiet (no constant sound).
+- flipping modes plays a **whoosh** (gaming) or a **crowd cheer + horn**
+  (football).
+- a **plunger ka-CHUNK** + your chosen payload sound when an
+  announcement fires from `/edit`.
 
-The **🔊 speaker button** in the bottom-right corner toggles ALL sound
-on/off. Your choice is remembered for next visit.
+the **🔊 speaker button** in the bottom-right corner mutes everything.
+your choice is remembered for next visit.
 
-**TL;DR** — The arena is your homepage. Most things on it are
-interactive — try hovering, tapping, scrolling. Sound is a big part of
-the vibe; the speaker button mutes everything if you need quiet.
+**tl;dr** — the arena is your homepage. most things on it are
+interactive — try hovering, tapping, scrolling. sound is a big part of
+the vibe. the speaker button mutes everything if you need quiet.
 
 ---
 
 # PART 5 ◇ SECRET DOOR (/edit)
 
-Go to **khalil2020.vercel.app/edit** and type your password.
+go to **khalil2020.vercel.app/edit** and type your password.
 
 ```
   ┌──────────────────────────────────────────────┐
@@ -230,7 +233,7 @@ Go to **khalil2020.vercel.app/edit** and type your password.
   └──────────────────────────────────────────────┘
 ```
 
-Once you're in, the top bar swaps to:
+once you're in, the top bar swaps to:
 
 ```
   ┌──────────────────────────────────────────────┐
@@ -238,44 +241,52 @@ Once you're in, the top bar swaps to:
   └──────────────────────────────────────────────┘
 ```
 
-Two tabs. Both edit the **same site** — pick whichever feels right for
+two tabs. both edit the **same site**. pick whichever feels right for
 what you're trying to do:
 
-- **LAUNCH** ← Mission Control. The big plunger + side modules.
-  Use it when you want to **fire a message** (announcement) or
-  quickly tweak status / now-playing / pinned video without scrolling.
-- **INLINE** ← Control Deck. Mini-mockups of the site with pins
-  on every editable field. Use it when you want to see what each
-  section will look like as you change it.
+- **LAUNCH** ← mission control. the big plunger + side modules. use it
+  when you want to **fire a message** or quickly tweak status /
+  now-playing / pinned video.
+- **INLINE** ← control deck. mini-mockups of the site with pins on
+  every editable field. use it when you want to see what each part will
+  look like as you change it.
 
-Anything you change in one tab shows up in the other. **They share the
-same memory.** No "switching loses my work" — it's the same canvas.
+anything you change in one tab shows up in the other. **they share the
+same memory.** no "switching loses my work" — it's the same canvas.
 
-### The two action buttons
+### the two action buttons
 
-| Button       | Does                                                         |
+| button       | does                                                         |
 |--------------|--------------------------------------------------------------|
-| ⊕ **SAVE**   | Pushes everything you changed (except messages) to the live site. Takes ~1 minute to deploy. |
-| × **EXIT**   | Logs you out. Site stays exactly as it was last saved.       |
+| ⊕ **SAVE**   | pushes everything you changed (except messages) to the live site. takes about a minute. |
+| × **EXIT**   | logs you out. the site stays exactly as it was last saved.   |
 
-Press SAVE when you're done editing a batch of stuff. **You can change a
-LOT before saving** — it's one commit per save.
+press SAVE when you finish a batch of changes. **you can change a LOT
+before saving** — it's one save for everything.
 
-**TL;DR** — /edit is the only password-locked page. Two tabs, both edit
-the same content. SAVE pushes everything live (except messages). EXIT
-logs out.
+### where to find this manual
+
+inside `/edit`, in the top-right corner of the top bar, there's a
+**📖 MANUAL** button. tap it and the manual opens in a new tab so you
+don't lose your edit session. you can also just go to
+khalil2020.vercel.app/manual any time.
+
+**tl;dr** — `/edit` is the only locked page. two tabs, both edit the
+same content. SAVE pushes everything live (except messages). EXIT
+logs out. the 📖 MANUAL link in the top-right opens this manual in a
+new tab.
 
 ---
 
 # PART 6 ◇ MISSION CONTROL (the LAUNCH tab)
 
-This is your **broadcast deck**. The headline feature: send a real-time
-message to anyone currently on the site.
+this is your **message launcher**. the headline feature: send a
+real-time message to anyone who's on the site right now.
 
 ```
   ┌──────────────────────────────────────────────┐
   │  ┌────────────────────┐                      │
-  │  │ LAUNCH WINDOW      │  ← CRT preview       │
+  │  │ LAUNCH WINDOW      │  ← live preview      │
   │  │                    │  (shows what fires)  │
   │  │  GAMING / FOOTBALL │                      │
   │  └────────────────────┘                      │
@@ -290,68 +301,67 @@ message to anyone currently on the site.
   └──────────────────────────────────────────────┘
 ```
 
-### Step-by-step: firing a message
+### step-by-step: firing a message
 
-1. **Type the message** — what you want everyone to see (up to 120 chars).
-2. **Pick a payload** — what kind of celebration:
+1. **type the message** — what you want everyone to see (up to 120 letters).
+2. **pick a payload** — what kind of celebration:
    - 🎉 **CONFETTI** — paper pop + sparkly chirps
    - 💰 **GOLD** — Mario-coin shower (14 pings)
    - ⚡ **NEON** — bass drop + rave zap
    - 🔥 **FIRE** — boom + breathing flame + crackles
    - ⚽ **GOAL** — referee whistle + horn + crowd roar
    - 🍰 **CAKE** — party horn + bell triad
-3. **Pick a fuse** — when it should go off:
-   - **NOW** — fires the instant you press FIRE (active for 5 min)
-   - **1H** — fires one hour from now (active for 5 min)
-   - **VISIT** — fires the next time a NEW visitor lands (active for 24 hours)
-   - **REFRESH** — fires every time the page is refreshed for the next hour
-4. **Hit the FIRE plunger** — big red button at the bottom.
+3. **pick a fuse** — when it should go off:
+   - **NOW** — fires the instant you press FIRE (lasts 5 minutes)
+   - **1H** — fires one hour from now (lasts 5 minutes)
+   - **VISIT** — fires the next time a new visitor lands (lasts 24 hours)
+   - **REFRESH** — fires every time the page is refreshed for the next
+     hour
+4. **hit the FIRE plunger** — big red button at the bottom.
 
-The CRT preview at the top shows you exactly what visitors will see. The
+the preview at the top shows you exactly what visitors will see. the
 plunger goes **ka-CHUNK** and the payload sound plays as it lands.
 
-### The 5 side modules (always visible)
+### the side modules (always visible)
 
-These edit things directly — no need to switch tabs:
+these edit things directly — no need to switch tabs:
 
-| Module           | Edits                                              |
+| module           | edits                                              |
 |------------------|----------------------------------------------------|
-| **LIVE STATUS** | Mood LED + sub count (current + goal)              |
-| **NOW · EQUIPPED / STARTING XI** | What you're playing/watching/reading/listening (per mode) |
-| **PINNED REPLAY** | Which video shows up first in the REPLAYS section  |
-| **REPLAY STYLE** | YouTube vs designed thumbnails, card rarities, palette |
-| **ABOUT** | The about paragraphs at the bottom of the site     |
-| **BOOT MODE** | Whether new visitors land in gaming or football    |
-| **SOCIALS** | TikTok + Instagram links in the footer             |
+| **LIVE STATUS**  | mood LED + sub count (current + goal)              |
+| **NOW · EQUIPPED / STARTING XI** | what you're playing/watching/reading/listening (per mode) |
+| **PINNED REPLAY** | which video shows up first in the REPLAYS section |
+| **REPLAY STYLE** | youtube vs designed thumbnails, card rarities, palette |
+| **ABOUT**        | the paragraphs at the bottom of the site           |
+| **BOOT MODE**    | whether new visitors land in gaming or football    |
+| **SOCIALS**      | tiktok + instagram links in the footer             |
 
-### Important difference: messages vs everything else
+### messages vs everything else
 
 ```
   MESSAGES (the plunger)        EVERYTHING ELSE
   ─────────────────────         ───────────────────
   ▼ FIRE button                 ⊕ SAVE button
-  goes out instantly            takes ~1 minute
-  no deploy                     triggers a rebuild
-  shows up in ~3 seconds        shows up after deploy
+  goes out instantly            takes about a minute
+  shows up in ~3 seconds        shows up after the rebuild
 ```
 
-**Why the difference?** Messages are temporary — they live in a fast
-storage and disappear after their fuse expires. Everything else
-(your handle, stats, videos, book, etc.) is part of the actual site so
-saving it pushes a new version of the site live.
+**why?** messages are quick — they live in a fast box and disappear when
+their fuse runs out. everything else (your handle, stats, videos, book)
+is part of the actual site. saving makes the site rebuild itself with
+the new stuff.
 
-**TL;DR** — The plunger sends a message that pops on the homepage within
-a few seconds. The SAVE button updates the actual site (slower but
-permanent). Both work from the LAUNCH tab; you just press different
-buttons.
+**tl;dr** — the plunger sends a message that pops on the homepage
+within seconds. the SAVE button updates the actual site (slower but it
+stays). both live in the LAUNCH tab — different buttons.
 
 ---
 
 # PART 7 ◇ CONTROL DECK (the INLINE tab)
 
-This tab shows **mini-mockups** of every section of the homepage. Each
-section has small **EDIT pins** floating on it — tap a pin to open a
-**drawer** with a form for that exact field.
+this tab shows **mini-mockups** of every part of the homepage. each
+section has small **EDIT pins** floating on it — tap a pin to slide a
+**drawer** in with a form for that exact field.
 
 ```
   ┌──────────────────────────────────────────────┐
@@ -381,47 +391,47 @@ section has small **EDIT pins** floating on it — tap a pin to open a
   └──────────────────────────────────────────────┘
 ```
 
-### Every pin and what it edits
+### every pin and what it edits
 
-| Pin            | Opens an editor for                                   |
+| pin            | opens an editor for                                   |
 |----------------|-------------------------------------------------------|
-| **HANDLE**     | Your @ username (max 40 chars)                        |
-| **HERO**       | Tagline + bio + CTA button text + vibe (per mode)     |
-| **STATS**      | The 4 stat cells (label + value, per mode)            |
-| **MOOD**       | The blinking LED next to your handle                  |
-| **SUBS**       | Current + goal numbers                                |
-| **NOW**        | Equipped / Starting XI block (per mode)               |
-| **PINNED**     | Which video pins to the top of REPLAYS                |
-| **STYLE**      | YouTube vs designed thumbnails + tier rarities + palette |
-| **ABOUT**      | The paragraphs at the bottom                          |
-| **BOOK**       | Title + subtitle + description + status + **cover photo** |
-| **SOCIALS**    | TikTok + Instagram links                              |
-| **BOOT MODE**  | Default mode for new visitors                         |
+| **HANDLE**     | your @ username (max 40 letters)                      |
+| **HERO**       | tagline + bio + button text + vibe (per mode)         |
+| **STATS**      | the 4 stat cells (label + value, per mode)            |
+| **MOOD**       | the blinking LED next to your handle                  |
+| **SUBS**       | current + goal numbers                                |
+| **NOW**        | equipped / starting XI block (per mode)               |
+| **PINNED**     | which video pins to the top of REPLAYS                |
+| **STYLE**      | youtube vs designed thumbnails + tier rarities + palette |
+| **ABOUT**      | the paragraphs at the bottom                          |
+| **BOOK**       | title + subtitle + description + status + **cover photo** |
+| **SOCIALS**    | tiktok + instagram links                              |
+| **BOOT MODE**  | default mode for new visitors                         |
 
-### Mode-aware editing
+### per-mode editing
 
-The HERO, STATS, and NOW sections **are different in gaming vs football**.
-The mode toggle at the top of the inline tab (GAMING / FOOTBALL) tells the
-preview which version you're looking at. Flip it before editing the
-mode-specific fields.
+HERO, STATS, and NOW are **different in gaming vs football**. the mode
+toggle at the top of the inline tab tells the preview which one you're
+looking at. flip it before editing those fields.
 
-### The drawer
+### the drawer
 
-Tapping a pin slides a drawer out from the right side with the form.
-Make your changes → the preview updates live → close the drawer → press
-SAVE at the top to push to the site.
+tap a pin → a drawer slides in from the right with the form. make your
+changes → the preview updates live → close the drawer → press SAVE at
+the top to push everything live.
 
-**TL;DR** — INLINE is the precision editor. See the site in miniature,
+**tl;dr** — INLINE is the precision editor. see the site in miniature,
 tap an EDIT pin to open the field, type, close, save.
 
 ---
 
 # PART 8 ◇ IMAGE UPLOADS
 
-Scroll to the bottom of the **INLINE tab**. You'll see the **◇ IMAGES**
-section. This is where you replace placeholder art with your own photos.
+scroll to the bottom of the **INLINE tab**. you'll see the **◇ IMAGES**
+section. this is where you replace placeholder art with your own
+photos.
 
-### The 8 slots
+### the 8 slots
 
 ```
   ┌──────────────────────────────────────────────┐
@@ -448,54 +458,55 @@ section. This is where you replace placeholder art with your own photos.
   └──────────────────────────────────────────────┘
 ```
 
-### How to upload
+### how to upload
 
-1. **Click** a slot OR **drag-and-drop** an image onto it.
-2. The image gets resized (down to ~1024px on the long edge) and uploaded.
-3. The thumbnail appears with a **✓ LIVE ON SITE** badge.
-4. Press **SAVE** at the top.
+1. **click** a slot OR **drag-and-drop** an image onto it.
+2. the image gets shrunk to fit (about 1024px on the long edge) and
+   uploaded.
+3. the thumbnail appears with a **✓ LIVE ON SITE** badge.
+4. press **SAVE** at the top.
 
-### To replace or remove
+### to replace or remove
 
-- **Replace:** click the slot again → pick a new file. The old one gets
-  replaced (don't worry, no one sees the old one once you save).
-- **Remove:** press the **× remove** button below the thumbnail.
-  Press SAVE — and the slot reverts to its default (emoji / gradient).
+- **replace:** click the slot again → pick a new photo. the old one
+  gets swapped out (no one sees the old one once you save).
+- **remove:** press the **× remove** button below the thumbnail. press
+  SAVE — the slot goes back to its default (emoji / gradient).
 
-### Where each slot shows up on the site
+### where each slot shows up on the site
 
-| Slot                | Where it lands on the homepage                          |
+| slot                | where it lands on the homepage                          |
 |---------------------|---------------------------------------------------------|
-| `portrait-gaming`   | Middle polaroid card (when gaming is active)            |
-| `portrait-football` | Middle polaroid card (when football is active)          |
-| `book-cover`        | Book section cover (replaces the gradient)              |
-| `replay-{video-id}` | That specific video's thumbnail (overrides YouTube's)   |
+| `portrait-gaming`   | the middle polaroid card (when gaming is active)        |
+| `portrait-football` | the middle polaroid card (when football is active)     |
+| `book-cover`        | the book cover (replaces the gradient)                  |
+| `replay-{video-id}` | that specific video's thumbnail (replaces youtube's)    |
 
-### Two places to edit the same thing
+### two places to edit the same thing
 
-The **BOOK COVER** slot can be uploaded from **either** the IMAGES section
-**OR** the BOOK pin's drawer. Both edit the same photo. Use whichever's
-faster.
+the **book cover** slot can be uploaded from **either** the IMAGES
+section OR the BOOK pin's drawer. both change the same photo. use
+whichever's faster.
 
-### What kinds of images work
+### what kinds of images work
 
-- **Formats:** JPG, PNG, WebP, GIF
-- **Max file size:** 6 MB (the uploader resizes anything bigger
-  automatically, so most phone photos work fine)
-- **Best shape:** photos already shaped like the slot — square-ish for
-  portraits, 3:4 portrait for book cover, 16:9 wide for replays. If
-  the aspect ratio doesn't match, the photo will be cropped to fit.
+- **formats:** JPG, PNG, WebP, GIF
+- **max file size:** 6 MB. the uploader shrinks anything bigger
+  automatically, so most phone photos work fine.
+- **best shape:** square-ish for portraits, tall (3:4) for the book
+  cover, wide (16:9) for replays. if the shape doesn't match, the
+  photo will be cropped to fit.
 
-**TL;DR** — Drag photos onto slots in the IMAGES section. Press SAVE.
-The photo replaces the placeholder. Press × remove to put the placeholder
-back. The book cover slot can be edited from two places — both edit the
-same photo.
+**tl;dr** — drag photos onto slots in the IMAGES section. press SAVE.
+the photo replaces the placeholder. press × remove to put the
+placeholder back. the book cover slot can be edited from two places —
+both change the same photo.
 
 ---
 
-# PART 9 ◇ SAVE & FIRE — How stuff goes live
+# PART 9 ◇ SAVE & FIRE — how stuff goes live
 
-Two different paths for two different kinds of changes:
+two paths. two kinds of changes.
 
 ```
                            SAVE              FIRE
@@ -504,42 +515,38 @@ Two different paths for two different kinds of changes:
                         announcements)
 
   press button         ⊕ SAVE                ▼ FIRE plunger
-  storage              GitHub commit         Vercel Edge Config
-  effect               new build deploys     instant write
-  visitors see it      ~1 minute later       within 3-5 seconds
-  reversible           git rollback          fuse expires, gone
+  takes               ~1 minute              3–5 seconds
+  stays               permanent              until the fuse runs out
+  can undo?           yes (rollback)         no need — it expires
 ```
 
-### What "saves" can break
+### what "saves" can break
 
-Almost nothing. If you typo your bio you can just edit again. The site
-goes through a build every save, but builds are fast (~30 seconds) and
-fail-loud — if a save somehow breaks, the deploy errors out and the
-PREVIOUS version stays live.
+almost nothing. if you typo your bio you can just edit again. the site
+does a rebuild on every save, but rebuilds are fast (around 30
+seconds). if a save somehow breaks the rebuild, the new version
+doesn't go live and the old version stays up. the site never goes
+blank on you.
 
-### What "fires" can break
+### what "fires" can break
 
-Less than nothing. Messages have a fuse — they go away on their own.
-Worst case: people see your typo for a minute, then it vanishes.
+less than nothing. messages have a fuse — they go away on their own.
+worst case: people see your typo for a minute, then it vanishes.
 
-### Where the data actually lives
+### where the data lives
 
-```
-  THE SITE'S TEXT, IMAGES, SETTINGS
-    ↓
-  content.json (on GitHub) + images on Vercel Blob (for photos)
+the text and images for your site are saved on github (a safe place
+that keeps every old version). the messages live in a separate fast
+box that doesn't trigger a rebuild — that's why they show up in 3
+seconds instead of 1 minute.
 
-  THE MESSAGES (announcements)
-    ↓
-  Vercel Edge Config (super-fast, doesn't trigger a deploy)
-```
+you don't have to think about any of this. but it's useful to know
+that messages are deliberately separate, so you can fire 20 of them a
+day without slowing anything down.
 
-You don't need to think about this — but it's useful to know that the
-messages are deliberately separate from the rest so you can fire 20 of
-them a day without spamming deploys.
-
-**TL;DR** — SAVE is for content (text, images, settings) — takes ~1
-minute. FIRE is for messages — takes 3-5 seconds. Both are reversible.
+**tl;dr** — SAVE is for content (text, images, settings) — takes about
+a minute. FIRE is for messages — takes 3–5 seconds. both are
+reversible.
 
 ---
 
@@ -551,57 +558,56 @@ minute. FIRE is for messages — takes 3-5 seconds. Both are reversible.
   ╚══════════════════════════════════════════════╝
 ```
 
-### I changed something and the site didn't update
+### "i changed something and the site didn't update"
 
-- Did you press **SAVE**? (Not FIRE — that's only for messages.)
-- After saving, give it **~1 minute** for the deploy. Refresh the
-  homepage hard (Cmd+Shift+R on Mac).
-- Still wrong? Open the **Vercel dashboard → Deployments** and check
-  for a red "Error" status on the latest one. If it errored, your
-  changes are sitting in GitHub but the live site is stuck on the
-  previous deploy. Tell whoever's helping you with the site (or me)
-  what you changed and they can fix it.
+- did you press **SAVE**? (not FIRE — that's only for messages.)
+- after saving, give it about a minute.
+- still wrong? do a **hard refresh**:
+  - **mac:** Cmd + Shift + R
+  - **windows:** Ctrl + Shift + R
+- still nothing? tell whoever helps you with the site. they can check
+  if the save got stuck.
 
-### I fired a message and no one sees it
+### "i fired a message and no one sees it"
 
-- Make sure the homepage **isn't muted** (the 🔊 button) — that's a
-  per-device setting that won't affect other visitors but might be
-  confusing on your end.
-- Wait **~5 seconds** — the homepage polls for new messages on a 3s
-  loop, so worst case is one full cycle.
-- Did you pick **NOW** as the fuse? Other fuses delay things.
+- check the speaker button — make sure your homepage isn't muted.
+- wait about 5 seconds. the homepage checks for new messages every
+  few seconds.
+- did you pick **NOW** as the fuse? the other fuses delay things.
 
-### An image upload failed
+### "an image upload failed"
 
-- Check the **file size** — over 6 MB might choke. Try resizing first.
-- Check the **format** — only JPG / PNG / WebP / GIF.
-- If you see "Blob storage is not configured" — that's a setup issue,
-  not your fault. Talk to whoever set up the site.
+- check the file size. over 6 MB might choke. try a smaller photo
+  first.
+- check the format. only JPG / PNG / WebP / GIF work.
+- if you see "blob storage is not configured" — that's a setup
+  problem, not your fault. tell whoever set up the site.
 
-### I want to undo a change
+### "i want to undo a change"
 
-- Same as making a change: just edit it back and save. The site doesn't
-  have an undo button, but git history does — any past version can be
-  restored by someone with repo access.
+- easiest way: edit it back and save again.
+- old versions of the site are saved on github. someone with repo
+  access can put back any past version in a couple of minutes.
 
-### Sounds don't play
+### "sounds don't play"
 
-- Browsers don't let pages play sound until you interact (click /
-  scroll / tap). Try clicking somewhere first.
-- iOS Safari sometimes needs an extra second to wake up audio — give
-  it a moment after you tap.
-- Check the **🔊 speaker button** in the bottom-right. If it's a
+- browsers don't let pages play sound until you click or tap
+  something. try clicking somewhere first.
+- iphone safari sometimes needs a second to wake up audio. wait a
+  tick after you tap.
+- check the **🔊 speaker button** in the bottom-right. if it has a
   slash through it, sound is muted.
 
-### The mode flip glitched mid-transition
+### "the mode flip glitched mid-transition"
 
-- Don't worry, it'll finish. If it really feels stuck, refresh once.
+- don't worry, it'll finish. if it really feels stuck, refresh the
+  page once.
 
-### Everything is broken
+### "everything is broken"
 
-- Don't panic. The previous version of the site is always one
-  rollback away. Tell whoever helps you with the site. We can
-  restore in a couple minutes.
+- don't panic. the old version is always one rollback away. tell
+  whoever helps you with the site — we can put it back in a couple
+  minutes.
 
 ---
 
@@ -610,14 +616,14 @@ minute. FIRE is for messages — takes 3-5 seconds. Both are reversible.
 ║                                              ║
 ║  END OF MANUAL · KHALIL.OPS v1.0             ║
 ║                                              ║
-║  Welcome to your own arena.                  ║
-║  Hit the goal.                               ║
+║  welcome to your own arena.                  ║
+║  hit the goal.                               ║
 ║                                              ║
 ║  ▶ ENTER                                     ║
 ║                                              ║
 ╚══════════════════════════════════════════════╝
 ```
 
-_Last updated: when this thing got cool enough to share. Keep this
-manual nearby. When you discover something new, tell us and we'll add
+_last updated: when this thing got cool enough to share. keep this
+manual nearby. when you discover something new, tell us and we'll add
 it._

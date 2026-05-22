@@ -1,0 +1,2145 @@
+<!doctype html>
+<html lang="en" data-mode="gaming">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KHALIL.OPS · Operator Manual</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Bungee&family=Caveat:wght@500;600;700&family=DM+Mono:wght@400;500&family=Inter:wght@400;500;600;700;800;900&family=Permanent+Marker&family=Russo+One&display=swap" rel="stylesheet">
+<style>
+  /* ───────────────────────────────────────────────────────────────
+     KHALIL.OPS · Operator Manual
+     palette + tokens lifted from components/topbar/palette.ts and
+     components/arena/theme.ts so the manual feels like part of the site
+     ─────────────────────────────────────────────────────────────── */
+
+  :root {
+    --bg-a: #0e0030;
+    --bg-b: #3a0a5a;
+    --bg-c: #5a14a0;
+    --accent: #00f0ff;     /* cyan */
+    --accent-2: #ff2bd6;   /* magenta */
+    --accent-3: #ffe600;   /* yellow */
+    --fg: #ffffff;
+    --dim: rgba(255,255,255,0.7);
+    --line: rgba(0,240,255,0.18);
+    --card: rgba(60,30,120,0.45);
+    --card-border: rgba(0,240,255,0.4);
+    --cta-a: #ff2bd6;
+    --cta-b: #9a0096;
+    --role: 'STREAMER';
+    --role-2: 'GAMER';
+    --role-3: 'GOAT';
+  }
+
+  [data-mode="football"] {
+    --bg-a: #001233;
+    --bg-b: #003366;
+    --bg-c: #0a4a2a;
+    --accent: #ffd700;     /* gold */
+    --accent-2: #ffffff;
+    --accent-3: #4d8fff;   /* blue */
+    --line: rgba(255,215,0,0.20);
+    --card: rgba(0,30,90,0.55);
+    --card-border: rgba(255,215,0,0.5);
+    --cta-a: #ffd700;
+    --cta-b: #b58a00;
+    --role: 'STRIKER';
+    --role-2: 'MADRIDISTA';
+    --role-3: 'FOREVER 7';
+  }
+
+  * { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    color: var(--fg);
+    font-family: 'Inter', system-ui, sans-serif;
+    background: radial-gradient(ellipse at top, var(--bg-c) 0%, var(--bg-b) 38%, var(--bg-a) 100%);
+    background-attachment: fixed;
+    min-height: 100vh;
+    transition: background .8s ease, color .8s ease;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    /* faint mode-tinted grid overlay — gaming vibe */
+    content: "";
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    background-size: 64px 64px;
+    pointer-events: none;
+    opacity: 0.5;
+    transition: opacity .8s ease;
+    z-index: 0;
+  }
+
+  body::after {
+    /* gentle scanlines */
+    content: "";
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(0deg, rgba(255,255,255,0.03) 0 1px, transparent 1px 4px);
+    pointer-events: none;
+    z-index: 1;
+    mix-blend-mode: overlay;
+  }
+
+  main {
+    position: relative;
+    z-index: 2;
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 0 20px 120px;
+  }
+
+  /* ───────── animations (mirrors lib.jsx) ───────── */
+
+  @keyframes k-bob {
+    0%, 100% { transform: translateY(0) rotate(var(--rot, 0deg)); }
+    50% { transform: translateY(-6px) rotate(var(--rot, 0deg)); }
+  }
+  @keyframes k-glow-pulse {
+    0%, 100% { box-shadow: 0 0 12px var(--accent), 0 0 24px var(--accent); }
+    50% { box-shadow: 0 0 24px var(--accent), 0 0 48px var(--accent); }
+  }
+  @keyframes k-shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+  @keyframes k-stamp-in {
+    0% { transform: translateY(-30px) scale(0.9); opacity: 0; filter: blur(8px); }
+    60% { transform: translateY(0) scale(1.05); opacity: 1; filter: blur(0); }
+    100% { transform: translateY(0) scale(1); opacity: 1; filter: blur(0); }
+  }
+  @keyframes k-flash {
+    0%, 100% { opacity: 0; }
+    50% { opacity: 0.7; }
+  }
+  @keyframes k-scanline {
+    0% { transform: translateY(-100%); }
+    100% { transform: translateY(200%); }
+  }
+  @keyframes k-pulse-led {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+  @keyframes k-confetti {
+    0% { transform: translate(0,0) rotate(0deg); opacity: 1; }
+    100% { transform: translate(var(--cx,80px), var(--cy,-200px)) rotate(540deg); opacity: 0; }
+  }
+  @keyframes k-plunge {
+    0% { transform: translateY(0); }
+    35% { transform: translateY(18px); }
+    100% { transform: translateY(0); }
+  }
+  @keyframes k-rumble {
+    0%, 100% { transform: translate(0,0); }
+    25% { transform: translate(-1px, 1px); }
+    75% { transform: translate(1px, -1px); }
+  }
+
+  /* ───────── top bar (live mode toggle) ───────── */
+
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 80;
+    display: flex;
+    align-items: stretch;
+    height: 64px;
+    background: rgba(0,0,0,0.55);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--accent);
+    box-shadow: 0 4px 24px rgba(0,0,0,0.6), 0 0 24px var(--accent);
+    overflow: hidden;
+  }
+
+  .topbar-half {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    cursor: pointer;
+    font-family: 'Anton', sans-serif;
+    font-size: 22px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    transition: flex .35s ease, opacity .35s ease, color .35s ease;
+    color: var(--fg);
+    user-select: none;
+    position: relative;
+  }
+
+  .topbar-half.idle { flex: 0 0 22%; opacity: 0.6; font-size: 14px; }
+  .topbar-half.active { flex: 1 1 78%; font-size: 22px; opacity: 1; }
+  .topbar-half.active::after {
+    content: "• CURRENTLY";
+    position: absolute;
+    bottom: 6px;
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 1.5px;
+    color: var(--accent);
+    opacity: 0.85;
+  }
+  .topbar-half.idle::after {
+    content: "← TAP";
+    position: absolute;
+    bottom: 6px;
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 1.5px;
+    opacity: 0.7;
+  }
+  .topbar-half.gaming { color: var(--accent); text-shadow: 0 0 12px var(--accent); }
+  .topbar-half.football { color: var(--accent); text-shadow: 0 0 12px var(--accent); }
+
+  [data-mode="gaming"] .topbar-half.football,
+  [data-mode="football"] .topbar-half.gaming {
+    color: rgba(255,255,255,0.6);
+    text-shadow: none;
+  }
+
+  .seam {
+    width: 2px;
+    background: var(--accent);
+    box-shadow: 0 0 8px var(--accent);
+  }
+
+  /* mode-flip overlay */
+  .flip-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 999;
+    pointer-events: none;
+    opacity: 0;
+    background: var(--accent);
+    transition: opacity 0s;
+  }
+  .flip-overlay.fire {
+    animation: k-flash 0.55s ease both;
+  }
+
+  /* ───────── general typography ───────── */
+
+  h1, h2, h3, h4 { margin: 0; }
+  .display {
+    font-family: 'Anton', sans-serif;
+    text-transform: uppercase;
+    letter-spacing: -1px;
+    line-height: 0.9;
+  }
+  .mono {
+    font-family: 'DM Mono', ui-monospace, monospace;
+    letter-spacing: 1.4px;
+    text-transform: uppercase;
+    font-size: 11px;
+  }
+  .marker {
+    font-family: 'Permanent Marker', cursive;
+  }
+  .handwriting {
+    font-family: 'Caveat', cursive;
+    font-weight: 700;
+  }
+
+  a { color: var(--accent); }
+
+  /* ───────── cover ───────── */
+
+  .cover {
+    padding: 60px 0 40px;
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    gap: 40px;
+    align-items: center;
+  }
+  @media (max-width: 800px) {
+    .cover { grid-template-columns: 1fr; }
+  }
+
+  .cover .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    border: 1px solid var(--accent);
+    border-radius: 4px;
+    color: var(--accent);
+    margin-bottom: 14px;
+    box-shadow: 0 0 12px var(--accent);
+  }
+  .cover .badge .led {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 8px var(--accent);
+    animation: k-pulse-led 2s ease-in-out infinite;
+  }
+
+  .cover h1.title {
+    font-family: 'Anton', sans-serif;
+    font-size: 120px;
+    line-height: 0.86;
+    letter-spacing: -2px;
+    text-shadow: 0 0 32px var(--accent), 0 4px 24px rgba(0,0,0,0.7);
+  }
+  @media (max-width: 800px) {
+    .cover h1.title { font-size: 78px; }
+  }
+
+  .cover h2.title-2 {
+    font-family: 'Anton', sans-serif;
+    font-size: 84px;
+    line-height: 0.86;
+    letter-spacing: -1px;
+    background: linear-gradient(180deg, var(--accent) 0%, var(--accent-2) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 0 18px var(--accent));
+  }
+  @media (max-width: 800px) {
+    .cover h2.title-2 { font-size: 56px; }
+  }
+
+  .cover .lede {
+    margin: 24px 0 26px;
+    font-size: 18px;
+    line-height: 1.55;
+    color: var(--dim);
+    max-width: 540px;
+  }
+
+  .ctaRow { display: flex; gap: 10px; flex-wrap: wrap; }
+  .cta {
+    font-family: 'Anton', sans-serif;
+    font-size: 22px;
+    letter-spacing: 1px;
+    padding: 16px 28px;
+    color: #0a0420;
+    background: linear-gradient(180deg, var(--cta-a) 0%, var(--cta-b) 100%);
+    clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
+    box-shadow: 0 0 24px color-mix(in srgb, var(--cta-a) 50%, transparent);
+    text-decoration: none;
+    cursor: pointer;
+    border: none;
+    transition: transform .15s ease;
+  }
+  .cta:hover { transform: translateY(-2px); }
+  .cta.ghost {
+    color: var(--fg);
+    background: transparent;
+    border: 1.5px solid var(--accent);
+    box-shadow: none;
+  }
+
+  [data-mode="football"] .cta {
+    color: #001233;
+  }
+
+  /* ───────── polaroid stack on cover ───────── */
+
+  .polaroid-stack {
+    position: relative;
+    height: 460px;
+    perspective: 800px;
+  }
+
+  .polaroid {
+    position: absolute;
+    background: #f3ede0;
+    color: #1a1106;
+    padding: 14px 14px 36px;
+    box-shadow: 0 18px 40px rgba(0,0,0,0.55);
+    width: 240px;
+    transition: transform .25s ease;
+    animation: k-bob 5.5s ease-in-out infinite;
+  }
+  .polaroid:hover { transform: scale(1.05) rotate(0deg) !important; z-index: 50; }
+
+  .polaroid .tape {
+    position: absolute;
+    top: -10px;
+    width: 60px;
+    height: 22px;
+    background: rgba(255,255,255,0.55);
+    border: 1px dashed rgba(0,0,0,0.15);
+    transform: rotate(-4deg);
+  }
+  .polaroid .tape.left { left: 14px; }
+  .polaroid .tape.right { right: 14px; transform: rotate(4deg); }
+
+  /* card 1: emblem */
+  .card-emblem {
+    top: 10px;
+    left: 0;
+    transform: rotate(-9deg);
+    --rot: -9deg;
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent-2) 100%);
+    color: #1a1106;
+    text-align: center;
+  }
+  .card-emblem .num {
+    font-family: 'Anton', sans-serif;
+    font-size: 140px;
+    line-height: 0.9;
+    color: #fff;
+    text-shadow: 0 4px 12px rgba(0,0,0,0.4);
+    margin-top: 8px;
+  }
+  .card-emblem .mono { color: #1a1106; opacity: 0.85; }
+
+  /* card 2: portrait */
+  .card-portrait {
+    top: 60px;
+    left: 70px;
+    transform: rotate(7deg);
+    --rot: 7deg;
+    animation-delay: 0.6s;
+    text-align: center;
+  }
+  .card-portrait .photo {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, var(--bg-c), var(--bg-a));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 96px;
+    margin: 8px auto;
+    box-shadow: inset 0 0 24px rgba(0,0,0,0.5);
+  }
+  .card-portrait .caption {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 1.4px;
+    color: #2a2418;
+    background: var(--accent);
+    padding: 4px 8px;
+    display: inline-block;
+    border-radius: 3px;
+  }
+
+  /* card 3: note */
+  .card-note {
+    top: 240px;
+    left: 30px;
+    transform: rotate(-4deg);
+    --rot: -4deg;
+    animation-delay: 1.2s;
+    background: repeating-linear-gradient(0deg, #fef9e6 0 22px, #f5edd0 22px 23px);
+    border-left: 3px solid #c54;
+  }
+  .card-note .note {
+    font-family: 'Caveat', cursive;
+    font-weight: 700;
+    font-size: 26px;
+    color: #3a2a14;
+    line-height: 1.05;
+    padding-top: 6px;
+  }
+
+  /* floating tags */
+  .floating-tag {
+    position: absolute;
+    background: #0a0d0f;
+    border: 1px solid var(--accent);
+    padding: 6px 12px;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 1.4px;
+    color: var(--accent);
+    box-shadow: 0 0 12px var(--accent), 0 4px 12px rgba(0,0,0,0.5);
+    z-index: 30;
+    animation: k-bob 4s ease-in-out infinite;
+  }
+  .floating-tag .num {
+    color: var(--fg);
+    font-family: 'Anton', sans-serif;
+    font-size: 18px;
+    margin-left: 6px;
+    letter-spacing: 0;
+  }
+  .floating-tag.tr { top: 8px; right: -14px; }
+  .floating-tag.bl { bottom: 16px; left: -14px; animation-delay: 0.8s; }
+
+  /* ───────── sections / parts ───────── */
+
+  section.part {
+    margin: 80px 0;
+    position: relative;
+    animation: k-stamp-in 0.6s cubic-bezier(.2,1.2,.4,1) both;
+  }
+
+  .part-marker {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 10px;
+  }
+  .part-num {
+    font-family: 'Anton', sans-serif;
+    font-size: 64px;
+    line-height: 1;
+    color: var(--accent);
+    text-shadow: 0 0 24px var(--accent);
+    min-width: 80px;
+  }
+  .part-line {
+    flex: 1;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent) 0%, transparent 100%);
+  }
+  .part-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--accent);
+    text-transform: uppercase;
+  }
+
+  h2.part-title {
+    font-family: 'Anton', sans-serif;
+    font-size: 56px;
+    line-height: 0.95;
+    letter-spacing: -1px;
+    margin-bottom: 24px;
+    text-shadow: 0 0 18px var(--accent);
+  }
+  @media (max-width: 800px) {
+    h2.part-title { font-size: 38px; }
+    .part-num { font-size: 44px; min-width: 60px; }
+  }
+
+  /* tl;dr handwritten note */
+  .tldr {
+    margin-top: 24px;
+    background: repeating-linear-gradient(0deg, #fef9e6 0 22px, #f5edd0 22px 23px);
+    color: #3a2a14;
+    padding: 24px 22px 22px 64px;
+    transform: rotate(-1deg);
+    box-shadow: 0 12px 28px rgba(0,0,0,0.5);
+    position: relative;
+    border-left: 3px solid #c54;
+    font-family: 'Caveat', cursive;
+    font-weight: 700;
+    font-size: 22px;
+    line-height: 1.25;
+    max-width: 760px;
+  }
+  .tldr::before {
+    content: "tl;dr";
+    position: absolute;
+    top: -14px;
+    left: 22px;
+    background: #ff3a3a;
+    color: #fff;
+    font-family: 'Anton', sans-serif;
+    font-size: 14px;
+    letter-spacing: 2px;
+    padding: 4px 10px;
+    text-transform: uppercase;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+  }
+  .tldr::after {
+    /* the "tape" strip */
+    content: "";
+    position: absolute;
+    top: -14px;
+    right: 30px;
+    width: 70px;
+    height: 24px;
+    background: rgba(255,255,255,0.5);
+    border: 1px dashed rgba(0,0,0,0.18);
+    transform: rotate(6deg);
+  }
+
+  /* prose body */
+  .prose p {
+    font-size: 17px;
+    line-height: 1.6;
+    color: var(--dim);
+    max-width: 760px;
+  }
+  .prose strong { color: var(--fg); }
+
+  /* HUD panel */
+  .panel {
+    background: rgba(0,0,0,0.45);
+    border: 1px solid var(--card-border);
+    border-radius: 6px;
+    padding: 22px;
+    margin: 18px 0;
+    box-shadow: 0 0 24px rgba(0,0,0,0.4), inset 0 0 24px color-mix(in srgb, var(--accent) 6%, transparent);
+  }
+  .panel .panel-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+
+  .terminal {
+    background: #0a0d0f;
+    border: 1px solid #2a333d;
+    border-radius: 6px;
+    padding: 18px 22px;
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    color: #92a4ae;
+    line-height: 1.7;
+    overflow-x: auto;
+    box-shadow: 0 0 24px rgba(0,0,0,0.5);
+  }
+  .terminal .prompt { color: var(--accent); }
+  .terminal .ok { color: #3df562; }
+  .terminal .warn { color: #ffb84d; }
+  .terminal .ink { color: #e6f2f6; }
+
+  /* trading card video tile */
+  .tradecard-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 14px;
+    margin: 18px 0;
+  }
+  .tradecard {
+    aspect-ratio: 3/4;
+    position: relative;
+    color: #fff;
+    padding: 12px;
+    clip-path: polygon(12px 0%, 100% 0%, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0% 100%, 0% 12px);
+    overflow: hidden;
+    transition: transform .3s ease;
+    cursor: default;
+  }
+  .tradecard:hover { transform: translateY(-4px) rotate(0deg); }
+  .tradecard::before {
+    /* holographic sheen */
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(115deg, transparent 30%, rgba(255,255,255,0.25) 50%, transparent 70%);
+    background-size: 200% 100%;
+    animation: k-shimmer 4s linear infinite;
+    mix-blend-mode: screen;
+    pointer-events: none;
+  }
+  .tradecard::after {
+    /* scanlines */
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(0deg, transparent 0 2px, rgba(0,0,0,0.25) 2px 3px);
+    pointer-events: none;
+  }
+  .tradecard .tier {
+    font-family: 'Anton', sans-serif;
+    font-size: 10px;
+    letter-spacing: 1.4px;
+    background: rgba(0,0,0,0.7);
+    padding: 3px 7px;
+    display: inline-block;
+    transform: skewX(-10deg);
+  }
+  .tradecard .icon {
+    font-size: 50px;
+    text-align: center;
+    margin-top: 18px;
+    filter: drop-shadow(0 4px 8px rgba(0,0,0,0.5));
+  }
+  .tradecard .label {
+    font-family: 'Anton', sans-serif;
+    font-size: 14px;
+    text-align: center;
+    margin-top: 10px;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.6);
+  }
+
+  .tc-legendary { background: linear-gradient(135deg, #ffd700 0%, #ff8a00 100%); border: 2px solid #ffe066; }
+  .tc-epic      { background: linear-gradient(135deg, #ff2bd6 0%, #7a26ff 100%); border: 2px solid #ff63d6; }
+  .tc-rare      { background: linear-gradient(135deg, #00f0ff 0%, #4d8fff 100%); border: 2px solid #00f0ff; }
+  .tc-common    { background: linear-gradient(135deg, #9ab1bd 0%, #5a6a78 100%); border: 2px solid #b5c4ce; }
+
+  /* tunnel rooms (depth-faked) */
+  .tunnel {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 18px 0;
+    perspective: 1000px;
+  }
+  .tunnel-room {
+    background: rgba(0,0,0,0.4);
+    border: 1px solid var(--card-border);
+    padding: 18px 22px;
+    border-radius: 4px;
+    transform: scale(var(--scale, 1)) translateZ(0);
+    opacity: var(--op, 1);
+    transition: transform .4s ease;
+    font-family: 'DM Mono', monospace;
+    box-shadow: 0 0 18px color-mix(in srgb, var(--accent) 14%, transparent);
+  }
+  .tunnel-room .room-num {
+    color: var(--accent);
+    font-size: 12px;
+    letter-spacing: 2px;
+    margin-bottom: 6px;
+  }
+  .tunnel-room .room-title {
+    font-family: 'Anton', sans-serif;
+    font-size: 22px;
+    letter-spacing: 1px;
+    color: var(--fg);
+    margin-bottom: 4px;
+    text-transform: uppercase;
+  }
+  .tunnel-room .room-desc {
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    color: var(--dim);
+    line-height: 1.4;
+  }
+  .tunnel-room.r0 { --scale: 0.7; --op: 0.5; }
+  .tunnel-room.r1 { --scale: 0.82; --op: 0.7; }
+  .tunnel-room.r2 { --scale: 0.94; --op: 0.85; }
+  .tunnel-room.r3 { --scale: 1; --op: 1; }
+  .tunnel-room.r4 {
+    --scale: 1.04;
+    --op: 1;
+    border: 2px solid var(--accent);
+    background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 15%, transparent), color-mix(in srgb, var(--accent-2) 15%, transparent));
+    box-shadow: 0 0 32px var(--accent);
+  }
+
+  /* arena layout map */
+  .arena-map {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 18px 0;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+  }
+  .arena-row {
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    padding: 14px 18px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .arena-row .row-tag {
+    color: var(--accent);
+    font-size: 10px;
+    letter-spacing: 1.6px;
+    min-width: 90px;
+  }
+  .arena-row .row-content {
+    color: var(--fg);
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    flex: 1;
+  }
+  .arena-row.hero { min-height: 110px; }
+  .arena-row.hero .row-content {
+    font-family: 'Anton', sans-serif;
+    font-size: 30px;
+    line-height: 1;
+  }
+
+  /* edit access screen */
+  .secret-door {
+    background: linear-gradient(180deg, #0a0d0f 0%, #171c22 100%);
+    border: 1px solid var(--accent);
+    border-radius: 6px;
+    padding: 36px;
+    text-align: center;
+    box-shadow: 0 0 32px var(--accent);
+    max-width: 480px;
+    margin: 18px auto;
+  }
+  .secret-door .label {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 2.5px;
+    color: var(--accent);
+    margin-bottom: 16px;
+  }
+  .secret-door .pass {
+    background: #0a0d0f;
+    border: 1px solid #2a333d;
+    color: var(--fg);
+    font-family: 'DM Mono', monospace;
+    font-size: 22px;
+    letter-spacing: 6px;
+    padding: 14px 18px;
+    width: 100%;
+    margin-bottom: 18px;
+    text-align: center;
+  }
+  .secret-door .auth-btn {
+    font-family: 'Anton', sans-serif;
+    background: linear-gradient(180deg, var(--accent) 0%, var(--accent-2) 100%);
+    color: #0a0420;
+    padding: 14px 28px;
+    border: none;
+    cursor: pointer;
+    letter-spacing: 2px;
+    font-size: 16px;
+    box-shadow: 0 0 24px var(--accent);
+    clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
+  }
+
+  .deck-tabs {
+    display: flex;
+    gap: 8px;
+    margin: 18px 0;
+  }
+  .deck-tab {
+    background: rgba(0,0,0,0.5);
+    border: 1px solid #2a333d;
+    color: var(--dim);
+    padding: 10px 18px;
+    font-family: 'Anton', sans-serif;
+    font-size: 14px;
+    letter-spacing: 2px;
+    cursor: pointer;
+    transition: all .2s ease;
+  }
+  .deck-tab.active {
+    background: var(--accent);
+    color: #0a0420;
+    border-color: var(--accent);
+    box-shadow: 0 0 18px var(--accent);
+  }
+
+  /* plunger module */
+  .mc-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+    margin: 18px 0;
+  }
+  @media (max-width: 800px) { .mc-grid { grid-template-columns: 1fr; } }
+
+  .launch-window {
+    background: #0a0d0f;
+    border: 2px solid #2a333d;
+    border-radius: 8px;
+    padding: 14px;
+    min-height: 240px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: inset 0 0 32px rgba(0,0,0,0.7);
+  }
+  .launch-window::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(0,240,255,0.06) 0%, transparent 50%);
+    pointer-events: none;
+  }
+  .launch-window::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 30%;
+    background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 8%, transparent), transparent);
+    animation: k-scanline 4s linear infinite;
+    pointer-events: none;
+  }
+  .launch-window .lw-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    color: var(--accent);
+    letter-spacing: 2px;
+  }
+  .launch-window .lw-msg {
+    font-family: 'Anton', sans-serif;
+    font-size: 22px;
+    color: var(--fg);
+    line-height: 1.1;
+    margin-top: 14px;
+    text-shadow: 0 0 12px var(--accent);
+  }
+  .launch-window .lw-sub {
+    color: var(--accent);
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    margin-top: 18px;
+    letter-spacing: 1.5px;
+  }
+  .launch-window.fired .lw-msg {
+    animation: k-stamp-in 0.6s cubic-bezier(.2,1.2,.4,1) both;
+  }
+
+  .mc-controls .row-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--accent);
+    letter-spacing: 2px;
+    margin: 14px 0 8px;
+  }
+  .payload-row, .fuse-row {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .payload-btn, .fuse-btn {
+    background: rgba(0,0,0,0.55);
+    border: 1px solid #2a333d;
+    color: var(--fg);
+    padding: 9px 12px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    cursor: pointer;
+    letter-spacing: 1px;
+    transition: all .15s ease;
+    border-radius: 3px;
+  }
+  .payload-btn .em { font-size: 16px; margin-right: 4px; vertical-align: middle; }
+  .payload-btn.active, .fuse-btn.active {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 12%, #0a0d0f);
+    box-shadow: 0 0 12px color-mix(in srgb, var(--accent) 40%, transparent);
+  }
+  .payload-btn:hover, .fuse-btn:hover { border-color: var(--accent); }
+
+  .plunger {
+    margin: 22px auto 8px;
+    display: block;
+    background: radial-gradient(circle at 35% 30%, #ff6a6a 0%, #ff3a3a 50%, #b00000 100%);
+    color: #fff;
+    font-family: 'Anton', sans-serif;
+    font-size: 22px;
+    letter-spacing: 3px;
+    padding: 18px 28px;
+    border: 3px solid #800;
+    border-radius: 999px;
+    cursor: pointer;
+    box-shadow: 0 8px 0 #800, 0 12px 24px rgba(0,0,0,0.5), inset 0 -6px 12px rgba(0,0,0,0.4), inset 0 6px 12px rgba(255,255,255,0.25);
+    width: 100%;
+    max-width: 320px;
+    user-select: none;
+    transition: transform .1s ease, box-shadow .1s ease;
+  }
+  .plunger.firing {
+    animation: k-plunge 0.4s ease both;
+    box-shadow: 0 0 0 #800, 0 4px 12px rgba(0,0,0,0.5);
+  }
+  .plunger-hint {
+    text-align: center;
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    color: var(--dim);
+    letter-spacing: 2px;
+    margin-top: 6px;
+  }
+
+  /* confetti */
+  .conf {
+    position: absolute;
+    width: 8px;
+    height: 12px;
+    pointer-events: none;
+    animation: k-confetti 1.4s cubic-bezier(.2,.6,.6,1) both;
+  }
+
+  /* pins */
+  .pin-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 10px;
+    margin: 18px 0;
+  }
+  .pin {
+    background: rgba(0,0,0,0.4);
+    border: 1px solid var(--card-border);
+    padding: 14px;
+    border-radius: 6px;
+    position: relative;
+    transition: all .2s ease;
+    cursor: default;
+  }
+  .pin:hover {
+    border-color: var(--accent);
+    box-shadow: 0 0 16px color-mix(in srgb, var(--accent) 40%, transparent);
+    transform: translateY(-2px);
+  }
+  .pin-tag {
+    display: inline-block;
+    background: var(--accent);
+    color: #0a0420;
+    padding: 3px 8px;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 1.5px;
+    margin-bottom: 8px;
+    border-radius: 2px;
+  }
+  [data-mode="football"] .pin-tag { color: #001233; }
+  .pin-desc {
+    font-size: 13px;
+    color: var(--dim);
+    line-height: 1.4;
+  }
+  .pin::after {
+    content: "✎";
+    position: absolute;
+    top: 8px;
+    right: 10px;
+    color: var(--accent);
+    font-size: 14px;
+    opacity: 0.6;
+  }
+
+  /* image slot grid */
+  .slot-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 10px;
+    margin: 18px 0;
+  }
+  .slot {
+    aspect-ratio: 1;
+    background: rgba(0,0,0,0.45);
+    border: 1.5px dashed var(--card-border);
+    border-radius: 6px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    text-align: center;
+    padding: 10px;
+    transition: all .2s ease;
+  }
+  .slot:hover {
+    border-color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 8%, rgba(0,0,0,0.45));
+  }
+  .slot .ic { font-size: 30px; opacity: 0.7; }
+  .slot .nm {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 1.4px;
+    color: var(--accent);
+  }
+  .slot .sz {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    color: var(--dim);
+  }
+
+  /* save vs fire */
+  .save-fire {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+    margin: 18px 0;
+  }
+  @media (max-width: 800px) { .save-fire { grid-template-columns: 1fr; } }
+  .sf-card {
+    background: rgba(0,0,0,0.45);
+    border: 1px solid var(--card-border);
+    border-radius: 6px;
+    padding: 22px;
+  }
+  .sf-card .sf-icon {
+    font-family: 'Anton', sans-serif;
+    font-size: 30px;
+    color: var(--accent);
+    margin-bottom: 10px;
+    text-shadow: 0 0 12px var(--accent);
+  }
+  .sf-card .sf-title {
+    font-family: 'Anton', sans-serif;
+    font-size: 28px;
+    margin-bottom: 14px;
+    letter-spacing: 1px;
+  }
+  .sf-card .sf-row {
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px dashed rgba(255,255,255,0.1);
+    padding: 8px 0;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+  }
+  .sf-card .sf-row .k { color: var(--dim); letter-spacing: 1.4px; }
+  .sf-card .sf-row .v { color: var(--accent); }
+  .sf-card.fire .sf-icon { color: #ff3a3a; text-shadow: 0 0 12px #ff3a3a; }
+  .sf-card.fire .sf-row .v { color: #ff6a6a; }
+
+  /* troubleshooting */
+  .ts-block {
+    background: #0a0d0f;
+    border: 1px solid #2a333d;
+    border-radius: 6px;
+    padding: 18px 22px;
+    margin: 10px 0;
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    color: #e6f2f6;
+    line-height: 1.6;
+  }
+  .ts-block .q {
+    color: var(--accent);
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    font-size: 12px;
+  }
+  .ts-block .a {
+    color: #92a4ae;
+    padding-left: 16px;
+    border-left: 2px solid var(--accent);
+  }
+
+  /* notebook block (alt to tldr for narrative bits) */
+  .notebook {
+    background: repeating-linear-gradient(0deg, #fef9e6 0 22px, #f5edd0 22px 23px);
+    color: #3a2a14;
+    padding: 18px 22px 18px 56px;
+    margin: 18px 0;
+    box-shadow: 0 10px 28px rgba(0,0,0,0.45);
+    position: relative;
+    border-left: 3px solid #c54;
+    font-family: 'Caveat', cursive;
+    font-weight: 600;
+    font-size: 20px;
+    line-height: 1.35;
+  }
+  .notebook strong { color: #1a1106; font-weight: 700; }
+
+  /* what changes table */
+  .compare {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+    margin: 18px 0;
+  }
+  @media (max-width: 800px) { .compare { grid-template-columns: 1fr; } }
+  .compare-col {
+    background: rgba(0,0,0,0.45);
+    border: 1px solid var(--card-border);
+    border-radius: 6px;
+    padding: 18px;
+  }
+  .compare-col h4 {
+    font-family: 'Anton', sans-serif;
+    font-size: 20px;
+    letter-spacing: 2px;
+    color: var(--accent);
+    margin-bottom: 12px;
+    text-transform: uppercase;
+  }
+  .compare-col ul { padding-left: 20px; margin: 0; }
+  .compare-col li { font-size: 14px; color: var(--dim); margin-bottom: 6px; }
+
+  /* end card */
+  .end-card {
+    text-align: center;
+    margin: 100px auto 0;
+    max-width: 720px;
+    padding: 60px 40px;
+    background: radial-gradient(ellipse at center, color-mix(in srgb, var(--accent) 18%, transparent) 0%, transparent 70%);
+    border-top: 1px solid var(--accent);
+    border-bottom: 1px solid var(--accent);
+  }
+  .end-card h2 {
+    font-family: 'Anton', sans-serif;
+    font-size: 64px;
+    letter-spacing: -1px;
+    margin-bottom: 14px;
+    background: linear-gradient(180deg, var(--accent) 0%, var(--accent-2) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 0 18px var(--accent));
+  }
+  .end-card p {
+    color: var(--dim);
+    font-size: 18px;
+    margin-bottom: 28px;
+  }
+  .end-card .enter-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    font-family: 'Anton', sans-serif;
+    font-size: 28px;
+    letter-spacing: 3px;
+    padding: 20px 40px;
+    color: #0a0420;
+    background: linear-gradient(180deg, var(--accent) 0%, var(--accent-2) 100%);
+    clip-path: polygon(12px 0%, 100% 0%, calc(100% - 12px) 100%, 0% 100%);
+    text-decoration: none;
+    box-shadow: 0 0 32px var(--accent);
+    animation: k-glow-pulse 2.5s ease-in-out infinite;
+  }
+  [data-mode="football"] .end-card .enter-btn { color: #001233; }
+
+  /* meta footer */
+  .meta {
+    text-align: center;
+    margin-top: 40px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--dim);
+    letter-spacing: 1.5px;
+  }
+
+  /* role chip on cover */
+  .role-chip {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 2.5px;
+    color: var(--accent);
+    text-transform: uppercase;
+  }
+  .role-chip .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 8px var(--accent);
+    animation: k-pulse-led 2s ease-in-out infinite;
+  }
+  .role-chip::after { content: var(--role) " · " var(--role-2) " · " var(--role-3); }
+
+  /* table-like rows for "flip modes" */
+  .ks-rows {
+    display: grid;
+    grid-template-columns: 100px 1fr;
+    gap: 4px 12px;
+    margin: 14px 0;
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+  }
+  .ks-rows .h { color: var(--accent); letter-spacing: 1.5px; padding: 8px 0; border-bottom: 1px solid var(--card-border); }
+  .ks-rows .c { color: var(--fg); padding: 8px 0; border-bottom: 1px solid var(--card-border); }
+
+  /* utility */
+  .stack { display: flex; flex-direction: column; gap: 12px; }
+  .row { display: flex; gap: 12px; flex-wrap: wrap; }
+  .pad-l { padding-left: 16px; }
+
+  /* mood badges */
+  .mood-row { display: flex; gap: 8px; flex-wrap: wrap; margin: 14px 0; }
+  .mood {
+    background: rgba(0,0,0,0.5);
+    border: 1px solid var(--card-border);
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .mood .led {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 6px var(--accent);
+  }
+  .mood.online .led { background: #3df562; box-shadow: 0 0 6px #3df562; }
+  .mood.fire .led { background: #ff3a3a; box-shadow: 0 0 6px #ff3a3a; }
+  .mood.stream .led { background: #ff63d6; box-shadow: 0 0 6px #ff63d6; }
+  .mood.school .led { background: #ffb84d; box-shadow: 0 0 6px #ffb84d; }
+  .mood.sleep .led { background: #3ec4ff; box-shadow: 0 0 6px #3ec4ff; }
+</style>
+</head>
+<body>
+
+<div class="flip-overlay" id="flipOverlay"></div>
+
+<!-- ───────── TOP BAR ───────── -->
+<div class="topbar" role="navigation" aria-label="mode toggle">
+  <div class="topbar-half gaming active" data-target="gaming" onclick="setMode('gaming')">🎮 GAMING</div>
+  <div class="seam"></div>
+  <div class="topbar-half football idle" data-target="football" onclick="setMode('football')">⚽ FOOTBALL</div>
+</div>
+
+<main>
+
+  <!-- ───────── COVER ───────── -->
+  <section class="cover">
+    <div>
+      <div class="role-chip"><span class="dot"></span></div>
+      <span class="badge mono"><span class="led"></span> KHALIL.OPS · v1.0 · CLEARANCE: ∞</span>
+      <h1 class="title">KHALIL</h1>
+      <h2 class="title-2">OPERATOR MANUAL</h2>
+      <p class="lede">
+        yo khalil. this is the manual for your own site.
+        read it once, then keep it around for when you forget what a button does.
+        every part ends with a <strong>tl;dr</strong> so you can skim if you're in a hurry.
+      </p>
+      <div class="ctaRow">
+        <a href="#part1" class="cta">▶ START READING</a>
+        <a href="https://khalil2020.vercel.app" class="cta ghost">OPEN MY SITE →</a>
+      </div>
+    </div>
+    <div class="polaroid-stack" aria-hidden="true">
+      <div class="polaroid card-emblem">
+        <div class="tape left"></div>
+        <div class="tape right"></div>
+        <div class="mono">JERSEY · HOME</div>
+        <div class="num">7</div>
+        <div class="mono">RANK · GOAT</div>
+      </div>
+      <div class="polaroid card-portrait">
+        <div class="tape left"></div>
+        <div class="tape right"></div>
+        <div class="photo"><span id="portraitEmoji">🎮</span></div>
+        <div class="caption">744 SUBS · ONLINE</div>
+      </div>
+      <div class="polaroid card-note">
+        <div class="tape left"></div>
+        <div class="note">i'm khalil.<br>and yeah i<br>actually carry.</div>
+      </div>
+      <div class="floating-tag tr">SUBS<span class="num">744</span></div>
+      <div class="floating-tag bl">RANK<span class="num">GOAT</span></div>
+    </div>
+  </section>
+
+  <!-- ───────── TOC ───────── -->
+  <section class="panel" aria-label="table of contents">
+    <div class="panel-label">◇ MISSION BRIEF · 10 PARTS</div>
+    <div class="ks-rows">
+      <div class="h">PART 1</div><div class="c">the site · what visitors see</div>
+      <div class="h">PART 2</div><div class="c">the two modes · gaming vs football</div>
+      <div class="h">PART 3</div><div class="c">the tunnel · the entry sequence</div>
+      <div class="h">PART 4</div><div class="c">the arena · the homepage layout</div>
+      <div class="h">PART 5</div><div class="c">secret door (/edit) · where you control everything</div>
+      <div class="h">PART 6</div><div class="c">mission control · LAUNCH tab · fire messages</div>
+      <div class="h">PART 7</div><div class="c">control deck · INLINE tab · edit fields</div>
+      <div class="h">PART 8</div><div class="c">image uploads · drop your own photos</div>
+      <div class="h">PART 9</div><div class="c">save &amp; fire · how stuff goes live</div>
+      <div class="h">PART 10</div><div class="c">troubleshooting · when something looks wrong</div>
+    </div>
+  </section>
+
+  <!-- ───────── PART 1 ───────── -->
+  <section class="part" id="part1">
+    <div class="part-marker">
+      <div class="part-num">01</div>
+      <div class="part-line"></div>
+      <div class="part-tag">◇ PART ONE</div>
+    </div>
+    <h2 class="part-title">THE SITE</h2>
+
+    <div class="prose">
+      <p>your site lives at <strong>khalil2020.vercel.app</strong>. anyone in the world can visit.</p>
+    </div>
+
+    <div class="terminal">
+      <div><span class="prompt">/</span>      <span class="ink">→ the arena</span> · the actual homepage</div>
+      <div><span class="prompt">/intro</span> <span class="ink">→ the tunnel walk</span> · first-time visitors</div>
+      <div><span class="prompt">/edit</span>  <span class="warn">→ YOUR SECRET DOOR</span> · locked unless you have the password</div>
+    </div>
+
+    <div class="prose">
+      <p>
+        first-timers land in the <strong>tunnel</strong> at <code style="color:var(--accent)">/intro</code>. once they hit
+        <strong>▶ ENTER THE ARENA</strong> at the end, a cookie gets baked into their browser and from then on they
+        land straight at <code style="color:var(--accent)">/</code> — the actual site.
+      </p>
+    </div>
+
+    <div class="tldr">
+      first-timers walk through the tunnel. repeat visitors skip straight to the arena. you can always visit /intro directly if you want to see the walk again.
+    </div>
+  </section>
+
+  <!-- ───────── PART 2 ───────── -->
+  <section class="part">
+    <div class="part-marker">
+      <div class="part-num">02</div>
+      <div class="part-line"></div>
+      <div class="part-tag">◇ PART TWO</div>
+    </div>
+    <h2 class="part-title">THE TWO MODES</h2>
+
+    <div class="prose">
+      <p>your site has <strong>two personalities</strong> that swap with one tap. try clicking the toggle at the top of this page — the whole manual flips colors with you. that's the same flip your site does.</p>
+    </div>
+
+    <div class="compare">
+      <div class="compare-col">
+        <h4>🎮 GAMING</h4>
+        <ul>
+          <li>neon purple + cyan + magenta</li>
+          <li>roles: streamer · gamer · goat</li>
+          <li>stats: K/D · WINS · STREAK · HRS</li>
+          <li>now: equipped loadout</li>
+          <li>vibe: glitchy, late-night, on-fire</li>
+        </ul>
+      </div>
+      <div class="compare-col">
+        <h4>⚽ FOOTBALL</h4>
+        <ul>
+          <li>gold + white + stadium navy</li>
+          <li>roles: striker · madridista · forever 7</li>
+          <li>stats: GOALS · CAPS · TROPHIES · ROBONA</li>
+          <li>now: starting XI</li>
+          <li>vibe: bernabéu lights, crowd hum, hala madrid</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-label">◇ HOW TO FLIP MODES</div>
+      <div class="ks-rows">
+        <div class="h">DESKTOP</div><div class="c">click the smaller half of the top bar</div>
+        <div class="h">DESKTOP</div><div class="c">OR press ← / → arrow keys</div>
+        <div class="h">MOBILE</div><div class="c">swipe horizontally anywhere on the page</div>
+        <div class="h">MOBILE</div><div class="c">OR tap the smaller half of the top bar</div>
+      </div>
+    </div>
+
+    <div class="prose">
+      <p><strong>mode-peek (desktop only).</strong> if you just hover the smaller (idle) half without clicking, the page gets a soft glow in the other mode's color — like a sneak peek. move your mouse away and it disappears. it's a hint, not a flip.</p>
+    </div>
+
+    <div class="compare">
+      <div class="compare-col">
+        <h4>WHAT CHANGES</h4>
+        <ul>
+          <li>the whole color palette</li>
+          <li>the hero title / fonts</li>
+          <li>your stats grid</li>
+          <li>your NOW block</li>
+          <li>the video tags on each replay</li>
+          <li>the background art</li>
+          <li>stadium crowd ambient (football only)</li>
+        </ul>
+      </div>
+      <div class="compare-col">
+        <h4>WHAT STAYS</h4>
+        <ul>
+          <li>your subscriber count</li>
+          <li>the book section</li>
+          <li>the video list itself</li>
+          <li>your mood / status LED</li>
+          <li>socials links</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="tldr">
+      one toggle swaps the entire color world. some stuff is per-mode (hero copy, stats, now block). some stuff is shared across both (subs, book, videos, socials, mood).
+    </div>
+  </section>
+
+  <!-- ───────── PART 3 ───────── -->
+  <section class="part">
+    <div class="part-marker">
+      <div class="part-num">03</div>
+      <div class="part-line"></div>
+      <div class="part-tag">◇ PART THREE</div>
+    </div>
+    <h2 class="part-title">THE TUNNEL</h2>
+
+    <div class="prose">
+      <p>the tunnel is the <strong>cinematic intro</strong>. five rooms, scrolled through in order. scroll progress 0 → 1 walks the camera through the corridor.</p>
+    </div>
+
+    <div class="tunnel">
+      <div class="tunnel-room r0">
+        <div class="room-num">ROOM 01 · FAR AHEAD</div>
+        <div class="room-title">HERO</div>
+        <div class="room-desc">"i am khalil" — your handle + sub counter. low rumble starts on first scroll.</div>
+      </div>
+      <div class="tunnel-room r1">
+        <div class="room-num">ROOM 02 · APPROACHING</div>
+        <div class="room-title">REPLAYS</div>
+        <div class="room-desc">a few floating video previews drift in. each scene thunks as you approach.</div>
+      </div>
+      <div class="tunnel-room r2">
+        <div class="room-num">ROOM 03 · NEAR</div>
+        <div class="room-title">ABOUT</div>
+        <div class="room-desc">who you are, in your words. status chips ride alongside.</div>
+      </div>
+      <div class="tunnel-room r3">
+        <div class="room-num">ROOM 04 · LOCKED</div>
+        <div class="room-title">BOOK</div>
+        <div class="room-desc">the book you're writing — spotlight + chapter info.</div>
+      </div>
+      <div class="tunnel-room r4">
+        <div class="room-num">ROOM 05 · DESTINATION</div>
+        <div class="room-title">▶ ENTER THE ARENA</div>
+        <div class="room-desc">hit the goal. bell chord chime. "in / outside the arena" caption + the ENTER button. this is the end of the tunnel.</div>
+      </div>
+    </div>
+
+    <div class="notebook">
+      a "<strong>· stand by · scroll to walk ·</strong>" card pops up the first time someone lands, so they know to scroll. the rumble is the engine hum. every scene thunks as you cross it. the destination scene plays a bell chord.
+    </div>
+
+    <div class="tldr">
+      scrolling the tunnel = walking forward. sound is part of it. the ENTER button at the bottom takes you into the arena and remembers you.
+    </div>
+  </section>
+
+  <!-- ───────── PART 4 ───────── -->
+  <section class="part">
+    <div class="part-marker">
+      <div class="part-num">04</div>
+      <div class="part-line"></div>
+      <div class="part-tag">◇ PART FOUR</div>
+    </div>
+    <h2 class="part-title">THE ARENA</h2>
+
+    <div class="prose">
+      <p>the arena is the actual homepage. top to bottom:</p>
+    </div>
+
+    <div class="arena-map">
+      <div class="arena-row">
+        <span class="row-tag">TOP BAR</span>
+        <span class="row-content">🎮 GAMING │ FOOTBALL ⚽ — the toggle</span>
+      </div>
+      <div class="arena-row">
+        <span class="row-tag">NAV</span>
+        <span class="row-content">● ONLINE · @khalilgaming2020 · REPLAYS / PROFILE / BOOK / SUBS</span>
+      </div>
+      <div class="arena-row hero">
+        <span class="row-tag">HERO</span>
+        <span class="row-content">KHALIL THE GOAT · polaroid stack · subscribe · stats grid</span>
+      </div>
+      <div class="arena-row">
+        <span class="row-tag">SUBS HUD</span>
+        <span class="row-content">SUBSCRIBERS · GOAL · 744 / 1000 ████████░░ 74%</span>
+      </div>
+      <div class="arena-row">
+        <span class="row-tag">NOW DOCK</span>
+        <span class="row-content">NOW · EQUIPPED · playing / watching / reading / listening</span>
+      </div>
+      <div class="arena-row">
+        <span class="row-tag">REPLAYS</span>
+        <span class="row-content">◇ REPLAYS · trading card grid (LEGENDARY · EPIC · RARE · COMMON)</span>
+      </div>
+      <div class="arena-row">
+        <span class="row-tag">ABOUT</span>
+        <span class="row-content">paragraphs you wrote</span>
+      </div>
+      <div class="arena-row">
+        <span class="row-tag">BOOK</span>
+        <span class="row-content">notebook paper · the book you're writing</span>
+      </div>
+      <div class="arena-row">
+        <span class="row-tag">FOOTER</span>
+        <span class="row-content">YT · TT · IG socials + copyright</span>
+      </div>
+    </div>
+
+    <h3 class="display" style="font-size:24px;color:var(--accent);margin-top:32px;">your videos as trading cards</h3>
+    <div class="prose">
+      <p>the REPLAYS grid is a binder of trading cards. each video gets a tier:</p>
+    </div>
+
+    <div class="tradecard-row">
+      <div class="tradecard tc-legendary">
+        <span class="tier">LEGENDARY</span>
+        <div class="icon">⭐</div>
+        <div class="label">YOUR BIG ONE</div>
+      </div>
+      <div class="tradecard tc-epic">
+        <span class="tier">EPIC</span>
+        <div class="icon">🎮</div>
+        <div class="label">FORTNITE W</div>
+      </div>
+      <div class="tradecard tc-rare">
+        <span class="tier">RARE</span>
+        <div class="icon">🎯</div>
+        <div class="label">SOLID PLAY</div>
+      </div>
+      <div class="tradecard tc-epic">
+        <span class="tier">EPIC</span>
+        <div class="icon">⚽</div>
+        <div class="label">GOLAZO</div>
+      </div>
+      <div class="tradecard tc-common">
+        <span class="tier">COMMON</span>
+        <div class="icon">📼</div>
+        <div class="label">EVERYDAY CLIP</div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-label">◇ THINGS THAT MOVE ON THE HOMEPAGE</div>
+      <div class="prose">
+        <p>· the <strong>polaroid stack</strong> breathes (up/down bob), tilts on hover, fans out when hovered or tapped. each card carries its own rotation.</p>
+        <p>· the <strong>subscribe / watch buttons</strong> lift on hover and ripple from the click point. stat tiles jiggle when tapped.</p>
+        <p>· video tiles have a <strong>holographic sheen</strong>. LEGENDARY/EPIC tiers get an extra bright sweep on loop. RARE/COMMON stay calm.</p>
+        <p>· the <strong>mood LED</strong> blinks softly next to your handle.</p>
+      </div>
+    </div>
+
+    <div class="mood-row">
+      <span class="mood online"><span class="led"></span>ONLINE</span>
+      <span class="mood fire"><span class="led"></span>ON FIRE</span>
+      <span class="mood stream"><span class="led"></span>STREAMING</span>
+      <span class="mood school"><span class="led"></span>IN SCHOOL</span>
+      <span class="mood sleep"><span class="led"></span>SLEEPING</span>
+    </div>
+
+    <div class="prose">
+      <p>football mode plays a quiet <strong>stadium crowd ambient</strong>. flipping plays a <strong>whoosh</strong> (gaming) or <strong>crowd cheer + horn</strong> (football). announcements add their own payload sound. the 🔊 button bottom-right mutes everything. your choice is remembered.</p>
+    </div>
+
+    <div class="tldr">
+      the arena is your homepage. most things on it are interactive — try hovering, tapping, scrolling. sound is a big part of the vibe; the speaker button mutes everything if you need quiet.
+    </div>
+  </section>
+
+  <!-- ───────── PART 5 ───────── -->
+  <section class="part">
+    <div class="part-marker">
+      <div class="part-num">05</div>
+      <div class="part-line"></div>
+      <div class="part-tag">◇ PART FIVE</div>
+    </div>
+    <h2 class="part-title">SECRET DOOR · /edit</h2>
+
+    <div class="prose">
+      <p>go to <strong>khalil2020.vercel.app/edit</strong> and type your password.</p>
+    </div>
+
+    <div class="secret-door">
+      <div class="label">◇ EDIT ACCESS · LEVEL ∞</div>
+      <input class="pass" type="password" value="••••••••••" readonly>
+      <button class="auth-btn">AUTHENTICATE →</button>
+    </div>
+
+    <div class="prose">
+      <p>once you're in, the top bar swaps to:</p>
+    </div>
+
+    <div class="terminal">
+      <div><span class="ink">KHALIL.OPS</span>   [<span class="prompt">LAUNCH</span>] [INLINE]   ⊕ <span class="ok">SAVE</span>   × <span class="warn">EXIT</span></div>
+    </div>
+
+    <div class="prose">
+      <p>two tabs. both edit the same site — pick whichever feels right for what you're trying to do:</p>
+    </div>
+
+    <div class="deck-tabs">
+      <div class="deck-tab active">⌬ LAUNCH</div>
+      <div class="deck-tab">✎ INLINE</div>
+    </div>
+
+    <div class="compare">
+      <div class="compare-col">
+        <h4>⌬ LAUNCH</h4>
+        <ul>
+          <li>mission control · the big plunger + side modules</li>
+          <li>use it to fire a message (announcement)</li>
+          <li>or quickly tweak status / now-playing / pinned video without scrolling</li>
+        </ul>
+      </div>
+      <div class="compare-col">
+        <h4>✎ INLINE</h4>
+        <ul>
+          <li>control deck · mini-mockups with pins on every editable field</li>
+          <li>use it when you want to see what each section will look like as you change it</li>
+          <li>precision editor</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="notebook">
+      anything you change in one tab shows up in the other. <strong>they share the same memory.</strong> no "switching loses my work" — it's the same canvas.
+    </div>
+
+    <div class="panel">
+      <div class="panel-label">◇ THE TWO ACTION BUTTONS (TOP RIGHT)</div>
+      <div class="ks-rows">
+        <div class="h">⊕ SAVE</div><div class="c">pushes everything you changed (except messages) to the live site. takes ~1 minute to deploy.</div>
+        <div class="h">× EXIT</div><div class="c">logs you out. site stays exactly as it was last saved.</div>
+      </div>
+    </div>
+
+    <div class="prose">
+      <p>press SAVE when you're done editing a batch of stuff. <strong>you can change a LOT before saving</strong> — it's one commit per save.</p>
+    </div>
+
+    <div class="tldr">
+      /edit is the only password-locked page. two tabs, both edit the same content. SAVE pushes everything live (except messages). EXIT logs out.
+    </div>
+  </section>
+
+  <!-- ───────── PART 6 ───────── -->
+  <section class="part">
+    <div class="part-marker">
+      <div class="part-num">06</div>
+      <div class="part-line"></div>
+      <div class="part-tag">◇ PART SIX</div>
+    </div>
+    <h2 class="part-title">MISSION CONTROL · LAUNCH</h2>
+
+    <div class="prose">
+      <p>this is your <strong>broadcast deck</strong>. the headline feature: send a real-time message to anyone currently on the site. <strong>try the plunger below</strong> — it works.</p>
+    </div>
+
+    <div class="mc-grid">
+      <div class="launch-window" id="launchWindow">
+        <div class="lw-label">◇ LAUNCH WINDOW · LIVE PREVIEW</div>
+        <div class="lw-msg" id="lwMsg">1K SUBS PARTY · FRIDAY 7PM</div>
+        <div class="lw-sub" id="lwSub">PAYLOAD: 🎉 CONFETTI · FUSE: NOW</div>
+      </div>
+      <div class="mc-controls">
+        <div class="row-label">PAYLOAD</div>
+        <div class="payload-row" id="payloadRow">
+          <button class="payload-btn active" data-payload="confetti" data-em="🎉">🎉 CONFETTI</button>
+          <button class="payload-btn" data-payload="gold" data-em="💰">💰 GOLD</button>
+          <button class="payload-btn" data-payload="neon" data-em="⚡">⚡ NEON</button>
+          <button class="payload-btn" data-payload="fire" data-em="🔥">🔥 FIRE</button>
+          <button class="payload-btn" data-payload="goal" data-em="⚽">⚽ GOAL</button>
+          <button class="payload-btn" data-payload="cake" data-em="🍰">🍰 CAKE</button>
+        </div>
+        <div class="row-label">FUSE</div>
+        <div class="fuse-row" id="fuseRow">
+          <button class="fuse-btn active" data-fuse="NOW">NOW</button>
+          <button class="fuse-btn" data-fuse="+1H">+1H</button>
+          <button class="fuse-btn" data-fuse="NEXT VISIT">NEXT VISIT</button>
+          <button class="fuse-btn" data-fuse="ON REFRESH">ON REFRESH</button>
+        </div>
+        <button class="plunger" id="plunger" onclick="firePlunger()">▼ FIRE</button>
+        <div class="plunger-hint">PRESS TO FIRE · KA-CHUNK</div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-label">◇ STEP-BY-STEP · FIRING A MESSAGE</div>
+      <div class="prose">
+        <p><strong>1.</strong> type the message — what you want everyone to see (up to 120 chars).</p>
+        <p><strong>2.</strong> pick a payload — what kind of celebration:</p>
+        <p class="pad-l">🎉 <strong>CONFETTI</strong> — paper pop + sparkly chirps<br>
+        💰 <strong>GOLD</strong> — mario-coin shower (14 pings)<br>
+        ⚡ <strong>NEON</strong> — bass drop + rave zap<br>
+        🔥 <strong>FIRE</strong> — boom + breathing flame + crackles<br>
+        ⚽ <strong>GOAL</strong> — referee whistle + horn + crowd roar<br>
+        🍰 <strong>CAKE</strong> — party horn + bell triad</p>
+        <p><strong>3.</strong> pick a fuse — when it should go off:</p>
+        <p class="pad-l"><strong>NOW</strong> — fires the instant you press FIRE (active for 5 min)<br>
+        <strong>+1H</strong> — fires one hour from now (active for 5 min)<br>
+        <strong>NEXT VISIT</strong> — fires the next time a NEW visitor lands (active 24h)<br>
+        <strong>ON REFRESH</strong> — fires every time the page refreshes for the next hour</p>
+        <p><strong>4.</strong> hit the FIRE plunger. the CRT preview shows you exactly what visitors will see. the plunger goes ka-CHUNK and the payload sound plays as it lands.</p>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-label">◇ THE SIDE MODULES (always visible in LAUNCH)</div>
+      <div class="ks-rows">
+        <div class="h">LIVE STATUS</div><div class="c">mood LED + sub count (current + goal)</div>
+        <div class="h">NOW</div><div class="c">what you're playing / watching / reading / listening (per mode)</div>
+        <div class="h">PINNED</div><div class="c">which video shows up first in REPLAYS</div>
+        <div class="h">STYLE</div><div class="c">youtube vs designed thumbnails, card rarities, palette</div>
+        <div class="h">ABOUT</div><div class="c">the about paragraphs at the bottom of the site</div>
+        <div class="h">BOOT MODE</div><div class="c">whether new visitors land in gaming or football</div>
+        <div class="h">SOCIALS</div><div class="c">tiktok + instagram links in the footer</div>
+      </div>
+    </div>
+
+    <div class="save-fire">
+      <div class="sf-card">
+        <div class="sf-icon">⊕ SAVE</div>
+        <div class="sf-title">EVERYTHING ELSE</div>
+        <div class="sf-row"><span class="k">BUTTON</span><span class="v">⊕ SAVE</span></div>
+        <div class="sf-row"><span class="k">EFFECT</span><span class="v">NEW BUILD DEPLOYS</span></div>
+        <div class="sf-row"><span class="k">SHOWS UP IN</span><span class="v">~1 MINUTE</span></div>
+        <div class="sf-row"><span class="k">REVERSIBLE</span><span class="v">YES · GIT ROLLBACK</span></div>
+      </div>
+      <div class="sf-card fire">
+        <div class="sf-icon">▼ FIRE</div>
+        <div class="sf-title">MESSAGES ONLY</div>
+        <div class="sf-row"><span class="k">BUTTON</span><span class="v">▼ FIRE PLUNGER</span></div>
+        <div class="sf-row"><span class="k">EFFECT</span><span class="v">INSTANT WRITE</span></div>
+        <div class="sf-row"><span class="k">SHOWS UP IN</span><span class="v">3–5 SECONDS</span></div>
+        <div class="sf-row"><span class="k">REVERSIBLE</span><span class="v">FUSE EXPIRES · GONE</span></div>
+      </div>
+    </div>
+
+    <div class="notebook">
+      <strong>why the difference?</strong> messages are temporary — they live in fast storage and disappear after their fuse expires. everything else (your handle, stats, videos, book, etc.) is part of the actual site, so saving it pushes a new version live.
+    </div>
+
+    <div class="tldr">
+      the plunger sends a message that pops on the homepage within seconds. SAVE updates the actual site (slower but permanent). both work from the LAUNCH tab; you just press different buttons.
+    </div>
+  </section>
+
+  <!-- ───────── PART 7 ───────── -->
+  <section class="part">
+    <div class="part-marker">
+      <div class="part-num">07</div>
+      <div class="part-line"></div>
+      <div class="part-tag">◇ PART SEVEN</div>
+    </div>
+    <h2 class="part-title">CONTROL DECK · INLINE</h2>
+
+    <div class="prose">
+      <p>this tab shows <strong>mini-mockups</strong> of every section of the homepage. each section has small <strong>EDIT pins</strong> (the ✎ icon) floating on it — tap a pin to open a drawer with a form for that exact field.</p>
+    </div>
+
+    <div class="panel">
+      <div class="panel-label">◇ EVERY PIN · WHAT IT EDITS</div>
+      <div class="pin-grid">
+        <div class="pin"><span class="pin-tag">HANDLE</span><div class="pin-desc">your @ username (max 40 chars)</div></div>
+        <div class="pin"><span class="pin-tag">HERO</span><div class="pin-desc">tagline + bio + CTA button text + vibe (per mode)</div></div>
+        <div class="pin"><span class="pin-tag">STATS</span><div class="pin-desc">the 4 stat cells (label + value, per mode)</div></div>
+        <div class="pin"><span class="pin-tag">MOOD</span><div class="pin-desc">the blinking LED next to your handle</div></div>
+        <div class="pin"><span class="pin-tag">SUBS</span><div class="pin-desc">current + goal numbers</div></div>
+        <div class="pin"><span class="pin-tag">NOW</span><div class="pin-desc">equipped / starting XI block (per mode)</div></div>
+        <div class="pin"><span class="pin-tag">PINNED</span><div class="pin-desc">which video pins to the top of REPLAYS</div></div>
+        <div class="pin"><span class="pin-tag">STYLE</span><div class="pin-desc">youtube vs designed thumbnails + tier rarities + palette</div></div>
+        <div class="pin"><span class="pin-tag">ABOUT</span><div class="pin-desc">the paragraphs at the bottom</div></div>
+        <div class="pin"><span class="pin-tag">BOOK</span><div class="pin-desc">title + subtitle + description + status + cover photo</div></div>
+        <div class="pin"><span class="pin-tag">SOCIALS</span><div class="pin-desc">tiktok + instagram links</div></div>
+        <div class="pin"><span class="pin-tag">BOOT MODE</span><div class="pin-desc">default mode for new visitors</div></div>
+      </div>
+    </div>
+
+    <div class="notebook">
+      the HERO, STATS, and NOW sections are <strong>different in gaming vs football</strong>. the mode toggle at the top of the inline tab tells the preview which version you're looking at. flip it before editing the mode-specific fields.
+    </div>
+
+    <div class="panel">
+      <div class="panel-label">◇ THE DRAWER</div>
+      <div class="prose">
+        <p>tapping a pin slides a drawer out from the right side with the form. make your changes → the preview updates live → close the drawer → press SAVE at the top to push to the site.</p>
+      </div>
+    </div>
+
+    <div class="tldr">
+      INLINE is the precision editor. see the site in miniature, tap an EDIT pin to open the field, type, close, save.
+    </div>
+  </section>
+
+  <!-- ───────── PART 8 ───────── -->
+  <section class="part">
+    <div class="part-marker">
+      <div class="part-num">08</div>
+      <div class="part-line"></div>
+      <div class="part-tag">◇ PART EIGHT</div>
+    </div>
+    <h2 class="part-title">IMAGE UPLOADS</h2>
+
+    <div class="prose">
+      <p>scroll to the bottom of the <strong>INLINE tab</strong>. you'll see the <strong>◇ IMAGES</strong> section. this is where you replace placeholder art with your own photos.</p>
+    </div>
+
+    <div class="panel">
+      <div class="panel-label">◇ 8 SLOTS · DRAG & DROP TO REPLACE</div>
+      <div class="slot-grid">
+        <div class="slot"><div class="ic">🎮</div><div class="nm">PORTRAIT</div><div class="sz">GAMING</div></div>
+        <div class="slot"><div class="ic">⚽</div><div class="nm">PORTRAIT</div><div class="sz">FOOTBALL</div></div>
+        <div class="slot"><div class="ic">📖</div><div class="nm">BOOK</div><div class="sz">COVER</div></div>
+        <div class="slot"><div class="ic">📼</div><div class="nm">REPLAY 1</div><div class="sz">16:9</div></div>
+        <div class="slot"><div class="ic">📼</div><div class="nm">REPLAY 2</div><div class="sz">16:9</div></div>
+        <div class="slot"><div class="ic">📼</div><div class="nm">REPLAY 3</div><div class="sz">16:9</div></div>
+        <div class="slot"><div class="ic">📼</div><div class="nm">REPLAY 4</div><div class="sz">16:9</div></div>
+        <div class="slot"><div class="ic">📼</div><div class="nm">REPLAY 5</div><div class="sz">16:9</div></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-label">◇ HOW TO UPLOAD</div>
+      <div class="prose">
+        <p><strong>1.</strong> click a slot OR drag-and-drop an image onto it.<br>
+        <strong>2.</strong> the image gets resized (down to ~1024px on the long edge) and uploaded.<br>
+        <strong>3.</strong> the thumbnail appears with a ✓ LIVE ON SITE badge.<br>
+        <strong>4.</strong> press SAVE at the top.</p>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-label">◇ REPLACE OR REMOVE</div>
+      <div class="ks-rows">
+        <div class="h">REPLACE</div><div class="c">click the slot again → pick a new file. old one gets replaced.</div>
+        <div class="h">REMOVE</div><div class="c">press the × remove button below the thumbnail. press SAVE — slot reverts to default (emoji / gradient).</div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-label">◇ FILE RULES</div>
+      <div class="ks-rows">
+        <div class="h">FORMATS</div><div class="c">JPG, PNG, WebP, GIF</div>
+        <div class="h">MAX SIZE</div><div class="c">6 MB (uploader resizes bigger files automatically)</div>
+        <div class="h">BEST SHAPE</div><div class="c">square-ish for portraits, 3:4 for book cover, 16:9 for replays</div>
+      </div>
+    </div>
+
+    <div class="notebook">
+      the <strong>BOOK COVER</strong> slot can be uploaded from either the IMAGES section OR the BOOK pin's drawer. both edit the same photo. use whichever's faster.
+    </div>
+
+    <div class="tldr">
+      drag photos onto slots in IMAGES. press SAVE. photo replaces the placeholder. press × remove to put the placeholder back.
+    </div>
+  </section>
+
+  <!-- ───────── PART 9 ───────── -->
+  <section class="part">
+    <div class="part-marker">
+      <div class="part-num">09</div>
+      <div class="part-line"></div>
+      <div class="part-tag">◇ PART NINE</div>
+    </div>
+    <h2 class="part-title">SAVE &amp; FIRE</h2>
+
+    <div class="prose">
+      <p>two different paths for two different kinds of changes.</p>
+    </div>
+
+    <div class="save-fire">
+      <div class="sf-card">
+        <div class="sf-icon">⊕ SAVE</div>
+        <div class="sf-title">EVERYTHING<br>EXCEPT MESSAGES</div>
+        <div class="sf-row"><span class="k">STORAGE</span><span class="v">GITHUB COMMIT</span></div>
+        <div class="sf-row"><span class="k">EFFECT</span><span class="v">NEW BUILD DEPLOYS</span></div>
+        <div class="sf-row"><span class="k">VISIBLE IN</span><span class="v">~1 MINUTE</span></div>
+        <div class="sf-row"><span class="k">REVERSIBLE</span><span class="v">YES · GIT ROLLBACK</span></div>
+      </div>
+      <div class="sf-card fire">
+        <div class="sf-icon">▼ FIRE</div>
+        <div class="sf-title">ANNOUNCEMENTS<br>ONLY</div>
+        <div class="sf-row"><span class="k">STORAGE</span><span class="v">VERCEL EDGE CONFIG</span></div>
+        <div class="sf-row"><span class="k">EFFECT</span><span class="v">INSTANT WRITE</span></div>
+        <div class="sf-row"><span class="k">VISIBLE IN</span><span class="v">3–5 SECONDS</span></div>
+        <div class="sf-row"><span class="k">REVERSIBLE</span><span class="v">FUSE EXPIRES · GONE</span></div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-label">◇ WHAT "SAVES" CAN BREAK</div>
+      <div class="prose">
+        <p>almost nothing. if you typo your bio you can just edit again. the site rebuilds every save, but builds are fast (~30 seconds) and <strong>fail-loud</strong> — if a save breaks the build, the deploy errors out and the PREVIOUS version stays live.</p>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-label">◇ WHAT "FIRES" CAN BREAK</div>
+      <div class="prose">
+        <p>less than nothing. messages have a fuse — they go away on their own. worst case: people see your typo for a minute, then it vanishes.</p>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-label">◇ WHERE THE DATA LIVES</div>
+      <div class="terminal">
+        <div><span class="prompt">SITE CONTENT</span> <span class="ink">→ content.json (on GitHub) + images on Vercel Blob</span></div>
+        <div><span class="prompt">MESSAGES</span>     <span class="ink">→ Vercel Edge Config (fast · doesn't trigger a deploy)</span></div>
+      </div>
+    </div>
+
+    <div class="tldr">
+      SAVE is for content (text, images, settings) — takes ~1 minute. FIRE is for messages — takes 3-5 seconds. both are reversible.
+    </div>
+  </section>
+
+  <!-- ───────── PART 10 ───────── -->
+  <section class="part">
+    <div class="part-marker">
+      <div class="part-num">10</div>
+      <div class="part-line"></div>
+      <div class="part-tag">◇ PART TEN</div>
+    </div>
+    <h2 class="part-title">TROUBLESHOOTING</h2>
+
+    <div class="prose">
+      <p>if something looks wrong, run through these in order:</p>
+    </div>
+
+    <div class="ts-block">
+      <div class="q">▸ i changed something and the site didn't update</div>
+      <div class="a">did you press <strong>SAVE</strong> (not FIRE — that's only for messages)? wait ~1 minute for the deploy. refresh the homepage hard (Cmd+Shift+R on Mac). still wrong? open Vercel dashboard → Deployments and check for a red Error on the latest one. if it errored, your changes are in GitHub but the live site is stuck on the previous deploy. tell whoever's helping you with the site.</div>
+    </div>
+    <div class="ts-block">
+      <div class="q">▸ i fired a message and no one sees it</div>
+      <div class="a">make sure the homepage isn't muted (the 🔊 button). wait ~5 seconds — the homepage polls for new messages on a 3s loop. did you pick NOW as the fuse? other fuses delay things.</div>
+    </div>
+    <div class="ts-block">
+      <div class="q">▸ an image upload failed</div>
+      <div class="a">check the file size (over 6 MB might choke — try resizing first). check the format — only JPG / PNG / WebP / GIF. if you see "Blob storage is not configured" — setup issue, not your fault. talk to whoever set up the site.</div>
+    </div>
+    <div class="ts-block">
+      <div class="q">▸ i want to undo a change</div>
+      <div class="a">same as making a change: edit it back and save. the site doesn't have an undo button, but git history does — any past version can be restored by someone with repo access.</div>
+    </div>
+    <div class="ts-block">
+      <div class="q">▸ sounds don't play</div>
+      <div class="a">browsers don't let pages play sound until you interact (click / scroll / tap). try clicking somewhere first. iOS safari sometimes needs an extra second to wake up audio. check the 🔊 speaker button in the bottom-right.</div>
+    </div>
+    <div class="ts-block">
+      <div class="q">▸ the mode flip glitched mid-transition</div>
+      <div class="a">don't worry, it'll finish. if it really feels stuck, refresh once.</div>
+    </div>
+    <div class="ts-block">
+      <div class="q">▸ everything is broken</div>
+      <div class="a">don't panic. the previous version of the site is always one rollback away. tell whoever helps you with the site. we can restore in a couple minutes.</div>
+    </div>
+  </section>
+
+  <!-- ───────── END CARD ───────── -->
+  <div class="end-card">
+    <h2>WELCOME TO YOUR OWN ARENA</h2>
+    <p>end of manual · KHALIL.OPS v1.0 · keep this nearby · hit the goal.</p>
+    <a href="https://khalil2020.vercel.app" class="enter-btn">▶ ENTER</a>
+    <div class="meta" style="margin-top:28px">when you discover something new, tell us and we'll add it.</div>
+  </div>
+
+</main>
+
+<script>
+  // ─────────── mode toggle ───────────
+  function setMode(target) {
+    const html = document.documentElement;
+    const current = html.getAttribute('data-mode');
+    if (target === current) return;
+
+    // flash overlay
+    const overlay = document.getElementById('flipOverlay');
+    overlay.classList.remove('fire');
+    void overlay.offsetWidth;
+    overlay.classList.add('fire');
+
+    // swap mode
+    html.setAttribute('data-mode', target);
+
+    // update halves
+    document.querySelectorAll('.topbar-half').forEach(h => {
+      const isActive = h.dataset.target === target;
+      h.classList.toggle('active', isActive);
+      h.classList.toggle('idle', !isActive);
+    });
+
+    // portrait emoji
+    document.getElementById('portraitEmoji').textContent = target === 'gaming' ? '🎮' : '⚽';
+
+    // role chip swap is via CSS var, but the dual ::after content quirk
+    // means we set it imperatively for cross-browser support
+    const dot = document.querySelector('.role-chip .dot');
+    if (dot) {
+      const labels = target === 'gaming' ? 'STREAMER · GAMER · GOAT' : 'STRIKER · MADRIDISTA · FOREVER 7';
+      let after = document.querySelector('.role-chip .label');
+      if (!after) {
+        after = document.createElement('span');
+        after.className = 'label';
+        document.querySelector('.role-chip').appendChild(after);
+      }
+      after.textContent = labels;
+    }
+  }
+
+  // initialize role chip label
+  (function initRoleChip() {
+    const labels = 'STREAMER · GAMER · GOAT';
+    const span = document.createElement('span');
+    span.className = 'label';
+    span.textContent = labels;
+    document.querySelector('.role-chip').appendChild(span);
+  })();
+
+  // keyboard arrows for mode flip
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight') setMode('football');
+    if (e.key === 'ArrowLeft') setMode('gaming');
+  });
+
+  // ─────────── plunger / payload / fuse ───────────
+  let currentPayload = { type: 'confetti', em: '🎉', label: 'CONFETTI' };
+  let currentFuse = 'NOW';
+
+  document.querySelectorAll('.payload-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.payload-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const text = btn.textContent.trim();
+      currentPayload = {
+        type: btn.dataset.payload,
+        em: btn.dataset.em,
+        label: text.replace(btn.dataset.em, '').trim()
+      };
+      updateLwSub();
+    });
+  });
+
+  document.querySelectorAll('.fuse-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.fuse-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentFuse = btn.dataset.fuse;
+      updateLwSub();
+    });
+  });
+
+  function updateLwSub() {
+    document.getElementById('lwSub').textContent =
+      `PAYLOAD: ${currentPayload.em} ${currentPayload.label} · FUSE: ${currentFuse}`;
+  }
+
+  function firePlunger() {
+    const p = document.getElementById('plunger');
+    p.classList.remove('firing');
+    void p.offsetWidth;
+    p.classList.add('firing');
+
+    const win = document.getElementById('launchWindow');
+    win.classList.remove('fired');
+    void win.offsetWidth;
+    win.classList.add('fired');
+
+    // confetti burst from plunger
+    confettiBurst(p);
+  }
+
+  function confettiBurst(originEl) {
+    const rect = originEl.getBoundingClientRect();
+    const launchWindow = document.getElementById('launchWindow');
+    const targetRect = launchWindow.getBoundingClientRect();
+    const colors = ['#ff2bd6', '#00f0ff', '#ffe600', '#3df562', '#ffd700', '#ff6a6a'];
+    for (let i = 0; i < 28; i++) {
+      const c = document.createElement('div');
+      c.className = 'conf';
+      c.style.position = 'fixed';
+      c.style.left = (rect.left + rect.width/2) + 'px';
+      c.style.top = (rect.top + 10) + 'px';
+      c.style.background = colors[i % colors.length];
+      c.style.setProperty('--cx', (Math.random() * 300 - 150) + 'px');
+      c.style.setProperty('--cy', (-150 - Math.random() * 200) + 'px');
+      c.style.zIndex = 999;
+      document.body.appendChild(c);
+      setTimeout(() => c.remove(), 1500);
+    }
+  }
+</script>
+
+</body>
+</html>
