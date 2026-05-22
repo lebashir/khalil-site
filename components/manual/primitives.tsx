@@ -3,6 +3,7 @@
 import type { CSSProperties, ReactNode } from 'react';
 import type { ArenaTheme } from '@/components/arena/theme';
 import type { ArenaSize } from '@/components/arena/useArenaSize';
+import { themedBackdrop, themedFg } from '@/lib/gaming-themes';
 
 // Shared atoms used across the /manual page. Mode-reactive — each
 // primitive takes the active ArenaTheme so the whole manual repaints
@@ -167,7 +168,7 @@ interface PanelProps {
 export const Panel = ({ label, theme, children, style }: PanelProps) => (
   <div
     style={{
-      background: 'rgba(0,0,0,0.45)',
+      background: themedBackdrop(theme.fg, 0.45),
       border: `1px solid ${theme.cardBorder}`,
       borderRadius: 6,
       padding: 22,
@@ -247,13 +248,16 @@ interface ProseProps {
   style?: CSSProperties;
 }
 
+// Prose body text uses --text-dim from globals.css — adapts per theme
+// without needing to thread `theme` through every Prose call site.
+// Dark themes get a light dim color; light themes get a dark dim color.
 export const Prose = ({ children, style }: ProseProps) => (
   <div
     style={{
       fontFamily: "'Inter', system-ui, sans-serif",
       fontSize: 17,
       lineHeight: 1.6,
-      color: 'rgba(255,255,255,0.78)',
+      color: 'var(--text-dim)',
       maxWidth: 760,
       ...style
     }}
@@ -299,7 +303,7 @@ export const KsRows = ({ rows, theme }: KsRowsProps) => (
             fontFamily: "'Inter', system-ui, sans-serif",
             fontSize: 14,
             lineHeight: 1.45,
-            color: 'rgba(255,255,255,0.85)'
+            color: themedFg(theme.fg, 0.85)
           }}
         >
           {v}

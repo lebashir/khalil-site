@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import type { ArenaTheme } from './theme';
 import type { ArenaSize } from './useArenaSize';
 import type { Mood } from '@/lib/content';
+import { themedFg } from '@/lib/gaming-themes';
 
 interface Props {
   theme: ArenaTheme;
@@ -129,7 +130,7 @@ export const Nav = ({ theme, size, mood }: Props) => {
           fontFamily: "'DM Mono', ui-monospace, monospace",
           fontSize: isDesktop ? 12 : 10,
           letterSpacing: 2,
-          color: 'rgba(255,255,255,0.7)'
+          color: themedFg(theme.fg, 0.7)
         }}
       >
         {links.map((l) => (

@@ -2,8 +2,9 @@
 
 import { useEffect, useRef, useState, type PointerEvent as ReactPointerEvent, type KeyboardEvent } from 'react';
 import type { Mode } from '@/lib/content';
-import { PALETTE, type ModePalette } from './palette';
+import { PALETTE, getGamingPalette, type ModePalette } from './palette';
 import { useModeFlipContext } from './ModeFlipProvider';
+import { useGamingTheme } from '@/components/GamingThemeProvider';
 
 type Size = 'desktop' | 'tablet' | 'phone';
 
@@ -304,6 +305,7 @@ export interface PeekDetail {
 
 export const TopBarMode = () => {
   const { mode, flip, isTransitioning } = useModeFlipContext();
+  const { themeKey } = useGamingTheme();
   const size = useTopbarSize();
   const height = HEIGHT_BY_SIZE[size];
 
@@ -371,7 +373,9 @@ export const TopBarMode = () => {
   };
 
   const isGaming = mode === 'gaming';
-  const pGaming = PALETTE.gaming;
+  // The gaming half repaints in the active theme; football is always the
+  // canonical Real Madrid palette (single-palette mode by design).
+  const pGaming = getGamingPalette(themeKey);
   const pFoot = PALETTE.football;
 
   // Live flex weighting. Drag delta shifts the seam, clamped to ±0.3 so

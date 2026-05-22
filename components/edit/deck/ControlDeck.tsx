@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import type { Mode, Mood, NowBlock, SiteContent } from '@/lib/content';
+import type { GamingThemeSettings, Mode, Mood, NowBlock, SiteContent } from '@/lib/content';
 import type { VideoItem } from '@/lib/youtube';
 import { playPlunger } from '@/lib/audio/sounds';
 import { ED, FONT, type FuseId, type PayloadId } from './constants';
@@ -17,6 +17,7 @@ import { AboutModule } from './modules/AboutModule';
 import { SocialsModule } from './modules/SocialsModule';
 import { ThumbStyleModule } from './modules/ThumbStyleModule';
 import { DefaultModeModule } from './modules/DefaultModeModule';
+import { ThemeModule } from './modules/ThemeModule';
 import { InlineEditView } from './inline/InlineEditView';
 
 interface ControlDeckProps {
@@ -171,6 +172,11 @@ export const ControlDeck = ({ initialContent, videos }: ControlDeckProps) => {
   const setSocials = (socials: SiteContent['socials']) => setContent({ ...content, socials });
   const setVideos = (videos: SiteContent['videos']) => setContent({ ...content, videos });
   const setDefaultMode = (defaultMode: Mode) => setContent({ ...content, defaultMode });
+  const setThemeSettings = (gaming: GamingThemeSettings) =>
+    setContent({
+      ...content,
+      theme: { ...(content.theme ?? {}), gaming }
+    });
 
   return (
     <div
@@ -232,6 +238,7 @@ export const ControlDeck = ({ initialContent, videos }: ControlDeckProps) => {
             setSocials={setSocials}
             setVideos={setVideos}
             setDefaultMode={setDefaultMode}
+            setThemeSettings={setThemeSettings}
             crtRef={crtRef}
           />
         )}
@@ -329,6 +336,7 @@ interface LaunchTabProps {
   setSocials: (s: SiteContent['socials']) => void;
   setVideos: (v: SiteContent['videos']) => void;
   setDefaultMode: (m: Mode) => void;
+  setThemeSettings: (t: GamingThemeSettings) => void;
   crtRef: React.RefObject<HTMLDivElement | null>;
 }
 
@@ -356,6 +364,7 @@ const LaunchTab = ({
   setSocials,
   setVideos,
   setDefaultMode,
+  setThemeSettings,
   crtRef
 }: LaunchTabProps) => {
   // Reusable nodes — same instances rendered in either layout
@@ -412,6 +421,9 @@ const LaunchTab = ({
     />
   );
   const thumbStyle = <ThumbStyleModule videos={content.videos} setVideos={setVideos} />;
+  const themePicker = (
+    <ThemeModule theme={content.theme?.gaming} setTheme={setThemeSettings} />
+  );
   const about = <AboutModule about={content.about} setAbout={setAbout} />;
   const bootAndSocialsRow = (
     <div
@@ -438,6 +450,7 @@ const LaunchTab = ({
         {nowPlaying}
         {pinnedVideo}
         {thumbStyle}
+        {themePicker}
         {about}
         {bootAndSocialsRow}
       </div>
@@ -457,6 +470,7 @@ const LaunchTab = ({
         {messageLauncher}
         {pinnedVideo}
         {thumbStyle}
+        {themePicker}
         {about}
         {bootAndSocialsRow}
       </div>

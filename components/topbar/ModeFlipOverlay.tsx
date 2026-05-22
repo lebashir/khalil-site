@@ -1,6 +1,7 @@
 'use client';
 
-import { PALETTE } from './palette';
+import { getPalette } from './palette';
+import { useGamingTheme } from '@/components/GamingThemeProvider';
 import type { ModeFlipTransition } from './useModeFlip';
 
 interface Props {
@@ -17,10 +18,15 @@ interface Props {
 // `transition` — keyed by nonce so a fresh DOM is created each flip,
 // which restarts the CSS animations cleanly.
 export const ModeFlipOverlay = ({ transition }: Props) => {
+  // Always call hooks at the top — early return after.
+  const { themeKey } = useGamingTheme();
   if (!transition) return null;
   const { from, to, nonce } = transition;
-  const fromP = PALETTE[from];
-  const toP = PALETTE[to];
+  // The flip overlay paints in both modes' colors. Gaming side renders
+  // in the active theme so the cinematic transition stays consistent
+  // with what the user sees on either side of the flip.
+  const fromP = getPalette(from, themeKey);
+  const toP = getPalette(to, themeKey);
 
   return (
     <div

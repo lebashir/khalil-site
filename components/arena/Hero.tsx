@@ -7,6 +7,7 @@ import { Reveal } from './Reveal';
 import { PolaroidStack } from './PolaroidStack';
 import { FloatingTag } from './FloatingTag';
 import { Pressable, Jiggleable } from '@/components/fx';
+import { themedBackdrop, themedFg } from '@/lib/gaming-themes';
 
 interface Props {
   mode: Mode;
@@ -145,7 +146,7 @@ export const Hero = ({ mode, theme, size, content }: Props) => {
             fontFamily: "'Inter', system-ui, sans-serif",
             fontSize: bioSize,
             lineHeight: 1.5,
-            color: 'rgba(255,255,255,0.85)',
+            color: themedFg(theme.fg, 0.85),
             animation: 'k-stamp-in .5s cubic-bezier(.2,1.2,.4,1) both'
           }}
         >
@@ -166,7 +167,7 @@ export const Hero = ({ mode, theme, size, content }: Props) => {
               fontFamily: "'Anton', 'Bungee', sans-serif",
               fontSize: isDesktop ? 24 : 18,
               letterSpacing: 1,
-              color: mode === 'gaming' ? '#0a0420' : '#001233',
+              color: theme.ctaText,
               background: `linear-gradient(180deg, ${theme.ctaA} 0%, ${theme.ctaB} 100%)`,
               padding: isDesktop ? '18px 32px' : '14px 24px',
               border: 'none',
@@ -218,7 +219,7 @@ export const Hero = ({ mode, theme, size, content }: Props) => {
               key={label}
               style={{
                 padding: isDesktop ? '14px 8px' : '8px 6px',
-                background: 'rgba(0,0,0,0.4)',
+                background: themedBackdrop(theme.fg, 0.4),
                 border: `1px solid ${theme.cardBorder}`,
                 borderRadius: 6,
                 textAlign: 'center',

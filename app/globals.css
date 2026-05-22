@@ -3,25 +3,160 @@
 @tailwind utilities;
 
 /* ── Mode palettes ────────────────────────────────────────────────────────
-   Source of truth (mirrored in components/topbar/palette.ts). Keep these
-   two in sync — the topbar uses raw hex strings; everything else uses
-   CSS vars driven by the html.gaming / html.football class. */
+   Source of truth (mirrored in components/topbar/palette.ts +
+   lib/gaming-themes.ts). Three layers:
+
+     1. `:root` — neon defaults so vars exist even before any class lands
+     2. `html.gaming.theme-X` — gaming-mode colors per theme
+        (one block per row in lib/gaming-themes.ts GAMING_THEMES)
+     3. `html.football` — single Real Madrid palette (no themes by design)
+
+   To add a theme: append a new `html.gaming.theme-X` block matching the
+   row in lib/gaming-themes.ts. To remove: delete the block AND the entry
+   in GAMING_THEMES + GAMING_THEME_ORDER. */
 
 :root,
 html.gaming,
-.preview-scope.gaming {
-  --bg-1: #0e0030;
-  --bg-2: #3a0a5a;
-  --bg-3: #5a14a0;
+html.gaming.theme-neon,
+.preview-scope.gaming,
+.preview-scope.gaming.theme-neon {
+  --bg-1: #08010c;
+  --bg-2: #1a0838;
+  --bg-3: #3a0a5a;
   --accent: #00f0ff;
   --accent-2: #ff2bd6;
   --accent-3: #ffe600;
   --text: #ffffff;
   --text-dim: #b8c4ff;
-  --card: rgba(40, 20, 90, 0.55);
+  --card: rgba(60, 30, 120, 0.45);
   --card-border: rgba(0, 240, 255, 0.4);
   --glow: 0 0 28px rgba(0, 240, 255, 0.55), 0 0 60px rgba(255, 43, 214, 0.3);
   --display-font: 'Bungee', cursive;
+}
+
+html.gaming.theme-toxic,
+.preview-scope.gaming.theme-toxic {
+  --bg-1: #040c08;
+  --bg-2: #0e2418;
+  --bg-3: #1a4226;
+  --accent: #b8ff00;
+  --accent-2: #ff5500;
+  --accent-3: #ff003c;
+  --text: #ffffff;
+  --text-dim: #c8e8a0;
+  --card: rgba(20, 50, 30, 0.55);
+  --card-border: rgba(184, 255, 0, 0.45);
+  --glow: 0 0 28px rgba(184, 255, 0, 0.55), 0 0 60px rgba(255, 85, 0, 0.3);
+}
+
+html.gaming.theme-lava,
+.preview-scope.gaming.theme-lava {
+  --bg-1: #070300;
+  --bg-2: #1a0a04;
+  --bg-3: #2e1810;
+  --accent: #ff6a00;
+  --accent-2: #ffae42;
+  --accent-3: #ff1744;
+  --text: #ffffff;
+  --text-dim: #f0c89a;
+  --card: rgba(50, 18, 8, 0.55);
+  --card-border: rgba(255, 106, 0, 0.45);
+  --glow: 0 0 28px rgba(255, 106, 0, 0.55), 0 0 60px rgba(255, 174, 66, 0.3);
+}
+
+html.gaming.theme-mono,
+.preview-scope.gaming.theme-mono {
+  --bg-1: #050505;
+  --bg-2: #0e0e0e;
+  --bg-3: #1a1a1a;
+  --accent: #ff2400;
+  --accent-2: #ffffff;
+  --accent-3: #ffd700;
+  --text: #ffffff;
+  --text-dim: #bababa;
+  --card: rgba(20, 20, 20, 0.65);
+  --card-border: rgba(255, 36, 0, 0.5);
+  --glow: 0 0 28px rgba(255, 36, 0, 0.55), 0 0 60px rgba(255, 255, 255, 0.2);
+}
+
+html.gaming.theme-crt,
+.preview-scope.gaming.theme-crt {
+  --bg-1: #000400;
+  --bg-2: #001a08;
+  --bg-3: #002f12;
+  --accent: #39ff14;
+  --accent-2: #ffaa00;
+  --accent-3: #ff003c;
+  --text: #d9ffd0;
+  --text-dim: #8acf80;
+  --card: rgba(0, 30, 15, 0.55);
+  --card-border: rgba(57, 255, 20, 0.45);
+  --glow: 0 0 28px rgba(57, 255, 20, 0.55), 0 0 60px rgba(255, 170, 0, 0.3);
+}
+
+html.gaming.theme-deep,
+.preview-scope.gaming.theme-deep {
+  --bg-1: #02061a;
+  --bg-2: #0a1238;
+  --bg-3: #1a2a6c;
+  --accent: #6c8bff;
+  --accent-2: #ff7a8a;
+  --accent-3: #ffd700;
+  --text: #e8f0ff;
+  --text-dim: #8a98c8;
+  --card: rgba(20, 30, 80, 0.55);
+  --card-border: rgba(108, 139, 255, 0.42);
+  --glow: 0 0 28px rgba(108, 139, 255, 0.55), 0 0 60px rgba(255, 122, 138, 0.3);
+}
+
+/* Light themes — flip the canvas. Dark text on light bg; card/backdrop
+   chrome paints with white-ish alpha instead of black-ish alpha. Polish
+   pass in components themes everything below the card surface via the
+   themedBackdrop() helper from lib/gaming-themes.ts. */
+
+html.gaming.theme-paper,
+.preview-scope.gaming.theme-paper {
+  --bg-1: #f3ede0;
+  --bg-2: #fbf6ea;
+  --bg-3: #fffaf0;
+  --accent: #ff5a1f;
+  --accent-2: #1a140a;
+  --accent-3: #0f7b5a;
+  --text: #1a140a;
+  --text-dim: #5a4a2a;
+  --card: rgba(255, 250, 240, 0.85);
+  --card-border: rgba(26, 20, 10, 0.18);
+  --glow: 0 0 28px rgba(255, 90, 31, 0.35), 0 0 60px rgba(26, 20, 10, 0.15);
+}
+
+html.gaming.theme-ice,
+.preview-scope.gaming.theme-ice {
+  --bg-1: #dbe9f2;
+  --bg-2: #ecf4fa;
+  --bg-3: #f7fbff;
+  --accent: #0084ff;
+  --accent-2: #00b4d8;
+  --accent-3: #ff3d6a;
+  --text: #0a2540;
+  --text-dim: #4a6a8a;
+  --card: rgba(255, 255, 255, 0.75);
+  --card-border: rgba(0, 132, 255, 0.30);
+  --glow: 0 0 28px rgba(0, 132, 255, 0.40), 0 0 60px rgba(0, 180, 216, 0.20);
+}
+
+html.gaming.theme-storm,
+.preview-scope.gaming.theme-storm {
+  --bg-1: #bcc4cf;
+  --bg-2: #d8dde5;
+  --bg-3: #eef0f4;
+  --accent: #2563eb;
+  --accent-2: #0a0f1a;
+  --accent-3: #f97316;
+  --text: #0a0f1a;
+  --text-dim: #3a4a5a;
+  --card: rgba(255, 255, 255, 0.75);
+  --card-border: rgba(37, 99, 235, 0.32);
+  --glow: 0 0 28px rgba(37, 99, 235, 0.40), 0 0 60px rgba(249, 115, 22, 0.20);
 }
 
 html.football,
@@ -78,10 +213,14 @@ a {
   touch-action: manipulation;
 }
 
+/* Backdrop-filter fallback — bump card opacity for the small set of
+   browsers that don't support blur(). Per-theme overrides skipped: the
+   themes' own --card alphas already sit in a usable range without blur,
+   and the regression on this code path is minor. */
 @supports not ((backdrop-filter: blur(8px)) or (-webkit-backdrop-filter: blur(8px))) {
   html.gaming,
   .preview-scope.gaming {
-    --card: rgba(40, 20, 90, 0.92);
+    --card: rgba(20, 20, 30, 0.92);
   }
   html.football,
   .preview-scope.football {

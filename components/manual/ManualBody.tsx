@@ -4,6 +4,7 @@ import type { CSSProperties, ReactNode } from 'react';
 import type { Mode, SiteContent } from '@/lib/content';
 import type { ArenaTheme } from '@/components/arena/theme';
 import type { ArenaSize } from '@/components/arena/useArenaSize';
+import { themedBackdrop, themedFg } from '@/lib/gaming-themes';
 import {
   PartMarker,
   PartTitle,
@@ -176,6 +177,22 @@ export const ManualBody = ({ mode, theme, size, content }: Props) => {
             ]}
             theme={theme}
           />
+        </Panel>
+
+        <Panel label="◇ GAMING THEMES (extra colors)" theme={theme}>
+          <Prose>
+            <p style={{ margin: 0 }}>
+              gaming mode has <strong>9 different themes</strong> — color
+              palettes you can swap into without leaving gaming. you pick
+              them in <Code theme={theme}>/edit</Code> → THEME · GAMING.
+              there are dark themes (neon, lava, crt, etc.) and light
+              themes (paper, ice, storm) that flip the whole canvas bright.
+              you can also turn on <strong>RANDOM</strong> mode — pick a
+              few themes for the pool and each visitor gets a surprise.
+              football mode stays a single Real Madrid palette — that's
+              on purpose.
+            </p>
+          </Prose>
         </Panel>
 
         <Tldr>
@@ -401,6 +418,7 @@ export const ManualBody = ({ mode, theme, size, content }: Props) => {
               ['NOW', "what you're playing / watching / reading / listening (per mode)"],
               ['PINNED REPLAY', 'which video shows up first in REPLAYS'],
               ['REPLAY STYLE', 'youtube vs designed thumbnails, card rarities, palette'],
+              ['THEME · GAMING', '9 color palettes to pick from. fixed (everyone sees one) or random (surprise per visitor).'],
               ['ABOUT', 'the about paragraphs at the bottom of the site'],
               ['BOOT MODE', 'whether new visitors land in gaming or football'],
               ['SOCIALS', 'tiktok + instagram links in the footer']
@@ -687,7 +705,7 @@ const Code = ({ children, theme }: { children: ReactNode; theme: ArenaTheme }) =
       fontSize: '0.95em',
       color: theme.accent,
       padding: '1px 6px',
-      background: 'rgba(0,0,0,0.4)',
+      background: themedBackdrop(theme.fg, 0.4),
       borderRadius: 3
     }}
   >
@@ -705,8 +723,8 @@ interface CompareColProps {
 const CompareCol = ({ active, theme, title, children }: CompareColProps) => (
   <div
     style={{
-      background: active ? `${theme.accent}10` : 'rgba(0,0,0,0.35)',
-      border: `1px solid ${active ? theme.accent : 'rgba(255,255,255,0.1)'}`,
+      background: active ? `${theme.accent}10` : themedBackdrop(theme.fg, 0.35),
+      border: `1px solid ${active ? theme.accent : themedFg(theme.fg, 0.1)}`,
       borderRadius: 6,
       padding: 18,
       boxShadow: active ? `0 0 18px ${theme.accent}40` : 'none',
@@ -731,7 +749,7 @@ const CompareCol = ({ active, theme, title, children }: CompareColProps) => (
         fontFamily: "'Inter', system-ui, sans-serif",
         fontSize: 14,
         lineHeight: 1.65,
-        color: 'rgba(255,255,255,0.78)'
+        color: themedFg(theme.fg, 0.78)
       }}
     >
       {children}
@@ -769,7 +787,7 @@ const PinGrid = ({ theme }: { theme: ArenaTheme }) => (
         key={tag}
         style={{
           padding: '12px 14px',
-          background: 'rgba(0,0,0,0.35)',
+          background: themedBackdrop(theme.fg, 0.35),
           border: `1px solid ${theme.cardBorder}`,
           borderRadius: 4,
           fontFamily: "'Inter', system-ui, sans-serif"
@@ -786,7 +804,7 @@ const PinGrid = ({ theme }: { theme: ArenaTheme }) => (
         >
           ✎ {tag}
         </div>
-        <div style={{ fontSize: 13, lineHeight: 1.4, color: 'rgba(255,255,255,0.78)' }}>
+        <div style={{ fontSize: 13, lineHeight: 1.4, color: themedFg(theme.fg, 0.78) }}>
           {desc}
         </div>
       </div>
@@ -820,7 +838,7 @@ const SlotGrid = ({ theme }: { theme: ArenaTheme }) => (
         key={`${s.name}-${i}`}
         style={{
           padding: '14px 8px',
-          background: 'rgba(0,0,0,0.4)',
+          background: themedBackdrop(theme.fg, 0.4),
           border: `1px dashed ${theme.accent}66`,
           borderRadius: 4,
           textAlign: 'center'
@@ -947,7 +965,7 @@ const SaveFireCard = ({ kind, theme, icon, title, rows }: SaveFireCardProps) => 
   return (
     <div
       style={{
-        background: 'rgba(0,0,0,0.45)',
+        background: themedBackdrop(theme.fg, 0.45),
         border: `2px solid ${accent}`,
         borderRadius: 6,
         padding: 22,
@@ -989,11 +1007,11 @@ const SaveFireCard = ({ kind, theme, icon, title, rows }: SaveFireCardProps) => 
               fontFamily: FONT_MONO,
               fontSize: 11,
               letterSpacing: 1.2,
-              borderBottom: '1px solid rgba(255,255,255,0.07)',
+              borderBottom: `1px solid ${themedFg(theme.fg, 0.07)}`,
               paddingBottom: 6
             }}
           >
-            <span style={{ color: 'rgba(255,255,255,0.55)' }}>{k}</span>
+            <span style={{ color: themedFg(theme.fg, 0.55) }}>{k}</span>
             <span style={{ color: accent, textAlign: 'right' }}>{v}</span>
           </div>
         ))}
@@ -1013,7 +1031,7 @@ interface TsBlockProps {
 const TsBlock = ({ theme, q, a }: TsBlockProps) => (
   <div
     style={{
-      background: 'rgba(0,0,0,0.35)',
+      background: themedBackdrop(theme.fg, 0.35),
       border: `1px solid ${theme.cardBorder}`,
       borderLeft: `3px solid ${theme.accent}`,
       borderRadius: 4,
@@ -1037,7 +1055,7 @@ const TsBlock = ({ theme, q, a }: TsBlockProps) => (
         fontFamily: "'Inter', system-ui, sans-serif",
         fontSize: 14.5,
         lineHeight: 1.55,
-        color: 'rgba(255,255,255,0.78)'
+        color: themedFg(theme.fg, 0.78)
       }}
     >
       {a}

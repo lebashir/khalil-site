@@ -6,6 +6,7 @@ import type { ArenaSize } from './useArenaSize';
 import { Reveal } from './Reveal';
 import { HudCard } from './HudCard';
 import { HudLabel } from './HudLabel';
+import { themedBackdrop } from '@/lib/gaming-themes';
 
 interface Props {
   subs: SiteContent['subs'];
@@ -61,7 +62,7 @@ export const SubsHud = ({ subs, theme, size }: Props) => {
             style={{
               marginTop: 10,
               height: isDesktop ? 12 : 8,
-              background: 'rgba(0,0,0,0.5)',
+              background: themedBackdrop(theme.fg, 0.5),
               borderRadius: 2,
               overflow: 'hidden',
               border: `1px solid ${theme.cardBorder}`,

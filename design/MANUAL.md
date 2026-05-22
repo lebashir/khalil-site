@@ -108,6 +108,18 @@ away and it disappears. it's a hint, not a flip.
 - your mood / status LED
 - socials links
 
+### gaming themes (extra colors)
+
+gaming mode has **9 different themes** — different color palettes you can
+swap into without leaving gaming mode. you pick them in `/edit` →
+THEME · GAMING. there are dark themes (neon, lava, crt, etc.) and light
+themes (paper, ice, storm) that flip the whole canvas bright.
+
+you can also turn on **random** mode — pick a few themes for the pool
+and each visitor gets a random one. fun for surprising people.
+
+football mode stays a single Real Madrid palette — that's on purpose.
+
 **tl;dr** — one toggle swaps the entire color world. some stuff is
 per-mode (hero copy, stats, now block). some stuff is shared (subs,
 book, videos, socials, mood).
@@ -332,6 +344,7 @@ these edit things directly — no need to switch tabs:
 | **NOW · EQUIPPED / STARTING XI** | what you're playing/watching/reading/listening (per mode) |
 | **PINNED REPLAY** | which video shows up first in the REPLAYS section |
 | **REPLAY STYLE** | youtube vs designed thumbnails, card rarities, palette |
+| **THEME · GAMING** | which color palette gaming mode uses (9 to pick from). also turn on RANDOM to give each visitor a different one. |
 | **ABOUT**        | the paragraphs at the bottom of the site           |
 | **BOOT MODE**    | whether new visitors land in gaming or football    |
 | **SOCIALS**      | tiktok + instagram links in the footer             |

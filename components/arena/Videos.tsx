@@ -62,7 +62,7 @@ const EmptyState = ({ theme }: { theme: ArenaTheme }) => (
         fontFamily: "'Anton', sans-serif",
         fontSize: 14,
         letterSpacing: 1,
-        color: '#0a0420',
+        color: theme.ctaText,
         background: `linear-gradient(180deg, ${theme.ctaA} 0%, ${theme.ctaB} 100%)`,
         padding: '10px 18px',
         clipPath: 'polygon(6px 0%, 100% 0%, calc(100% - 6px) 100%, 0% 100%)',

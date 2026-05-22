@@ -51,10 +51,7 @@ export const CardEmblem = ({
           position: 'relative',
           width: '100%',
           height: '100%',
-          background:
-            mode === 'gaming'
-              ? 'linear-gradient(135deg, #1a0838 0%, #3a0a5a 50%, #ff2bd6 130%)'
-              : 'linear-gradient(135deg, #001233 0%, #003366 60%, #ffd700 140%)',
+          background: `linear-gradient(135deg, ${theme.bgB} 0%, ${theme.bgC} ${mode === 'gaming' ? '50%' : '60%'}, ${theme.accent2}cc ${mode === 'gaming' ? '130%' : '140%'})`,
           overflow: 'hidden',
           display: 'flex',
           alignItems: 'center',

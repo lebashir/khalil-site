@@ -93,7 +93,7 @@ export const ReplaysRoom = ({ theme, lockT, size, videos }: Props) => {
             position: 'relative',
             aspectRatio: '16/9',
             background: featured
-              ? 'linear-gradient(135deg, #1a0838, #0a0420)'
+              ? `linear-gradient(135deg, ${theme.bgFar}, ${theme.bgDeep})`
               : `linear-gradient(135deg, ${theme.bgMid}, ${theme.bgFar})`,
             border: `1px solid ${theme.cardBorder}`,
             borderRadius: 8,

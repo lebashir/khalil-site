@@ -1,4 +1,9 @@
 import contentJson from '@/content.json';
+import {
+  GAMING_THEMES,
+  DEFAULT_GAMING_THEME,
+  isGamingThemeKey
+} from '@/lib/gaming-themes';
 
 export type Mode = 'gaming' | 'football';
 
@@ -39,6 +44,22 @@ export interface VideoEditorial {
   pinnedId: string | null;
 }
 
+export interface GamingThemeSettings {
+  /** 'fixed' = every visitor sees `fixedKey`.
+   *  'random' = visitors get a random pick from `pool` (sticky per
+   *  browser via localStorage; re-randomized if the pool changes). */
+  mode: 'fixed' | 'random';
+  /** Used when mode === 'fixed'. Always a valid GamingThemeKey. */
+  fixedKey: string;
+  /** Used when mode === 'random'. Subset of valid GamingThemeKeys. */
+  pool: string[];
+}
+
+export interface ThemeSettings {
+  gaming: GamingThemeSettings;
+  // Future: football?: FootballThemeSettings (when football themes ship)
+}
+
 export interface SiteContent {
   defaultMode: Mode;
   handle: string;
@@ -62,6 +83,9 @@ export interface SiteContent {
    *  this map is the slot-to-asset wiring. Edits flow through
    *  POST /api/edit/image/upload + the standard /api/edit/save path. */
   images: Record<string, string>;
+  /** Optional. When absent, falls back to DEFAULT_GAMING_THEME ('neon').
+   *  Validated + written by ThemeModule in /edit (Phase 4+). */
+  theme?: ThemeSettings;
 }
 
 // Well-known image slots. Video tile slots (`replay-{videoId}`) are
@@ -333,6 +357,34 @@ export const validateContent = (raw: unknown, base?: SiteContent): ValidationRes
           : current.videos.pinnedId
   };
 
+  // Theme settings — optional block. Validates the gaming-mode picker
+  // settings. Invalid mode/key/pool entries silently coerce to safe
+  // defaults so a corrupt payload can't break the site. Missing block
+  // inherits from `current.theme` (or defaults to fixed/neon for first
+  // deploys before this schema existed).
+  const themeRaw = (c.theme ?? {}) as { gaming?: unknown };
+  const gamingRaw =
+    themeRaw.gaming && typeof themeRaw.gaming === 'object'
+      ? (themeRaw.gaming as Record<string, unknown>)
+      : null;
+  const currentGaming = current.theme?.gaming;
+  const themeMode: 'fixed' | 'random' =
+    gamingRaw?.mode === 'random' ? 'random' : gamingRaw?.mode === 'fixed' ? 'fixed' : currentGaming?.mode ?? 'fixed';
+  const themeFixedKey =
+    typeof gamingRaw?.fixedKey === 'string' && isGamingThemeKey(gamingRaw.fixedKey)
+      ? gamingRaw.fixedKey
+      : currentGaming?.fixedKey && isGamingThemeKey(currentGaming.fixedKey)
+        ? currentGaming.fixedKey
+        : DEFAULT_GAMING_THEME;
+  const themePool: string[] = Array.isArray(gamingRaw?.pool)
+    ? gamingRaw.pool.filter(
+        (k): k is string => typeof k === 'string' && k in GAMING_THEMES
+      )
+    : currentGaming?.pool ?? [];
+  const themeSettings: ThemeSettings = {
+    gaming: { mode: themeMode, fixedKey: themeFixedKey, pool: themePool }
+  };
+
   if (errors.length > 0) return { ok: false, errors };
 
   // Images map — slot-id → URL. Accept only known/well-formed slot IDs and
@@ -367,7 +419,8 @@ export const validateContent = (raw: unknown, base?: SiteContent): ValidationRes
     book,
     videos,
     socials: { tiktok, instagram },
-    images
+    images,
+    theme: themeSettings
   };
 
   if (errors.length > 0) return { ok: false, errors };

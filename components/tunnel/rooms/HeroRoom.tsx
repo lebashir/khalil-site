@@ -105,10 +105,7 @@ export const HeroRoom = ({ mode, theme, lockT, size, subs }: Props) => {
               height: 200,
               flexShrink: 0,
               borderRadius: '50%',
-              background:
-                mode === 'gaming'
-                  ? 'conic-gradient(from 180deg at 50% 50%, #00f0ff, #b026ff, #ff2bd6, #ffe600, #00f0ff)'
-                  : 'conic-gradient(from 180deg at 50% 50%, #ffd700, #fff, #4d8fff, #fff, #ffd700)',
+              background: `conic-gradient(from 180deg at 50% 50%, ${theme.accent}, ${theme.accent2}, ${theme.accent3}, ${theme.accent2}, ${theme.accent})`,
               position: 'relative',
               boxShadow: `0 0 60px ${theme.accent}88, 0 16px 32px rgba(0,0,0,0.6)`,
               transform: `scale(${lockT})`,

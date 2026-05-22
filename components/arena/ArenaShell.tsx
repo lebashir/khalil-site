@@ -5,8 +5,9 @@ import type { Mode, SiteContent } from '@/lib/content';
 import type { VideoItem } from '@/lib/youtube';
 import { useModeFlipContext } from '@/components/topbar';
 import { TopBarMode, PEEK_EVENT, type PeekDetail } from '@/components/topbar';
+import { useGamingTheme } from '@/components/GamingThemeProvider';
 import { startStadiumAmbient, stopStadiumAmbient } from '@/lib/audio/sounds';
-import { THEMES } from './theme';
+import { getArenaTheme } from './theme';
 import { useArenaSize } from './useArenaSize';
 import { SceneBackground } from './bg/SceneBackground';
 import { Nav } from './Nav';
@@ -31,8 +32,9 @@ interface Props {
 // behind the overlay slab.
 export const ArenaShell = ({ content, videos, videoError }: Props) => {
   const { mode, isTransitioning } = useModeFlipContext();
+  const { themeKey } = useGamingTheme();
   const size = useArenaSize();
-  const theme = THEMES[mode];
+  const theme = getArenaTheme(mode, themeKey);
 
   // §8 — mode-peek hover preview. Hovering the IDLE half of TopBarMode
   // dispatches a 'khalil:peek' event with the would-be-target mode. We
@@ -51,7 +53,7 @@ export const ArenaShell = ({ content, videos, videoError }: Props) => {
   // mode against itself (would just be a no-op wash on the current
   // accent color).
   const peekActive = peekMode !== null && peekMode !== mode && !isTransitioning;
-  const peekTheme = peekActive && peekMode ? THEMES[peekMode] : null;
+  const peekTheme = peekActive && peekMode ? getArenaTheme(peekMode, themeKey) : null;
 
   // Stadium crowd ambient — only when football mode is active on the
   // homepage. Fades in/out smoothly on mode flip; stops on unmount so

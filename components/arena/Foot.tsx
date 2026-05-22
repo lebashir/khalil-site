@@ -1,6 +1,7 @@
 import type { ArenaTheme } from './theme';
 import type { ArenaSize } from './useArenaSize';
 import type { SiteContent } from '@/lib/content';
+import { themedBackdrop } from '@/lib/gaming-themes';
 
 interface Props {
   theme: ArenaTheme;
@@ -24,7 +25,7 @@ const SocialLink = ({ label, href, size, theme }: SocialLinkProps) => {
     width: isDesktop ? 40 : 30,
     height: isDesktop ? 40 : 30,
     borderRadius: 6,
-    background: 'rgba(0,0,0,0.4)',
+    background: themedBackdrop(theme.fg, 0.4),
     border: `1px solid ${theme.cardBorder}`,
     display: 'inline-flex' as const,
     alignItems: 'center' as const,

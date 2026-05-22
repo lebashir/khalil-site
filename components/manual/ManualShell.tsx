@@ -4,8 +4,10 @@ import type { ReactNode } from 'react';
 import type { SiteContent } from '@/lib/content';
 import { useModeFlipContext } from '@/components/topbar';
 import { TopBarMode } from '@/components/topbar';
-import { THEMES, type ArenaTheme } from '@/components/arena/theme';
+import { useGamingTheme } from '@/components/GamingThemeProvider';
+import { getArenaTheme, type ArenaTheme } from '@/components/arena/theme';
 import { useArenaSize } from '@/components/arena/useArenaSize';
+import { themedBackdrop, themedFg } from '@/lib/gaming-themes';
 import { ManualCover } from './ManualCover';
 import { ManualBody } from './ManualBody';
 import { Panel } from './primitives';
@@ -21,8 +23,9 @@ interface Props {
 // modes repaints the whole manual including the polaroid cover.
 export const ManualShell = ({ content }: Props) => {
   const { mode } = useModeFlipContext();
+  const { themeKey } = useGamingTheme();
   const size = useArenaSize();
-  const theme = THEMES[mode];
+  const theme = getArenaTheme(mode, themeKey);
 
   return (
     <div
@@ -131,7 +134,7 @@ const Toc = ({ theme }: { theme: ArenaTheme }) => (
             style={{
               fontFamily: "'Inter', system-ui, sans-serif",
               fontSize: 14,
-              color: 'rgba(255,255,255,0.78)',
+              color: themedFg(theme.fg, 0.78),
               textDecoration: 'none'
             }}
           >
@@ -158,7 +161,7 @@ const EndCard = ({ theme, children }: EndCardProps) => (
       textAlign: 'center',
       border: `2px solid ${theme.accent}`,
       borderRadius: 8,
-      background: 'rgba(0,0,0,0.45)',
+      background: themedBackdrop(theme.fg, 0.45),
       boxShadow: `0 0 40px ${theme.accent}40`,
       animation: 'k-stamp-in .6s cubic-bezier(.2,1.2,.4,1) both'
     }}
@@ -179,7 +182,7 @@ const EndCard = ({ theme, children }: EndCardProps) => (
         margin: '0 0 24px',
         fontFamily: "'Inter', system-ui, sans-serif",
         fontSize: 16,
-        color: 'rgba(255,255,255,0.75)'
+        color: themedFg(theme.fg, 0.75)
       }}
     >
       {children}
@@ -192,7 +195,7 @@ const EndCard = ({ theme, children }: EndCardProps) => (
         fontFamily: "'Anton', sans-serif",
         fontSize: 24,
         letterSpacing: 2,
-        color: '#0a0420',
+        color: theme.ctaText,
         background: `linear-gradient(180deg, ${theme.ctaA} 0%, ${theme.ctaB} 100%)`,
         textDecoration: 'none',
         clipPath: 'polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%)',

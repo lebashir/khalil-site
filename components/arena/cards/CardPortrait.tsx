@@ -3,6 +3,7 @@ import type { Mode } from '@/lib/content';
 import type { ArenaTheme } from '../theme';
 import type { ArenaSize } from '../useArenaSize';
 import { Polaroid } from '../Polaroid';
+import { themedBackdrop } from '@/lib/gaming-themes';
 
 interface Props {
   icon: string;
@@ -56,10 +57,7 @@ export const CardPortrait = ({
           position: 'relative',
           width: '100%',
           height: '100%',
-          background:
-            mode === 'gaming'
-              ? `radial-gradient(ellipse at 50% 30%, ${theme.accent}55 0%, #1a0838 70%)`
-              : `radial-gradient(ellipse at 50% 30%, ${theme.accent}40 0%, #001233 70%)`,
+          background: `radial-gradient(ellipse at 50% 30%, ${theme.accent}${mode === 'gaming' ? '55' : '40'} 0%, ${theme.bgB} 70%)`,
           overflow: 'hidden',
           display: 'flex',
           flexDirection: 'column',
@@ -72,10 +70,7 @@ export const CardPortrait = ({
             width: '60%',
             aspectRatio: '1',
             borderRadius: '50%',
-            background:
-              mode === 'gaming'
-                ? 'linear-gradient(180deg, #0e0625 0%, #2a0f5a 100%)'
-                : 'linear-gradient(180deg, #0a4a6a 0%, #002a55 100%)',
+            background: `linear-gradient(180deg, ${theme.bgA} 0%, ${theme.bgB} 100%)`,
             border: `3px solid ${theme.accent}`,
             boxShadow: `0 0 24px ${theme.accent}, inset 0 0 16px rgba(0,0,0,0.5)`,
             display: 'flex',
@@ -100,7 +95,7 @@ export const CardPortrait = ({
           style={{
             marginTop: 12,
             padding: '4px 10px',
-            background: 'rgba(0,0,0,0.55)',
+            background: themedBackdrop(theme.fg, 0.55),
             border: `1px solid ${theme.cardBorder}`,
             fontFamily: "'DM Mono', ui-monospace, monospace",
             fontSize: isDesktop ? 11 : 9,

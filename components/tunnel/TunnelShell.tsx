@@ -4,6 +4,7 @@ import { useEffect, useRef } from 'react';
 import type { SiteContent } from '@/lib/content';
 import type { VideoItem } from '@/lib/youtube';
 import { TopBarMode, useModeFlipContext } from '@/components/topbar';
+import { useGamingTheme } from '@/components/GamingThemeProvider';
 import { useArenaSize } from '@/components/arena/useArenaSize';
 import {
   playEnterChime,
@@ -11,7 +12,7 @@ import {
   startIntroHum,
   stopIntroHum
 } from '@/lib/audio/sounds';
-import { TUNNEL_THEMES } from './theme';
+import { getTunnelTheme } from './theme';
 import { SCENES, sceneState, clamp } from './state';
 import { useTunnelScroll } from './useTunnelScroll';
 import { TunnelBG } from './TunnelBG';
@@ -36,8 +37,9 @@ interface Props {
 // cookie and hard-navigates to /).
 export const TunnelShell = ({ content, videos }: Props) => {
   const { mode } = useModeFlipContext();
+  const { themeKey } = useGamingTheme();
   const size = useArenaSize();
-  const theme = TUNNEL_THEMES[mode];
+  const theme = getTunnelTheme(mode, themeKey);
   const { ref, progress } = useTunnelScroll();
 
   // Heights live in CSS so SSR + CSR render identically (avoids the

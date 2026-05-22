@@ -1,5 +1,6 @@
 import type { CSSProperties } from 'react';
 import type { ArenaTheme } from './theme';
+import { themedBackdrop } from '@/lib/gaming-themes';
 
 interface Props {
   label: string;
@@ -17,7 +18,7 @@ export const FloatingTag = ({ label, value, theme, position, delay = '0s' }: Pro
     style={{
       position: 'absolute',
       ...position,
-      background: 'rgba(0,0,0,0.7)',
+      background: themedBackdrop(theme.fg, 0.7),
       border: `1px solid ${theme.cardBorder}`,
       borderRadius: 4,
       padding: '6px 10px 6px 26px',
@@ -39,7 +40,7 @@ export const FloatingTag = ({ label, value, theme, position, delay = '0s' }: Pro
         height: 8,
         borderRadius: '50%',
         border: `1.5px solid ${theme.accent}`,
-        background: 'rgba(0,0,0,0.7)',
+        background: themedBackdrop(theme.fg, 0.7),
         boxShadow: `0 0 6px ${theme.accent}`,
         transition: 'border-color .6s ease, box-shadow .6s ease'
       }}
@@ -59,7 +60,7 @@ export const FloatingTag = ({ label, value, theme, position, delay = '0s' }: Pro
       style={{
         fontFamily: "'Anton', sans-serif",
         fontSize: 22,
-        color: '#fff',
+        color: theme.fg,
         lineHeight: 1
       }}
     >

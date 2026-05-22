@@ -84,7 +84,7 @@ export const VideoCard = ({ video, theme, tier, big = false, useDesignThumb, des
           ? `url(${customThumbUrl}) center/cover`
           : showDesignArt && thumb
             ? `linear-gradient(135deg, ${thumb.from}, ${thumb.to})`
-            : 'linear-gradient(135deg, #1a0838, #0a0420)',
+            : `linear-gradient(135deg, ${theme.bgB}, ${theme.bgA})`,
         boxShadow: `0 12px 24px rgba(0,0,0,0.55), 0 0 0 1px ${tc[0]}55, 0 0 24px ${tc[0]}33`,
         textDecoration: 'none'
       }}

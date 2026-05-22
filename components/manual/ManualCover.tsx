@@ -6,6 +6,7 @@ import type { ArenaSize } from '@/components/arena/useArenaSize';
 import { CardEmblem } from '@/components/arena/cards/CardEmblem';
 import { CardPortrait } from '@/components/arena/cards/CardPortrait';
 import { CardNote } from '@/components/arena/cards/CardNote';
+import { themedFg } from '@/lib/gaming-themes';
 
 interface Props {
   mode: Mode;
@@ -110,7 +111,7 @@ export const ManualCover = ({ mode, theme, size, content }: Props) => {
             margin: '24px 0 26px',
             fontSize: 18,
             lineHeight: 1.55,
-            color: 'rgba(255,255,255,0.78)',
+            color: themedFg(theme.fg, 0.78),
             maxWidth: 540,
             fontFamily: "'Inter', system-ui, sans-serif"
           }}
@@ -129,7 +130,7 @@ export const ManualCover = ({ mode, theme, size, content }: Props) => {
               fontSize: 22,
               letterSpacing: 1,
               padding: '16px 28px',
-              color: '#0a0420',
+              color: theme.ctaText,
               background: `linear-gradient(180deg, ${theme.ctaA} 0%, ${theme.ctaB} 100%)`,
               clipPath:
                 'polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%)',
