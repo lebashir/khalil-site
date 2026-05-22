@@ -8,11 +8,13 @@ interface Props {
   transition: ModeFlipTransition | null;
 }
 
-// Cinematic 900ms transition layer. Three painted layers:
+// Cinematic 900ms transition layer. Six painted layers:
 //   1. Diagonal wipe slab in the target mode's gradient (sweeps in then out)
 //   2. White flash near the midpoint
 //   3. Six skewed light streaks shooting across
-//   4. Outgoing label falls / blurs out, incoming label rises into place
+//   4. Direction-specific scene (BERNABÉU stamp or GG·LOAD-IN terminal)
+//   5. Outgoing label falls / blurs out (now sits BEHIND the scene)
+//   6. Incoming small label rises into place after the scene clears
 //
 // Mounted globally by <ModeFlipProvider>. Rendered conditionally on
 // `transition` — keyed by nonce so a fresh DOM is created each flip,
@@ -117,7 +119,13 @@ export const ModeFlipOverlay = ({ transition }: Props) => {
         {fromP.emoji} {fromP.label}
       </div>
 
-      {/* Incoming label rises into place */}
+      {/* Direction-specific themed scene — the part that turns this flip
+          into a tiny show. Lands after the wipe finishes, holds, then
+          fades. */}
+      {to === 'football' ? <FootballScene paint={toP} /> : <GamingScene paint={toP} />}
+
+      {/* Incoming small label rises into place — restrained now because
+          the themed scene is the headline. */}
       <div
         style={{
           position: 'absolute',
@@ -130,7 +138,8 @@ export const ModeFlipOverlay = ({ transition }: Props) => {
           letterSpacing: 4,
           textShadow: `0 0 32px ${toP.accent}, 0 0 64px ${toP.accent2}`,
           animation: 'tb-rise-label .55s cubic-bezier(.3,1.4,.4,1) .35s both',
-          whiteSpace: 'nowrap'
+          whiteSpace: 'nowrap',
+          opacity: 0.18
         }}
       >
         {toP.emoji} {toP.label}
@@ -138,3 +147,188 @@ export const ModeFlipOverlay = ({ transition }: Props) => {
     </div>
   );
 };
+
+// ── Scene plates ────────────────────────────────────────────────────────
+
+interface SceneProps {
+  paint: ReturnType<typeof getPalette>;
+}
+
+// Football scene — two spotlight cones drop from the top corners and a
+// "WELCOME TO THE BERNABÉU" stamp smacks in with a slight rotation,
+// finishing just before the overlay clears.
+const FootballScene = ({ paint }: SceneProps) => (
+  <>
+    {/* Spotlight cones — top-left and top-right */}
+    <div
+      style={{
+        position: 'absolute',
+        top: 0,
+        left: '-10%',
+        width: '60%',
+        height: '110%',
+        background: `linear-gradient(155deg, ${paint.accent}cc 0%, ${paint.accent}66 22%, transparent 60%)`,
+        transformOrigin: 'top center',
+        transform: 'translateY(-80%) scaleY(0.4)',
+        animation: 'tb-spotlight-drop .55s cubic-bezier(.3,1.4,.4,1) .25s both',
+        mixBlendMode: 'screen',
+        opacity: 0
+      }}
+    />
+    <div
+      style={{
+        position: 'absolute',
+        top: 0,
+        right: '-10%',
+        width: '60%',
+        height: '110%',
+        background: `linear-gradient(-155deg, ${paint.accent}cc 0%, ${paint.accent}66 22%, transparent 60%)`,
+        transformOrigin: 'top center',
+        transform: 'translateY(-80%) scaleY(0.4)',
+        animation: 'tb-spotlight-drop .55s cubic-bezier(.3,1.4,.4,1) .32s both',
+        mixBlendMode: 'screen',
+        opacity: 0
+      }}
+    />
+
+    {/* WELCOME TO THE BERNABÉU stamp */}
+    <div
+      style={{
+        position: 'absolute',
+        top: '46%',
+        left: '50%',
+        animation:
+          'tb-stamp-in .42s cubic-bezier(.3,1.6,.4,1) .42s both, tb-stamp-out .2s ease-out .82s forwards',
+        opacity: 0,
+        textAlign: 'center',
+        pointerEvents: 'none'
+      }}
+    >
+      <div
+        style={{
+          fontFamily: "'DM Mono', ui-monospace, monospace",
+          fontSize: 'clamp(11px, 1.4vw, 14px)',
+          letterSpacing: 4,
+          color: paint.accent,
+          marginBottom: 6,
+          textShadow: `0 0 8px ${paint.accent}`,
+          textTransform: 'uppercase'
+        }}
+      >
+        ✦ welcome to the ✦
+      </div>
+      <div
+        style={{
+          fontFamily: "'Anton', sans-serif",
+          fontSize: 'clamp(48px, 9vw, 130px)',
+          letterSpacing: 5,
+          color: '#ffffff',
+          lineHeight: 0.95,
+          textShadow: `0 0 28px ${paint.accent}, 0 4px 0 ${paint.accent2}cc, 0 8px 22px rgba(0,0,0,0.6)`,
+          // Slight outline so the stamp reads on any background.
+          WebkitTextStroke: `2px ${paint.accent2}`
+        }}
+      >
+        BERNABÉU
+      </div>
+      <div
+        style={{
+          height: 3,
+          margin: '8px auto 0',
+          width: '70%',
+          background: `linear-gradient(90deg, transparent, ${paint.accent}, transparent)`,
+          boxShadow: `0 0 10px ${paint.accent}`
+        }}
+      />
+    </div>
+  </>
+);
+
+// Gaming scene — scanline grid pans across the screen and a faux
+// terminal types "GG · LOAD-IN" out, with a blinking cursor.
+const GamingScene = ({ paint }: SceneProps) => (
+  <>
+    {/* Scanline grid backplate */}
+    <div
+      style={{
+        position: 'absolute',
+        inset: 0,
+        backgroundImage: `repeating-linear-gradient(0deg, ${paint.accent}1a 0 1px, transparent 1px 24px), repeating-linear-gradient(90deg, ${paint.accent2}14 0 1px, transparent 1px 24px)`,
+        backgroundSize: '24px 24px, 24px 24px',
+        animation: 'tb-scanlines-pan 1.2s linear infinite, tb-flash-bright .55s ease-out .25s both',
+        mixBlendMode: 'screen',
+        opacity: 0
+      }}
+    />
+
+    {/* Terminal plate */}
+    <div
+      style={{
+        position: 'absolute',
+        top: '50%',
+        left: '50%',
+        transform: 'translate(-50%, -50%)',
+        padding: 'clamp(14px, 2vw, 22px) clamp(20px, 3vw, 36px)',
+        background: 'rgba(0,0,0,0.78)',
+        border: `1px solid ${paint.accent}`,
+        borderRadius: 6,
+        boxShadow: `0 0 38px ${paint.accent}66, inset 0 0 24px ${paint.accent2}22`,
+        animation:
+          'tb-stamp-in .38s cubic-bezier(.3,1.6,.4,1) .42s both, tb-stamp-out .2s ease-out .82s forwards',
+        opacity: 0,
+        pointerEvents: 'none'
+      }}
+    >
+      <div
+        style={{
+          fontFamily: "'DM Mono', ui-monospace, monospace",
+          fontSize: 'clamp(10px, 1.2vw, 13px)',
+          letterSpacing: 3,
+          color: paint.accent2,
+          marginBottom: 4,
+          textTransform: 'uppercase',
+          opacity: 0.7
+        }}
+      >
+        // KHALIL.OPS · MODE LOAD
+      </div>
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: 6,
+          fontFamily: "'DM Mono', ui-monospace, monospace",
+          fontSize: 'clamp(22px, 4vw, 48px)',
+          letterSpacing: 3,
+          color: paint.accent,
+          textShadow: `0 0 18px ${paint.accent}`,
+          fontWeight: 700,
+          whiteSpace: 'nowrap'
+        }}
+      >
+        <span>{'>'}</span>
+        <span
+          style={{
+            display: 'inline-block',
+            overflow: 'hidden',
+            whiteSpace: 'nowrap',
+            animation: 'tb-terminal-typeon .35s steps(12, end) .55s both'
+          }}
+        >
+          GG · LOAD-IN
+        </span>
+        <span
+          style={{
+            display: 'inline-block',
+            width: '0.55em',
+            height: '0.9em',
+            marginLeft: 2,
+            background: paint.accent,
+            boxShadow: `0 0 8px ${paint.accent}`,
+            animation: 'tb-terminal-cursor .45s steps(1, end) infinite'
+          }}
+        />
+      </div>
+    </div>
+  </>
+);

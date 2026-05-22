@@ -240,18 +240,30 @@ const Half = ({ paint, isActive, flex, onClick, onPeek, size, side }: HalfProps)
               {paint.sub}
             </div>
           )}
-          {!isActive && !isPhone && (
+          {/* Idle-side TAP hint. Renders on every viewport — on phone the
+              copy is short so it fits the narrow idle half. */}
+          {!isActive && (
             <div
               style={{
                 fontFamily: "'DM Mono', ui-monospace, monospace",
-                fontSize: 9,
-                letterSpacing: 2,
+                fontSize: isPhone ? 8 : 9,
+                letterSpacing: isPhone ? 1.2 : 2,
                 color: paint.accent,
-                opacity: 0.65,
-                marginTop: 3
+                opacity: 0.85,
+                marginTop: isPhone ? 2 : 3,
+                textTransform: 'uppercase',
+                fontWeight: 700,
+                textShadow: `0 0 4px ${paint.accent}`,
+                whiteSpace: 'nowrap'
               }}
             >
-              {side === 'left' ? '← TAP' : 'TAP →'}
+              {isPhone
+                ? side === 'left'
+                  ? '← FLIP'
+                  : 'FLIP →'
+                : side === 'left'
+                  ? '← TAP TO FLIP'
+                  : 'TAP TO FLIP →'}
             </div>
           )}
         </div>
@@ -303,11 +315,54 @@ export interface PeekDetail {
   mode: Mode | null;
 }
 
+// First-visit hint flag — set in localStorage after the toast plays once.
+// We never auto-show again so returning visitors aren't pestered.
+const HINT_STORAGE_KEY = 'khalil:flipHintSeen';
+// How long the hint stays on screen after it has slid in.
+const HINT_DWELL_MS = 4200;
+// Delay before showing — let the rest of the page paint first.
+const HINT_DELAY_MS = 1500;
+
 export const TopBarMode = () => {
   const { mode, flip, isTransitioning } = useModeFlipContext();
   const { themeKey } = useGamingTheme();
   const size = useTopbarSize();
   const height = HEIGHT_BY_SIZE[size];
+
+  // One-shot first-visit hint. Renders a small toast pointing at the idle
+  // side after a short delay; auto-dismisses, and never shows again.
+  // Suppressed entirely for visitors who already interacted with the bar.
+  const [showHint, setShowHint] = useState(false);
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    let seen = false;
+    try {
+      seen = window.localStorage.getItem(HINT_STORAGE_KEY) === '1';
+    } catch {
+      // localStorage may be disabled — default to showing the hint once
+      // per page load in that case, which is the same UX in practice.
+    }
+    if (seen) return;
+    const showT = window.setTimeout(() => setShowHint(true), HINT_DELAY_MS);
+    const hideT = window.setTimeout(() => setShowHint(false), HINT_DELAY_MS + HINT_DWELL_MS);
+    return () => {
+      window.clearTimeout(showT);
+      window.clearTimeout(hideT);
+    };
+  }, []);
+
+  // Mark hint as seen on the first user-driven flip, so it never re-shows
+  // on subsequent page loads. Keyed on `mode` changing.
+  const initialModeRef = useRef(mode);
+  useEffect(() => {
+    if (mode === initialModeRef.current) return;
+    setShowHint(false);
+    try {
+      window.localStorage.setItem(HINT_STORAGE_KEY, '1');
+    } catch {
+      /* localStorage unavailable — silently no-op */
+    }
+  }, [mode]);
 
   const broadcastPeek = (next: Mode | null) => {
     if (typeof window === 'undefined') return;
@@ -440,6 +495,34 @@ export const TopBarMode = () => {
         }}
       />
 
+      {/* Seam chevron — small arrow on the seam that points toward the
+          IDLE side and bounces every couple of seconds. Strong "I'm a
+          toggle" signal independent of the TAP TO FLIP microcopy.
+          Suppressed during the cinematic transition so it doesn't fight
+          the overlay. */}
+      {!isTransitioning && (
+        <div
+          aria-hidden
+          style={{
+            position: 'absolute',
+            top: '50%',
+            left: `${seamPct}%`,
+            animation: `${isGaming ? 'tb-chevron-right' : 'tb-chevron-left'} 2.4s ease-in-out infinite`,
+            fontFamily: "'DM Mono', ui-monospace, monospace",
+            fontSize: size === 'phone' ? 14 : 18,
+            fontWeight: 900,
+            color: isGaming ? pFoot.accent : pGaming.accent,
+            textShadow: `0 0 8px ${isGaming ? pFoot.accent : pGaming.accent}`,
+            zIndex: 6,
+            pointerEvents: 'none',
+            lineHeight: 1,
+            transition: 'left .55s cubic-bezier(.6,1.4,.3,1)'
+          }}
+        >
+          {isGaming ? '→' : '←'}
+        </div>
+      )}
+
       <Half
         paint={pFoot}
         isActive={!isGaming}
@@ -451,6 +534,39 @@ export const TopBarMode = () => {
         size={size}
         side="right"
       />
+
+      {/* First-visit "tap to flip" toast. Renders once per visitor, just
+          below the bar, near the idle side so it's clear what's
+          interactive. Auto-fades. */}
+      {showHint && !isTransitioning && (
+        <div
+          role="note"
+          style={{
+            position: 'absolute',
+            top: height - 6,
+            left: isGaming ? `calc(${seamPct}% + 24px)` : `calc(${seamPct}% - 24px)`,
+            transform: 'translate(-50%, 0)',
+            padding: size === 'phone' ? '6px 10px' : '7px 14px',
+            background: 'rgba(0,0,0,0.85)',
+            border: `1px solid ${isGaming ? pFoot.accent : pGaming.accent}`,
+            borderRadius: 4,
+            fontFamily: "'DM Mono', ui-monospace, monospace",
+            fontSize: size === 'phone' ? 9 : 10,
+            letterSpacing: 1.5,
+            color: isGaming ? pFoot.accent : pGaming.accent,
+            boxShadow: `0 6px 22px rgba(0,0,0,0.5), 0 0 14px ${isGaming ? pFoot.accent : pGaming.accent}66`,
+            backdropFilter: 'blur(6px)',
+            WebkitBackdropFilter: 'blur(6px)',
+            zIndex: 81,
+            textTransform: 'uppercase',
+            whiteSpace: 'nowrap',
+            animation: 'tb-hint-in .3s ease-out both, tb-hint-out .35s ease-in forwards ' + (HINT_DWELL_MS / 1000) + 's',
+            pointerEvents: 'none'
+          }}
+        >
+          ↔ {size === 'phone' ? 'TAP OR SWIPE' : 'TAP HERE OR SWIPE'} — TRY IT
+        </div>
+      )}
     </div>
   );
 };
