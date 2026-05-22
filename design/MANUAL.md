@@ -117,12 +117,26 @@ themes (paper, ice, storm) that flip the whole canvas bright.
 
 three ways to set it:
 
-- **FIXED** — everyone sees the one theme you pick.
-- **RANDOM** — every page refresh rolls a new color from your pool.
+- **FIXED** — pick one theme. everyone sees that one theme.
+- **RANDOM** — fresh pick from your pool on every page refresh.
   even the same person reloading the page keeps getting surprised.
-- **SHUFFLE** — each visitor gets their OWN random pick from the pool,
+- **SHUFFLE** — each visitor gets their own random pick from your pool,
   but it stays the same for them every time they come back. variety
   across visitors, calm for any one viewer.
+
+**the pool** is the set of themes you tap on in `/edit`. you control
+which themes are in the pool — could be 2, could be all 9.
+RANDOM and SHUFFLE both draw from the SAME pool you picked. they only
+differ in WHEN they pick:
+
+```
+  ┌─────────────────────────────────────────────────────────┐
+  │  YOU CURATE THE POOL   →   2-9 THEMES YOU LIKE          │
+  │                                                         │
+  │  RANDOM  → re-rolls from pool on every page load        │
+  │  SHUFFLE → rolls once per visitor, then sticks          │
+  └─────────────────────────────────────────────────────────┘
+```
 
 football mode stays a single Real Madrid palette — that's on purpose.
 

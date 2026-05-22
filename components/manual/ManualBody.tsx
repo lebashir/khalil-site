@@ -188,18 +188,27 @@ export const ManualBody = ({ mode, theme, size, content }: Props) => {
               there are dark themes (neon, lava, crt, etc.) and light
               themes (paper, ice, storm) that flip the whole canvas bright.
             </p>
-            <p style={{ margin: '10px 0 0' }}>three ways to set it:</p>
+            <p style={{ margin: '10px 0 0' }}>three ways to publish:</p>
             <ul style={{ margin: '6px 0 0', paddingLeft: 18 }}>
-              <li><strong>FIXED</strong> — everyone sees the one theme you pick.</li>
-              <li><strong>RANDOM</strong> — every page refresh rolls a new color from your pool. even reloading keeps surprising you.</li>
-              <li><strong>SHUFFLE</strong> — each visitor gets their own random pick, but it stays the same for them every time they come back.</li>
+              <li><strong>FIXED</strong> — pick one theme. everyone sees that one.</li>
+              <li><strong>RANDOM</strong> — fresh pick from your pool on every page refresh. even reloading keeps surprising you.</li>
+              <li><strong>SHUFFLE</strong> — each visitor gets their own random pick from your pool, kept the same for them every time they come back.</li>
             </ul>
             <p style={{ margin: '10px 0 0' }}>
-              football mode stays a single Real Madrid palette — that's
-              on purpose.
+              <strong>the pool</strong> is the set of themes you tap on in{' '}
+              <Code theme={theme}>/edit</Code>. you control which themes
+              are in it — could be 2, could be all 9.{' '}
+              <strong>RANDOM and SHUFFLE both draw from the SAME pool
+              you picked.</strong> they only differ in WHEN they pick:
+              random re-rolls every refresh, shuffle rolls once and
+              sticks per visitor.
             </p>
           </Prose>
         </Panel>
+
+        <Notebook>
+          football mode stays a single Real Madrid palette — that's on purpose.
+        </Notebook>
 
         <Tldr>
           one toggle swaps the entire color world. some stuff is per-mode

@@ -95,13 +95,42 @@ export const ThemeModule = ({ theme, setTheme }: Props) => {
         </ModeBtn>
         <ModeBtn active={isRandom} color={ED.pink} onClick={() => setMode('random')}>
           ◇ RANDOM
-          <Sub>new pick on every refresh</Sub>
+          <Sub>fresh pick from pool · every refresh</Sub>
         </ModeBtn>
         <ModeBtn active={isShuffle} color={ED.amber} onClick={() => setMode('shuffle')}>
           ◇ SHUFFLE
-          <Sub>each visitor keeps their pick</Sub>
+          <Sub>one pick from pool · sticky per visitor</Sub>
         </ModeBtn>
       </div>
+
+      {/* Pool-mode hint — only relevant when the user is in a pool mode.
+          Makes it explicit that both RANDOM and SHUFFLE pick from the
+          SAME curated pool below; the mode only changes the timing. */}
+      {usesPool && (
+        <div
+          style={{
+            marginBottom: 12,
+            padding: '6px 10px',
+            background: 'rgba(0,0,0,0.4)',
+            border: `1px dashed ${ED.line}`,
+            borderRadius: 3,
+            fontFamily: FONT.mono,
+            fontSize: 10,
+            letterSpacing: 1.2,
+            color: ED.inkDim,
+            textTransform: 'uppercase',
+            lineHeight: 1.5
+          }}
+        >
+          ↓ tap themes below to add/remove them from the pool.
+          {' '}
+          <span style={{ color: isRandom ? ED.pink : ED.amber }}>
+            {isRandom
+              ? 'random rolls one each refresh.'
+              : 'shuffle picks one per visitor, then sticks.'}
+          </span>
+        </div>
+      )}
 
       {/* Pool warning */}
       {poolEmpty && (
