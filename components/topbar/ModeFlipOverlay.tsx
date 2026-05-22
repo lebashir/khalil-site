@@ -8,13 +8,15 @@ interface Props {
   transition: ModeFlipTransition | null;
 }
 
-// Cinematic 900ms transition layer. Six painted layers:
+// Cinematic 900ms transition layer. Five painted layers:
 //   1. Diagonal wipe slab in the target mode's gradient (sweeps in then out)
 //   2. White flash near the midpoint
 //   3. Six skewed light streaks shooting across
-//   4. Direction-specific scene (BERNABÉU stamp or GG·LOAD-IN terminal)
-//   5. Outgoing label falls / blurs out (now sits BEHIND the scene)
-//   6. Incoming small label rises into place after the scene clears
+//   4. Outgoing label falls / blurs out (the goodbye to the previous mode)
+//   5. Direction-specific scene plate (BERNABÉU stamp going to football,
+//      GG·LOAD-IN terminal going to gaming) — this IS the welcome to the
+//      new mode; we used to render a separate dimmed incoming label here
+//      too, but it sat on top of the scene and obscured it.
 //
 // Mounted globally by <ModeFlipProvider>. Rendered conditionally on
 // `transition` — keyed by nonce so a fresh DOM is created each flip,
@@ -121,29 +123,10 @@ export const ModeFlipOverlay = ({ transition }: Props) => {
 
       {/* Direction-specific themed scene — the part that turns this flip
           into a tiny show. Lands after the wipe finishes, holds, then
-          fades. */}
+          fades. The themed scene IS the welcome to the new mode — we
+          intentionally do NOT render the giant rising label on top of
+          it; that label was redundant and obscured the stamp. */}
       {to === 'football' ? <FootballScene paint={toP} /> : <GamingScene paint={toP} />}
-
-      {/* Incoming small label rises into place — restrained now because
-          the themed scene is the headline. */}
-      <div
-        style={{
-          position: 'absolute',
-          top: '54%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          fontFamily: "'Anton', sans-serif",
-          fontSize: 'clamp(80px, 14vw, 220px)',
-          color: toP.ink,
-          letterSpacing: 4,
-          textShadow: `0 0 32px ${toP.accent}, 0 0 64px ${toP.accent2}`,
-          animation: 'tb-rise-label .55s cubic-bezier(.3,1.4,.4,1) .35s both',
-          whiteSpace: 'nowrap',
-          opacity: 0.18
-        }}
-      >
-        {toP.emoji} {toP.label}
-      </div>
     </div>
   );
 };
@@ -191,12 +174,14 @@ const FootballScene = ({ paint }: SceneProps) => (
       }}
     />
 
-    {/* WELCOME TO THE BERNABÉU stamp */}
+    {/* WELCOME TO THE BERNABÉU stamp. z-index lifts it above the slab
+        + flash + streaks so nothing can paint over it mid-flip. */}
     <div
       style={{
         position: 'absolute',
-        top: '46%',
+        top: '50%',
         left: '50%',
+        zIndex: 10,
         animation:
           'tb-stamp-in .42s cubic-bezier(.3,1.6,.4,1) .42s both, tb-stamp-out .2s ease-out .82s forwards',
         opacity: 0,
@@ -207,12 +192,13 @@ const FootballScene = ({ paint }: SceneProps) => (
       <div
         style={{
           fontFamily: "'DM Mono', ui-monospace, monospace",
-          fontSize: 'clamp(11px, 1.4vw, 14px)',
-          letterSpacing: 4,
+          fontSize: 'clamp(12px, 1.6vw, 16px)',
+          letterSpacing: 5,
           color: paint.accent,
-          marginBottom: 6,
-          textShadow: `0 0 8px ${paint.accent}`,
-          textTransform: 'uppercase'
+          marginBottom: 8,
+          textShadow: `0 0 10px ${paint.accent}`,
+          textTransform: 'uppercase',
+          fontWeight: 700
         }}
       >
         ✦ welcome to the ✦
@@ -220,12 +206,12 @@ const FootballScene = ({ paint }: SceneProps) => (
       <div
         style={{
           fontFamily: "'Anton', sans-serif",
-          fontSize: 'clamp(48px, 9vw, 130px)',
-          letterSpacing: 5,
+          fontSize: 'clamp(54px, 10vw, 150px)',
+          letterSpacing: 6,
           color: '#ffffff',
           lineHeight: 0.95,
-          textShadow: `0 0 28px ${paint.accent}, 0 4px 0 ${paint.accent2}cc, 0 8px 22px rgba(0,0,0,0.6)`,
-          // Slight outline so the stamp reads on any background.
+          textShadow: `0 0 32px ${paint.accent}, 0 4px 0 ${paint.accent2}cc, 0 10px 24px rgba(0,0,0,0.75)`,
+          // Outline so the stamp reads on any background.
           WebkitTextStroke: `2px ${paint.accent2}`
         }}
       >
@@ -234,7 +220,7 @@ const FootballScene = ({ paint }: SceneProps) => (
       <div
         style={{
           height: 3,
-          margin: '8px auto 0',
+          margin: '10px auto 0',
           width: '70%',
           background: `linear-gradient(90deg, transparent, ${paint.accent}, transparent)`,
           boxShadow: `0 0 10px ${paint.accent}`
@@ -261,18 +247,20 @@ const GamingScene = ({ paint }: SceneProps) => (
       }}
     />
 
-    {/* Terminal plate */}
+    {/* Terminal plate. z-index lifts it above the slab + flash + streaks
+        so nothing can paint over it mid-flip. */}
     <div
       style={{
         position: 'absolute',
         top: '50%',
         left: '50%',
+        zIndex: 10,
         transform: 'translate(-50%, -50%)',
-        padding: 'clamp(14px, 2vw, 22px) clamp(20px, 3vw, 36px)',
-        background: 'rgba(0,0,0,0.78)',
-        border: `1px solid ${paint.accent}`,
+        padding: 'clamp(16px, 2.2vw, 26px) clamp(22px, 3.4vw, 42px)',
+        background: 'rgba(0,0,0,0.85)',
+        border: `2px solid ${paint.accent}`,
         borderRadius: 6,
-        boxShadow: `0 0 38px ${paint.accent}66, inset 0 0 24px ${paint.accent2}22`,
+        boxShadow: `0 0 44px ${paint.accent}80, inset 0 0 30px ${paint.accent2}33, 0 12px 30px rgba(0,0,0,0.7)`,
         animation:
           'tb-stamp-in .38s cubic-bezier(.3,1.6,.4,1) .42s both, tb-stamp-out .2s ease-out .82s forwards',
         opacity: 0,
