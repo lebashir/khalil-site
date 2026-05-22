@@ -45,13 +45,16 @@ export interface VideoEditorial {
 }
 
 export interface GamingThemeSettings {
-  /** 'fixed' = every visitor sees `fixedKey`.
-   *  'random' = visitors get a random pick from `pool` (sticky per
-   *  browser via localStorage; re-randomized if the pool changes). */
-  mode: 'fixed' | 'random';
+  /** 'fixed'   — every visitor sees `fixedKey`.
+   *  'random'  — visitors get a fresh random pick from `pool` on EVERY
+   *              page load (no localStorage, no stickiness).
+   *  'shuffle' — visitors get a random pick from `pool` that's sticky per
+   *              browser (saved in localStorage; re-randomized if the
+   *              pool changes or the saved key is no longer in it). */
+  mode: 'fixed' | 'random' | 'shuffle';
   /** Used when mode === 'fixed'. Always a valid GamingThemeKey. */
   fixedKey: string;
-  /** Used when mode === 'random'. Subset of valid GamingThemeKeys. */
+  /** Used when mode is 'random' or 'shuffle'. Subset of valid keys. */
   pool: string[];
 }
 
@@ -368,8 +371,16 @@ export const validateContent = (raw: unknown, base?: SiteContent): ValidationRes
       ? (themeRaw.gaming as Record<string, unknown>)
       : null;
   const currentGaming = current.theme?.gaming;
-  const themeMode: 'fixed' | 'random' =
-    gamingRaw?.mode === 'random' ? 'random' : gamingRaw?.mode === 'fixed' ? 'fixed' : currentGaming?.mode ?? 'fixed';
+  // Coerce mode to one of the three valid values. Unknown values fall
+  // back to the previously-saved mode (or 'fixed' for the first save).
+  const themeMode: 'fixed' | 'random' | 'shuffle' =
+    gamingRaw?.mode === 'random'
+      ? 'random'
+      : gamingRaw?.mode === 'shuffle'
+        ? 'shuffle'
+        : gamingRaw?.mode === 'fixed'
+          ? 'fixed'
+          : currentGaming?.mode ?? 'fixed';
   const themeFixedKey =
     typeof gamingRaw?.fixedKey === 'string' && isGamingThemeKey(gamingRaw.fixedKey)
       ? gamingRaw.fixedKey

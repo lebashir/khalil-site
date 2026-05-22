@@ -115,8 +115,14 @@ swap into without leaving gaming mode. you pick them in `/edit` →
 THEME · GAMING. there are dark themes (neon, lava, crt, etc.) and light
 themes (paper, ice, storm) that flip the whole canvas bright.
 
-you can also turn on **random** mode — pick a few themes for the pool
-and each visitor gets a random one. fun for surprising people.
+three ways to set it:
+
+- **FIXED** — everyone sees the one theme you pick.
+- **RANDOM** — every page refresh rolls a new color from your pool.
+  even the same person reloading the page keeps getting surprised.
+- **SHUFFLE** — each visitor gets their OWN random pick from the pool,
+  but it stays the same for them every time they come back. variety
+  across visitors, calm for any one viewer.
 
 football mode stays a single Real Madrid palette — that's on purpose.
 
@@ -353,7 +359,7 @@ session to the next:
 | **LIVE STATUS**  | mood LED + sub count (current + goal)              |
 | **NOW · EQUIPPED / STARTING XI** | what you're playing/watching/reading/listening (per mode) |
 | **PINNED REPLAY** | which video shows up first in the REPLAYS section |
-| **THEME · GAMING** | which color palette gaming mode uses (9 to pick from). also turn on RANDOM to give each visitor a different one. |
+| **THEME · GAMING** | which color palette gaming mode uses (9 to pick from). FIXED = one for everyone. RANDOM = new pick every refresh. SHUFFLE = each visitor keeps their own random pick. |
 
 things like your handle, hero copy, about paragraphs, book, socials,
 replay style and boot mode are the **permanent identity** of the site

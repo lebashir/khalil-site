@@ -187,8 +187,14 @@ export const ManualBody = ({ mode, theme, size, content }: Props) => {
               them in <Code theme={theme}>/edit</Code> → THEME · GAMING.
               there are dark themes (neon, lava, crt, etc.) and light
               themes (paper, ice, storm) that flip the whole canvas bright.
-              you can also turn on <strong>RANDOM</strong> mode — pick a
-              few themes for the pool and each visitor gets a surprise.
+            </p>
+            <p style={{ margin: '10px 0 0' }}>three ways to set it:</p>
+            <ul style={{ margin: '6px 0 0', paddingLeft: 18 }}>
+              <li><strong>FIXED</strong> — everyone sees the one theme you pick.</li>
+              <li><strong>RANDOM</strong> — every page refresh rolls a new color from your pool. even reloading keeps surprising you.</li>
+              <li><strong>SHUFFLE</strong> — each visitor gets their own random pick, but it stays the same for them every time they come back.</li>
+            </ul>
+            <p style={{ margin: '10px 0 0' }}>
               football mode stays a single Real Madrid palette — that's
               on purpose.
             </p>
@@ -421,7 +427,7 @@ export const ManualBody = ({ mode, theme, size, content }: Props) => {
               ['LIVE STATUS', 'mood LED + sub count (current + goal)'],
               ['NOW', "what you're playing / watching / reading / listening (per mode)"],
               ['PINNED REPLAY', 'which video shows up first in REPLAYS'],
-              ['THEME · GAMING', '9 color palettes to pick from. fixed (everyone sees one) or random (surprise per visitor).']
+              ['THEME · GAMING', '9 color palettes. FIXED = one for everyone · RANDOM = new pick every refresh · SHUFFLE = each visitor keeps their own pick.']
             ]}
             theme={theme}
           />

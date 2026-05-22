@@ -63,7 +63,7 @@ const RootLayout = ({ children }: { children: React.ReactNode }) => {
   const rawFixedKey = themeSettings?.fixedKey;
   const publishedThemeKey: GamingThemeKey =
     rawFixedKey && isGamingThemeKey(rawFixedKey) ? rawFixedKey : DEFAULT_GAMING_THEME;
-  const themeMode: 'fixed' | 'random' = themeSettings?.mode ?? 'fixed';
+  const themeMode: 'fixed' | 'random' | 'shuffle' = themeSettings?.mode ?? 'fixed';
   // Filter the pool to known-valid keys so the inline script never picks
   // a stale key (e.g. content.json was set when a theme existed that's
   // since been removed from the registry).
@@ -75,12 +75,18 @@ const RootLayout = ({ children }: { children: React.ReactNode }) => {
   // CSS-var-driven elements (every consumer of --bg-1, --accent, …)
   // resolve to the right values on first frame.
   //
-  // Theme resolution priority (descending):
-  //   1. localStorage[khalil-gaming-theme] if valid AND still in pool
-  //      (random mode) — sticky for returning visitors / Khalil's preview
-  //   2. If random mode + pool non-empty — pick one + persist
-  //   3. publishedThemeKey (the fixed setting from content.json)
-  //   4. DEFAULT_GAMING_THEME
+  // Theme resolution by mode:
+  //   FIXED   — always the publishedThemeKey. localStorage saved theme
+  //             still wins (so Khalil's preview persists across his own
+  //             reloads), unless the saved key is no longer valid.
+  //   RANDOM  — picks fresh from `pool` on every page load. Ignores
+  //             localStorage entirely. The site never stays the same
+  //             twice — every refresh is a surprise.
+  //   SHUFFLE — picks once and remembers (sticky per browser via
+  //             localStorage). Re-rolls if the saved theme dropped out
+  //             of the pool. The visitor has "their" colors.
+  //   (FIXED still respects Khalil's saved preview so he can preview
+  //   without affecting other visitors.)
   const inlineModeScript = `
     (function() {
       try {
@@ -94,17 +100,27 @@ const RootLayout = ({ children }: { children: React.ReactNode }) => {
         var published = '${publishedThemeKey}';
 
         var saved = localStorage.getItem('khalil-gaming-theme');
+        var savedValid = saved && validThemes.indexOf(saved) !== -1;
         var theme;
 
-        var savedValid = saved && validThemes.indexOf(saved) !== -1;
-        var savedInPool = savedValid && pool.indexOf(saved) !== -1;
-
-        if (savedValid && (themeMode === 'fixed' || pool.length === 0 || savedInPool)) {
-          // Khalil's preview OR a sticky random pick that's still in the pool
-          theme = saved;
-        } else if (themeMode === 'random' && pool.length > 0) {
+        if (themeMode === 'random' && pool.length > 0) {
+          // Truly random: fresh roll on every load, do NOT persist.
           theme = pool[Math.floor(Math.random() * pool.length)];
-          try { localStorage.setItem('khalil-gaming-theme', theme); } catch (e) {}
+        } else if (themeMode === 'shuffle' && pool.length > 0) {
+          // Sticky random: reuse the saved pick if it's still in the
+          // pool; otherwise roll a new one and save it.
+          var savedInPool = savedValid && pool.indexOf(saved) !== -1;
+          if (savedInPool) {
+            theme = saved;
+          } else {
+            theme = pool[Math.floor(Math.random() * pool.length)];
+            try { localStorage.setItem('khalil-gaming-theme', theme); } catch (e) {}
+          }
+        } else if (savedValid) {
+          // FIXED mode (or random/shuffle with empty pool) — honor a
+          // locally-saved preview if present (lets Khalil see his pick
+          // without changing what visitors see).
+          theme = saved;
         } else {
           theme = published;
         }

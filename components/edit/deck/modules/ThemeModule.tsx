@@ -18,6 +18,8 @@ interface Props {
   setTheme: (next: GamingThemeSettings) => void;
 }
 
+type ThemeMode = 'fixed' | 'random' | 'shuffle';
+
 const DEFAULT_SETTINGS: GamingThemeSettings = {
   mode: 'fixed',
   fixedKey: DEFAULT_GAMING_THEME,
@@ -32,7 +34,8 @@ const normalize = (raw: GamingThemeSettings | undefined): GamingThemeSettings =>
   const src = raw ?? DEFAULT_SETTINGS;
   const fixedKey = isGamingThemeKey(src.fixedKey) ? src.fixedKey : DEFAULT_GAMING_THEME;
   const pool = (src.pool ?? []).filter(isGamingThemeKey);
-  const mode: 'fixed' | 'random' = src.mode === 'random' ? 'random' : 'fixed';
+  const mode: ThemeMode =
+    src.mode === 'random' ? 'random' : src.mode === 'shuffle' ? 'shuffle' : 'fixed';
   return { mode, fixedKey, pool };
 };
 
@@ -49,7 +52,7 @@ export const ThemeModule = ({ theme, setTheme }: Props) => {
   const settings = normalize(theme);
   const { themeKey: localPreview, setThemeKey, clearLocalOverride } = useGamingTheme();
 
-  const setMode = (next: 'fixed' | 'random') => {
+  const setMode = (next: ThemeMode) => {
     setTheme({ ...settings, mode: next });
   };
 
@@ -69,28 +72,34 @@ export const ThemeModule = ({ theme, setTheme }: Props) => {
 
   const previewOnly = (k: GamingThemeKey) => setThemeKey(k);
 
+  const isFixed = settings.mode === 'fixed';
   const isRandom = settings.mode === 'random';
-  const poolEmpty = isRandom && settings.pool.length === 0;
+  const isShuffle = settings.mode === 'shuffle';
+  const usesPool = isRandom || isShuffle;
+  const poolEmpty = usesPool && settings.pool.length === 0;
 
   return (
     <Panel title="THEME · GAMING" kicker="// picks the gaming-mode palette for visitors" accent={ED.pink}>
-      {/* Mode toggle — Fixed vs Random */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6, marginBottom: 14 }}>
-        <ModeBtn
-          active={!isRandom}
-          color={ED.green}
-          onClick={() => setMode('fixed')}
-        >
+      {/* Mode toggle — three rows wrap nicely on phone, render side by side on desktop */}
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
+          gap: 6,
+          marginBottom: 14
+        }}
+      >
+        <ModeBtn active={isFixed} color={ED.green} onClick={() => setMode('fixed')}>
           ◇ FIXED
           <Sub>everyone sees one theme</Sub>
         </ModeBtn>
-        <ModeBtn
-          active={isRandom}
-          color={ED.pink}
-          onClick={() => setMode('random')}
-        >
+        <ModeBtn active={isRandom} color={ED.pink} onClick={() => setMode('random')}>
           ◇ RANDOM
-          <Sub>each visitor gets a surprise</Sub>
+          <Sub>new pick on every refresh</Sub>
+        </ModeBtn>
+        <ModeBtn active={isShuffle} color={ED.amber} onClick={() => setMode('shuffle')}>
+          ◇ SHUFFLE
+          <Sub>each visitor keeps their pick</Sub>
         </ModeBtn>
       </div>
 
@@ -124,14 +133,15 @@ export const ThemeModule = ({ theme, setTheme }: Props) => {
       >
         {GAMING_THEME_ORDER.map((key) => {
           const t = GAMING_THEMES[key]!;
-          const selected = isRandom ? settings.pool.includes(key) : key === settings.fixedKey;
+          // FIXED mode picks one. RANDOM and SHUFFLE both build a pool.
+          const selected = usesPool ? settings.pool.includes(key) : key === settings.fixedKey;
           const previewing = localPreview === key;
           const isLight = isLightGamingTheme(t);
           return (
             <button
               key={key}
               type="button"
-              onClick={() => (isRandom ? togglePool(key) : setFixed(key))}
+              onClick={() => (usesPool ? togglePool(key) : setFixed(key))}
               onMouseEnter={() => {
                 // Hover-to-preview only — actual click commits and persists.
                 if (localPreview !== key) previewOnly(key);
@@ -228,7 +238,7 @@ export const ThemeModule = ({ theme, setTheme }: Props) => {
                     borderRadius: 2
                   }}
                 >
-                  {isRandom ? '✓ POOL' : '◆ ACTIVE'}
+                  {usesPool ? '✓ POOL' : '◆ ACTIVE'}
                 </span>
               )}
             </button>
@@ -261,9 +271,9 @@ export const ThemeModule = ({ theme, setTheme }: Props) => {
           previewing: <span style={{ color: ED.amber }}>{localPreview}</span>
           {' · '}
           published: <span style={{ color: ED.green }}>
-            {isRandom
+            {usesPool
               ? settings.pool.length > 0
-                ? `random (${settings.pool.length})`
+                ? `${settings.mode} (${settings.pool.length})`
                 : `${settings.fixedKey} · pool empty`
               : settings.fixedKey}
           </span>
@@ -276,9 +286,12 @@ export const ThemeModule = ({ theme, setTheme }: Props) => {
             // setting after iterating in preview.
             clearLocalOverride();
             // Update local preview state to match published immediately.
-            const target = isRandom && settings.pool.length > 0
-              ? settings.pool[0]!
-              : settings.fixedKey;
+            // For RANDOM / SHUFFLE we can't predict the visitor's roll,
+            // so we show the first pool entry as a representative pick.
+            const target =
+              usesPool && settings.pool.length > 0
+                ? settings.pool[0]!
+                : settings.fixedKey;
             if (isGamingThemeKey(target)) setThemeKey(target);
           }}
           style={{
