@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { GamingThemeSettings, Mode, Mood, NowBlock, SiteContent } from '@/lib/content';
 import type { VideoItem } from '@/lib/youtube';
+import type { ChannelStats } from '@/lib/youtube-channel';
 import { playPlunger } from '@/lib/audio/sounds';
 import { ED, FONT, type FuseId, type PayloadId } from './constants';
 import { TopBar, type DeckTab } from './TopBar';
@@ -11,6 +12,7 @@ import { MessageLauncher } from './MessageLauncher';
 import { Panel } from './primitives';
 import { StatusModule } from './modules/StatusModule';
 import { SubsModule } from './modules/SubsModule';
+import { HeroTagsModule } from './modules/HeroTagsModule';
 import { NowPlayingModule } from './modules/NowPlayingModule';
 import { PinnedVideoModule } from './modules/PinnedVideoModule';
 import { ThemeModule } from './modules/ThemeModule';
@@ -19,6 +21,7 @@ import { InlineEditView } from './inline/InlineEditView';
 interface ControlDeckProps {
   initialContent: SiteContent;
   videos: VideoItem[];
+  channelStats: ChannelStats | null;
 }
 
 const SAVE_TOAST_MS = 5000;
@@ -64,7 +67,7 @@ const useViewport = (): Viewport => {
 //
 // Save posts the full SiteContent JSON to /api/edit/save so the API
 // contract is unchanged regardless of which tab made the edits.
-export const ControlDeck = ({ initialContent, videos }: ControlDeckProps) => {
+export const ControlDeck = ({ initialContent, videos, channelStats }: ControlDeckProps) => {
   const { isPhone, isDesktop } = useViewport();
   const [content, setContent] = useState<SiteContent>(initialContent);
   const [mode, setMode] = useState<Mode>(initialContent.defaultMode);
@@ -235,6 +238,8 @@ export const ControlDeck = ({ initialContent, videos }: ControlDeckProps) => {
             setPinnedId={setPinnedId}
             setThemeSettings={setThemeSettings}
             crtRef={crtRef}
+            channelStats={channelStats}
+            setContent={setContent}
           />
         )}
       </main>
@@ -337,6 +342,8 @@ interface LaunchTabProps {
   setPinnedId: (id: string | null) => void;
   setThemeSettings: (t: GamingThemeSettings) => void;
   crtRef: React.RefObject<HTMLDivElement | null>;
+  channelStats: ChannelStats | null;
+  setContent: (next: SiteContent) => void;
 }
 
 const LaunchTab = ({
@@ -360,7 +367,9 @@ const LaunchTab = ({
   setNow,
   setPinnedId,
   setThemeSettings,
-  crtRef
+  crtRef,
+  channelStats,
+  setContent
 }: LaunchTabProps) => {
   // Reusable nodes — same instances rendered in either layout
   const launchWindow = (
@@ -405,6 +414,14 @@ const LaunchTab = ({
       </div>
     </Panel>
   );
+  const heroTagsPanel = (
+    <HeroTagsModule
+      content={content}
+      setContent={setContent}
+      channelStats={channelStats}
+      videos={videos}
+    />
+  );
   const nowPlaying = (
     <NowPlayingModule mode={mode} now={content.now[mode]} setNow={setNow} />
   );
@@ -428,6 +445,7 @@ const LaunchTab = ({
         {launchWindow}
         {messageLauncher}
         {liveStatusPanel}
+        {heroTagsPanel}
         {nowPlaying}
         {pinnedVideo}
         {themePicker}
@@ -442,6 +460,7 @@ const LaunchTab = ({
       <div style={{ display: 'flex', flexDirection: 'column', gap: 14, minWidth: 0 }}>
         {launchWindow}
         {liveStatusPanel}
+        {heroTagsPanel}
         {nowPlaying}
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 14, minWidth: 0 }}>

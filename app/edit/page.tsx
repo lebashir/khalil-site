@@ -2,6 +2,7 @@ import { cookies } from 'next/headers';
 import { getContent } from '@/lib/content';
 import { SESSION_COOKIE, verifyToken } from '@/lib/edit-session';
 import { getRecentVideos } from '@/lib/youtube';
+import { getChannelStats } from '@/lib/youtube-channel';
 import { LoginForm } from '@/components/edit/LoginForm';
 import { ControlDeck } from '@/components/edit/deck/ControlDeck';
 
@@ -28,10 +29,13 @@ const EditPage = async () => {
   if (!isLoggedIn) return <LoginForm />;
 
   const content = getContent();
-  // Pull videos so the PinnedVideoModule + ReplaysPreview have data.
-  // Falls back to an empty list if no YOUTUBE_API_KEY is set.
-  const { videos } = await getRecentVideos();
-  return <ControlDeck initialContent={content} videos={videos} />;
+  // Pull videos and channel stats in parallel.
+  // Both fall back gracefully when no YOUTUBE_API_KEY is set.
+  const [{ videos }, channelStats] = await Promise.all([
+    getRecentVideos(),
+    getChannelStats()
+  ]);
+  return <ControlDeck initialContent={content} videos={videos} channelStats={channelStats} />;
 };
 
 export default EditPage;
