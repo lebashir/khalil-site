@@ -122,8 +122,8 @@
   "images": {},
   "theme": {
     "gaming": {
-      "mode": "random",
-      "fixedKey": "storm",
+      "mode": "fixed",
+      "fixedKey": "neon",
       "pool": [
         "storm",
         "deep",
@@ -132,7 +132,6 @@
         "mono",
         "lava",
         "toxic",
-        "neon",
         "crt"
       ]
     }
