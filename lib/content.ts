@@ -34,6 +34,27 @@ export interface DesignThumb {
 
 export type VideoTier = 'LEGENDARY' | 'EPIC' | 'RARE' | 'COMMON';
 
+export type TagSource = 'manual' | 'subs' | 'views' | 'videos' | 'pinnedLikes';
+export type TagPosition = 'tl' | 'tr' | 'bl' | 'br';
+
+export interface FloatingTagConfig {
+  enabled: boolean;
+  source: TagSource;
+  label: string;
+  manualValue: string;
+  position: TagPosition;
+}
+
+export interface Song {
+  id: string;
+  title: string;
+  audioUrl: string;
+  coverUrl: string | null;
+  durationSeconds: number | null;
+  visible: boolean;
+  sunoUrl?: string;
+}
+
 export type Mood = 'online' | 'on-fire' | 'streaming' | 'in-school' | 'sleeping';
 
 export interface VideoEditorial {
@@ -89,6 +110,16 @@ export interface SiteContent {
   /** Optional. When absent, falls back to DEFAULT_GAMING_THEME ('neon').
    *  Validated + written by ThemeModule in /edit (Phase 4+). */
   theme?: ThemeSettings;
+  /** Exactly 4 entries — one per corner of the hero polaroid. Disabled
+   *  slots leave that corner empty. */
+  floatingTags: FloatingTagConfig[];
+  /** Ordered Suno-style songs. Max 12 entries. Invisible entries excluded
+   *  from public site. */
+  songs: Song[];
+  /** Manual fallback values for the VIEWS / VIDEOS floating tags when
+   *  source is 'manual' or when the wired API returns null. */
+  viewsManual: number;
+  videosManual: number;
 }
 
 // Well-known image slots. Video tile slots (`replay-{videoId}`) are
@@ -99,10 +130,14 @@ export type StaticImageSlot = (typeof STATIC_IMAGE_SLOTS)[number];
 
 // Pattern for dynamic per-video thumbnail slots.
 const REPLAY_SLOT_RE = /^replay-[A-Za-z0-9_-]{3,40}$/;
+// Pattern for song-cover image slots — keyed by the song's short id.
+const SONG_COVER_SLOT_RE = /^song-cover-[a-z0-9]{6,12}$/;
 
 export const isValidImageSlotId = (id: string): boolean => {
   if ((STATIC_IMAGE_SLOTS as readonly string[]).includes(id)) return true;
-  return REPLAY_SLOT_RE.test(id);
+  if (REPLAY_SLOT_RE.test(id)) return true;
+  if (SONG_COVER_SLOT_RE.test(id)) return true;
+  return false;
 };
 
 // Per-field length rails — also used by the /edit form to enforce.
@@ -121,7 +156,11 @@ export const FIELD_LIMITS = {
   handle: 40,
   nowField: 80,
   statValue: 12,
-  statLabel: 16
+  statLabel: 16,
+  tagLabel: 8,
+  tagValue: 12,
+  songTitle: 80,
+  songSunoUrl: 200
 } as const;
 
 const MOODS: Mood[] = ['online', 'on-fire', 'streaming', 'in-school', 'sleeping'];
@@ -210,6 +249,71 @@ const buildTiers = (raw: unknown, fallback: VideoTier[]): VideoTier[] => {
     }
   }
   return out.length > 0 ? out : fallback;
+};
+
+const VALID_TAG_SOURCES: TagSource[] = ['manual', 'subs', 'views', 'videos', 'pinnedLikes'];
+const VALID_TAG_POSITIONS: TagPosition[] = ['tl', 'tr', 'bl', 'br'];
+const BLOB_HOST_RE = /^https:\/\/[a-z0-9-]+\.public\.blob\.vercel-storage\.com\//i;
+
+const buildFloatingTags = (
+  raw: unknown,
+  fallback: FloatingTagConfig[]
+): FloatingTagConfig[] => {
+  // Force exactly-4 length so the corners-model invariant always holds.
+  // Anything malformed silently coerces to the fallback at that position.
+  const arr = Array.isArray(raw) ? raw : [];
+  const positions: TagPosition[] = ['tl', 'tr', 'bl', 'br'];
+  return positions.map((position, i) => {
+    const src = (arr[i] ?? {}) as Partial<FloatingTagConfig>;
+    const fb = fallback[i] ?? {
+      enabled: false,
+      source: 'manual' as TagSource,
+      label: '',
+      manualValue: '',
+      position
+    };
+    const source: TagSource = VALID_TAG_SOURCES.includes(src.source as TagSource)
+      ? (src.source as TagSource)
+      : fb.source;
+    const label = typeof src.label === 'string'
+      ? src.label.slice(0, FIELD_LIMITS.tagLabel)
+      : fb.label;
+    const manualValue = typeof src.manualValue === 'string'
+      ? src.manualValue.slice(0, FIELD_LIMITS.tagValue)
+      : fb.manualValue;
+    const enabled = typeof src.enabled === 'boolean' ? src.enabled : fb.enabled;
+    return { enabled, source, label, manualValue, position };
+  });
+};
+
+const SONG_ID_RE = /^[a-z0-9]{6,12}$/;
+
+const buildSong = (raw: unknown, errors: string[]): Song | null => {
+  if (!raw || typeof raw !== 'object') return null;
+  const s = raw as Partial<Song>;
+  const id = typeof s.id === 'string' && SONG_ID_RE.test(s.id) ? s.id : null;
+  if (!id) { errors.push('Song id is missing or malformed.'); return null; }
+  const title = typeof s.title === 'string' ? s.title.trim().slice(0, FIELD_LIMITS.songTitle) : '';
+  if (!title) { errors.push(`Song ${id}: title is required.`); return null; }
+  const audioUrl = typeof s.audioUrl === 'string' ? s.audioUrl.trim() : '';
+  if (!BLOB_HOST_RE.test(audioUrl)) {
+    errors.push(`Song ${id}: audioUrl must be a Vercel Blob URL.`);
+    return null;
+  }
+  const coverUrl = typeof s.coverUrl === 'string'
+    ? (BLOB_HOST_RE.test(s.coverUrl.trim()) ? s.coverUrl.trim() : null)
+    : null;
+  const durationSeconds = typeof s.durationSeconds === 'number' && s.durationSeconds > 0 && s.durationSeconds <= 600
+    ? Math.floor(s.durationSeconds)
+    : null;
+  const visible = typeof s.visible === 'boolean' ? s.visible : true;
+  let sunoUrl: string | undefined;
+  if (typeof s.sunoUrl === 'string' && s.sunoUrl.trim()) {
+    const trimmed = s.sunoUrl.trim().slice(0, FIELD_LIMITS.songSunoUrl);
+    if (isHttpUrl(trimmed)) sunoUrl = trimmed;
+    else errors.push(`Song ${id}: sunoUrl must be a valid https URL.`);
+  }
+  return { id, title, audioUrl, coverUrl, durationSeconds, visible, sunoUrl };
 };
 
 // Validates a submission against the current schema. Older /edit form
@@ -415,6 +519,31 @@ export const validateContent = (raw: unknown, base?: SiteContent): ValidationRes
     images[key] = trimmed;
   }
 
+  // Floating tags — exactly 4 (one per corner). Falls back to current
+  // tags when raw is missing/malformed so partial save payloads round-trip.
+  const floatingTags = buildFloatingTags(c.floatingTags, current.floatingTags);
+
+  // Songs — max 12 visible+invisible. Each invalid entry silently dropped
+  // with an error so the rest still saves.
+  const songsRaw = Array.isArray(c.songs) ? c.songs : current.songs;
+  const songs: Song[] = [];
+  for (const raw of songsRaw) {
+    const song = buildSong(raw, errors);
+    if (song) songs.push(song);
+    if (songs.length >= 12) break;
+  }
+  if (Array.isArray(c.songs) && c.songs.length > 12) {
+    errors.push('Too many songs (max 12). Remove some before saving.');
+  }
+
+  // Manual fallback values for views/videos floating tags.
+  const viewsManual = typeof c.viewsManual === 'number' && c.viewsManual >= 0
+    ? Math.floor(c.viewsManual)
+    : current.viewsManual ?? 0;
+  const videosManual = typeof c.videosManual === 'number' && c.videosManual >= 0
+    ? Math.floor(c.videosManual)
+    : current.videosManual ?? 0;
+
   const content: SiteContent = {
     defaultMode: defaultMode as Mode,
     handle,
@@ -431,7 +560,11 @@ export const validateContent = (raw: unknown, base?: SiteContent): ValidationRes
     videos,
     socials: { tiktok, instagram },
     images,
-    theme: themeSettings
+    theme: themeSettings,
+    floatingTags,
+    songs,
+    viewsManual,
+    videosManual
   };
 
   if (errors.length > 0) return { ok: false, errors };
