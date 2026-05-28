@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import type { DesignThumb, Mode, VideoTier } from '@/lib/content';
 import type { VideoItem } from '@/lib/youtube';
-import { formatViews, formatRelative } from '@/lib/youtube';
+import { formatViews, formatRelative, formatCount } from '@/lib/youtube';
 import type { ArenaTheme } from './theme';
 import { Pressable } from '@/components/fx';
 
@@ -315,6 +315,9 @@ export const VideoCard = ({ video, theme, tier, big = false, useDesignThumb, des
             }}
           >
             ▸ {views}
+            {video.likeCount !== null && video.likeCount > 0 && !video.isLive && (
+              <> · ♥ {formatCount(video.likeCount)}</>
+            )}
           </span>
           {ago && (
             <span
