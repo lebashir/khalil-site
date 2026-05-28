@@ -77,8 +77,8 @@
     "status": "first copies dropping soon"
   },
   "videos": {
-    "useDesignThumbForFeatured": false,
-    "useDesignThumbsForRest": false,
+    "useDesignThumbForFeatured": true,
+    "useDesignThumbsForRest": true,
     "designThumbs": [
       {
         "from": "#5b3aa6",
