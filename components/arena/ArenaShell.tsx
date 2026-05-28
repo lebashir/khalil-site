@@ -16,6 +16,7 @@ import { Hero } from './Hero';
 import { SubsHud } from './SubsHud';
 import { NowDock } from './NowDock';
 import { Videos } from './Videos';
+import { Bangers } from './Bangers';
 import { About } from './About';
 import { Book } from './Book';
 import { Foot } from './Foot';
@@ -88,6 +89,7 @@ export const ArenaShell = ({ content, videos, videoError, channelStats }: Props)
           images={content.images}
           error={videoError}
         />
+        <Bangers songs={content.songs} theme={theme} size={size} />
         <About paragraphs={content.about} theme={theme} size={size} />
         <Book
           book={content.book}
