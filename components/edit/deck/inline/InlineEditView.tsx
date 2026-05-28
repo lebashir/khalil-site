@@ -23,6 +23,8 @@ import { BookPreview } from './BookPreview';
 import { FooterPreview } from './FooterPreview';
 import { ImagesPreview } from './ImagesPreview';
 import { ImageDropzone } from './ImageDropzone';
+import { BangersPreview } from './BangersPreview';
+import { BangersEditor } from './BangersEditor';
 
 // PinKey covers ONLY on-site-editor sections (the site's permanent
 // identity + content). Session-level pins (mood, subs, now, pinned
@@ -36,7 +38,8 @@ type PinKey =
   | 'about'
   | 'book'
   | 'socials'
-  | 'defaults';
+  | 'defaults'
+  | 'bangers';
 
 interface InlineEditViewProps {
   mode: Mode;
@@ -81,6 +84,7 @@ export const InlineEditView = ({
   const setSocials = (socials: SiteContent['socials']) => setContent({ ...content, socials });
   const setVideos = (videos: SiteContent['videos']) => setContent({ ...content, videos });
   const setDefaultMode = (defaultMode: Mode) => setContent({ ...content, defaultMode });
+  const setSongs = (songs: SiteContent['songs']) => setContent({ ...content, songs });
   // Immutable per-slot image update — pass null to remove. The dropzones
   // and the BOOK pin's cover field both call this; book-cover stays in
   // sync because they share the slot id.
@@ -102,7 +106,8 @@ export const InlineEditView = ({
     setSocials,
     setVideos,
     setDefaultMode,
-    setImage
+    setImage,
+    setSongs
   });
 
   return (
@@ -169,6 +174,7 @@ export const InlineEditView = ({
         images={content.images}
         onEdit={(k) => open(k)}
       />
+      <BangersPreview songs={content.songs} onEdit={(k) => open(k)} />
       <AboutPreview about={content.about} onEdit={(k) => open(k)} />
       <BookPreview
         book={content.book}
@@ -260,6 +266,7 @@ interface DrawerCtx {
   setVideos: (v: SiteContent['videos']) => void;
   setDefaultMode: (m: Mode) => void;
   setImage: (slotId: string, url: string | null) => void;
+  setSongs: (s: SiteContent['songs']) => void;
 }
 
 interface DrawerView {
@@ -342,6 +349,13 @@ function renderDrawer(pin: PinKey | null, ctx: DrawerCtx): DrawerView | null {
         kicker: '// what fresh visitors see first',
         accent: ED.amber,
         content: <DefaultModeModule hideHeader defaultMode={ctx.content.defaultMode} setDefaultMode={ctx.setDefaultMode} />
+      };
+    case 'bangers':
+      return {
+        title: 'BANGERS',
+        kicker: '// dropped from the studio',
+        accent: ED.pink,
+        content: <BangersEditor songs={ctx.content.songs} onChange={ctx.setSongs} />
       };
   }
 }
