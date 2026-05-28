@@ -12,7 +12,7 @@ interface Props {
 const relTime = (iso: string): string => {
   const t = new Date(iso).getTime();
   if (Number.isNaN(t)) return '';
-  const sec = Math.round((Date.now() - t) / 1000);
+  const sec = Math.max(0, Math.round((Date.now() - t) / 1000));
   if (sec < 60) return `${sec}s ago`;
   if (sec < 3600) return `${Math.round(sec / 60)}m ago`;
   return `${Math.round(sec / 3600)}h ago`;
@@ -21,7 +21,8 @@ const relTime = (iso: string): string => {
 export const YouTubeIntelModule = ({ initial }: Props) => {
   const [stats, setStats] = useState<ChannelStats | null>(initial);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(initial ? null : 'no_stats');
+  type ErrorState = 'no_stats' | 'fetch_failed' | null;
+  const [error, setError] = useState<ErrorState>(initial ? null : 'no_stats');
   const [bioExpanded, setBioExpanded] = useState(false);
 
   const refresh = useCallback(async () => {
