@@ -520,11 +520,11 @@ export const validateContent = (raw: unknown, base?: SiteContent): ValidationRes
 
   // Floating tags — exactly 4 (one per corner). Falls back to current
   // tags when raw is missing/malformed so partial save payloads round-trip.
-  const floatingTags = buildFloatingTags(c.floatingTags, current.floatingTags);
+  const floatingTags = buildFloatingTags(c.floatingTags, current.floatingTags ?? []);
 
   // Songs — max 12 visible+invisible. Each invalid entry silently dropped
   // with an error so the rest still saves.
-  const songsRaw = Array.isArray(c.songs) ? c.songs : current.songs;
+  const songsRaw = Array.isArray(c.songs) ? c.songs : (current.songs ?? []);
   const songs: Song[] = [];
   for (const raw of songsRaw) {
     const song = buildSong(raw, errors);

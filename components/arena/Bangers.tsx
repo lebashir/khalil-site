@@ -24,7 +24,7 @@ const GRADIENT_POOL = [
 ];
 
 export const Bangers = ({ songs, theme, size }: Props) => {
-  const visible = songs.filter(s => s.visible);
+  const visible = (songs ?? []).filter(s => s.visible);
   if (visible.length === 0) return null;
   const isDesktop = size === 'desktop';
   const isTablet = size === 'tablet';
