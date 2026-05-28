@@ -16,6 +16,7 @@ import { HeroTagsModule } from './modules/HeroTagsModule';
 import { NowPlayingModule } from './modules/NowPlayingModule';
 import { PinnedVideoModule } from './modules/PinnedVideoModule';
 import { ThemeModule } from './modules/ThemeModule';
+import { YouTubeIntelModule } from './modules/YouTubeIntelModule';
 import { InlineEditView } from './inline/InlineEditView';
 
 interface ControlDeckProps {
@@ -435,6 +436,9 @@ const LaunchTab = ({
   const themePicker = (
     <ThemeModule theme={content.theme?.gaming} setTheme={setThemeSettings} />
   );
+  const youTubeIntel = (
+    <YouTubeIntelModule initial={channelStats} />
+  );
 
   // Mobile / tablet: linear stack. The CRT-then-launcher pairing stays
   // adjacent so the user sees the burst as soon as they fire (autoscroll
@@ -444,6 +448,7 @@ const LaunchTab = ({
       <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
         {launchWindow}
         {messageLauncher}
+        {youTubeIntel}
         {liveStatusPanel}
         {heroTagsPanel}
         {nowPlaying}
@@ -465,6 +470,7 @@ const LaunchTab = ({
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 14, minWidth: 0 }}>
         {messageLauncher}
+        {youTubeIntel}
         {pinnedVideo}
         {themePicker}
       </div>
