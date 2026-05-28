@@ -252,8 +252,7 @@ const buildTiers = (raw: unknown, fallback: VideoTier[]): VideoTier[] => {
 };
 
 const VALID_TAG_SOURCES: TagSource[] = ['manual', 'subs', 'views', 'videos', 'pinnedLikes'];
-const VALID_TAG_POSITIONS: TagPosition[] = ['tl', 'tr', 'bl', 'br'];
-const BLOB_HOST_RE = /^https:\/\/[a-z0-9-]+\.public\.blob\.vercel-storage\.com\//i;
+const BLOB_HOST_RE = /^https:\/\/[a-z0-9-]+\.public\.blob\.vercel-storage\.com\//;
 
 const buildFloatingTags = (
   raw: unknown,
@@ -310,7 +309,7 @@ const buildSong = (raw: unknown, errors: string[]): Song | null => {
   let sunoUrl: string | undefined;
   if (typeof s.sunoUrl === 'string' && s.sunoUrl.trim()) {
     const trimmed = s.sunoUrl.trim().slice(0, FIELD_LIMITS.songSunoUrl);
-    if (isHttpUrl(trimmed)) sunoUrl = trimmed;
+    if (isHttpUrl(trimmed) && trimmed.startsWith('https://')) sunoUrl = trimmed;
     else errors.push(`Song ${id}: sunoUrl must be a valid https URL.`);
   }
   return { id, title, audioUrl, coverUrl, durationSeconds, visible, sunoUrl };
