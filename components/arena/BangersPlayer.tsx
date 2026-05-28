@@ -32,6 +32,11 @@ export const BangersPlayerProvider = ({ children }: { children: React.ReactNode 
   const [playingId, setPlayingId] = useState<string | null>(null);
   const [progress, setProgress] = useState(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  // Mirrors `playingId` in a ref so async audio callbacks (error, play
+  // rejection) can check whether they're still responsible for the
+  // current track. Without this, a stale error/reject from Song A can
+  // wipe state set by Song B that just started.
+  const expectedIdRef = useRef<string | null>(null);
 
   // Lazy-create the audio element on the client. Avoids SSR mismatch.
   useEffect(() => {
@@ -42,12 +47,19 @@ export const BangersPlayerProvider = ({ children }: { children: React.ReactNode 
       if (a.duration > 0) setProgress(a.currentTime / a.duration);
     };
     const onEnd = () => {
+      expectedIdRef.current = null;
       setPlayingId(null);
       setProgress(0);
     };
     const onError = () => {
-      setPlayingId(null);
-      setProgress(0);
+      // Reset only if no song is currently expected to be playing.
+      // expectedIdRef is set synchronously in togglePlay BEFORE a.src
+      // is reassigned, so an aborted-load error from the previous
+      // song's src won't reach this branch with a non-null expected.
+      if (expectedIdRef.current === null) {
+        setPlayingId(null);
+        setProgress(0);
+      }
     };
     a.addEventListener('timeupdate', onTime);
     a.addEventListener('ended', onEnd);
@@ -65,24 +77,32 @@ export const BangersPlayerProvider = ({ children }: { children: React.ReactNode 
     const a = audioRef.current;
     if (!a) return;
     if (playingId === song.id) {
+      expectedIdRef.current = null;
       a.pause();
       setPlayingId(null);
       return;
     }
+    expectedIdRef.current = song.id;
     a.pause();
     a.src = song.audioUrl;
     a.currentTime = 0;
     setProgress(0);
     setPlayingId(song.id);
     void a.play().catch(() => {
-      // Most likely: blocked autoplay or invalid blob URL. Reset state.
-      setPlayingId(null);
+      // Only reset if this rejection still applies to the song the
+      // user expects to be playing. A stale reject for Song A after
+      // Song B was started must NOT wipe Song B's state.
+      if (expectedIdRef.current === song.id) {
+        expectedIdRef.current = null;
+        setPlayingId(null);
+      }
     });
   }, [playingId]);
 
   const stop = useCallback(() => {
     const a = audioRef.current;
     if (!a) return;
+    expectedIdRef.current = null;
     a.pause();
     setPlayingId(null);
     setProgress(0);

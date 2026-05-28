@@ -146,6 +146,7 @@ export const SongCard = ({ song, theme, themedGradient }: Props) => {
           target="_blank"
           rel="noopener noreferrer"
           onClick={(e) => e.stopPropagation()}
+          onKeyDown={(e) => e.stopPropagation()}
           style={{
             position: 'absolute',
             top: 10,
