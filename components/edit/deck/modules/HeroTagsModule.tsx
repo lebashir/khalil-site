@@ -39,8 +39,11 @@ const POSITION_LABEL: Record<TagPosition, string> = {
 };
 
 // Resolves what the wired source would currently render — mirrors the
-// public site's resolveTagValue but only the LIVE part (no fallback).
-// We show this as a preview row so the editor knows what's on the site.
+// public site's resolveTagValue but only the LIVE API tier (not the
+// content-based fallbacks). NOTE: the public site ALSO falls back to
+// content.subs.current / viewsManual / videosManual before using
+// manualValue, so a "—" here does NOT mean the tag is blank on the
+// live site — it just means the API tier is unavailable.
 const livePreview = (
   source: TagSource,
   channelStats: ChannelStats | null,
