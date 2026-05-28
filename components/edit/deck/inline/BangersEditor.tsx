@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useRef, useState } from 'react';
+import type { CSSProperties } from 'react';
 import type { Song } from '@/lib/content';
 import { FIELD_LIMITS } from '@/lib/content';
 import { ED, FONT } from '../constants';
@@ -121,10 +122,22 @@ const SongRow = ({
         >
           {song.visible ? '● VISIBLE' : '○ HIDDEN'}
         </button>
-        <button type="button" onClick={() => onMove(-1)} disabled={index === 0} style={chipStyle(ED.line)}>
+        <button
+          type="button"
+          aria-label="Move up"
+          onClick={() => onMove(-1)}
+          disabled={index === 0}
+          style={chipStyle(ED.line)}
+        >
           ▲
         </button>
-        <button type="button" onClick={() => onMove(1)} disabled={index === total - 1} style={chipStyle(ED.line)}>
+        <button
+          type="button"
+          aria-label="Move down"
+          onClick={() => onMove(1)}
+          disabled={index === total - 1}
+          style={chipStyle(ED.line)}
+        >
           ▼
         </button>
         <button type="button" onClick={onDelete} style={chipStyle(ED.red)}>
@@ -152,7 +165,7 @@ const SongRow = ({
   );
 };
 
-const chipStyle = (color: string): React.CSSProperties => ({
+const chipStyle = (color: string): CSSProperties => ({
   cursor: 'pointer',
   background: 'rgba(0,0,0,0.5)',
   border: `1px solid ${color}`,
