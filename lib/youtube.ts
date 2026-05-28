@@ -23,6 +23,7 @@ export interface VideoItem {
   title: string;
   thumbnails: VideoThumbnails;
   viewCount: number | null;
+  likeCount: number | null;
   publishedAt: string;
   durationSeconds: number | null;
   isLive: boolean;
@@ -83,7 +84,7 @@ interface VideosResponse {
       thumbnails?: Record<string, { url?: string }>;
       liveBroadcastContent?: string; // 'live' | 'upcoming' | 'none'
     };
-    statistics?: { viewCount?: string };
+    statistics?: { viewCount?: string; likeCount?: string };
     contentDetails?: { duration?: string };
     liveStreamingDetails?: { actualStartTime?: string; actualEndTime?: string };
   }>;
@@ -137,6 +138,7 @@ export const getRecentVideos = async (): Promise<VideosResult> => {
         title: v.snippet?.title ?? 'Untitled',
         thumbnails: { medium, high, large },
         viewCount: v.statistics?.viewCount ? parseInt(v.statistics.viewCount, 10) : null,
+        likeCount: v.statistics?.likeCount ? parseInt(v.statistics.likeCount, 10) : null,
         publishedAt: v.snippet?.publishedAt ?? '',
         durationSeconds: v.contentDetails?.duration ? parseIsoDuration(v.contentDetails.duration) : null,
         isLive
@@ -153,6 +155,16 @@ export const getRecentVideos = async (): Promise<VideosResult> => {
   } catch {
     return { videos: [], error: 'fetch_failed' };
   }
+};
+
+/** Compact-formats any count: 421 → '421', 12_300 → '12K', 1_234_567 → '1.2M'.
+ *  Returns '' for null. Used by the video card's like badge and by the
+ *  floating-tag value resolver for VIEWS / VIDEOS / SUBS. */
+export const formatCount = (n: number | null): string => {
+  if (n === null) return '';
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1).replace(/\.0$/, '')}M`;
+  if (n >= 1000) return `${(n / 1000).toFixed(1).replace(/\.0$/, '')}K`;
+  return String(n);
 };
 
 export const formatViews = (n: number | null): string => {
