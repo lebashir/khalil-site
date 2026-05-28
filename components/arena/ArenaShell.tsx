@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import type { Mode, SiteContent } from '@/lib/content';
 import type { VideoItem } from '@/lib/youtube';
+import type { ChannelStats } from '@/lib/youtube-channel';
 import { useModeFlipContext } from '@/components/topbar';
 import { TopBarMode, PEEK_EVENT, type PeekDetail } from '@/components/topbar';
 import { useGamingTheme } from '@/components/GamingThemeProvider';
@@ -24,13 +25,14 @@ interface Props {
   content: SiteContent;
   videos: VideoItem[];
   videoError: string | null;
+  channelStats: ChannelStats | null;
 }
 
 // The full Arena composition. Mode is sourced from <ModeFlipProvider>
 // (mounted in app/layout.tsx) so the homepage and the cinematic flip
 // agree on the current mode. Re-renders when the mode swaps at t=400ms
 // behind the overlay slab.
-export const ArenaShell = ({ content, videos, videoError }: Props) => {
+export const ArenaShell = ({ content, videos, videoError, channelStats }: Props) => {
   const { mode, isTransitioning } = useModeFlipContext();
   const { themeKey } = useGamingTheme();
   const size = useArenaSize();
@@ -74,7 +76,7 @@ export const ArenaShell = ({ content, videos, videoError }: Props) => {
       <div style={{ position: 'relative' }}>
         <TopBarMode />
         <Nav theme={theme} size={size} mood={content.mood} />
-        <Hero mode={mode} theme={theme} size={size} content={content} />
+        <Hero mode={mode} theme={theme} size={size} content={content} videos={videos} channelStats={channelStats} />
         <SubsHud subs={content.subs} theme={theme} size={size} />
         <NowDock mode={mode} now={content.now} theme={theme} size={size} />
         <Videos

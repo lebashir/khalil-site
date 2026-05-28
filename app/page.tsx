@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import { ArenaShell } from '@/components/arena/ArenaShell';
 import { getContent } from '@/lib/content';
 import { getRecentVideos } from '@/lib/youtube';
+import { getChannelStats } from '@/lib/youtube-channel';
 import { INTRO_COOKIE_NAME } from '@/lib/intro-cookie';
 
 const HomePage = async () => {
@@ -15,8 +16,18 @@ const HomePage = async () => {
   }
 
   const content = getContent();
-  const { videos, error } = await getRecentVideos();
-  return <ArenaShell content={content} videos={videos} videoError={error} />;
+  const [videoResult, channelStats] = await Promise.all([
+    getRecentVideos(),
+    getChannelStats()
+  ]);
+  return (
+    <ArenaShell
+      content={content}
+      videos={videoResult.videos}
+      videoError={videoResult.error}
+      channelStats={channelStats}
+    />
+  );
 };
 
 export default HomePage;

@@ -1,8 +1,11 @@
 'use client';
 
-import type { Mode, SiteContent } from '@/lib/content';
+import type { Mode, SiteContent, FloatingTagConfig, TagPosition } from '@/lib/content';
 import type { ArenaTheme } from './theme';
 import type { ArenaSize } from './useArenaSize';
+import type { ChannelStats } from '@/lib/youtube-channel';
+import type { VideoItem } from '@/lib/youtube';
+import { formatCount } from '@/lib/youtube';
 import { Reveal } from './Reveal';
 import { PolaroidStack } from './PolaroidStack';
 import { FloatingTag } from './FloatingTag';
@@ -14,11 +17,96 @@ interface Props {
   theme: ArenaTheme;
   size: ArenaSize;
   content: SiteContent;
+  videos: VideoItem[];
+  channelStats: ChannelStats | null;
 }
+
+// Resolves a floating tag's displayed value. Order of preference:
+// 1. Live wired source (when channelStats / video data is present)
+// 2. Manual override value (tag.manualValue)
+// 3. Empty string → caller hides the slot
+const resolveTagValue = (
+  tag: FloatingTagConfig,
+  channelStats: ChannelStats | null,
+  content: SiteContent,
+  videos: VideoItem[]
+): string => {
+  switch (tag.source) {
+    case 'manual':
+      return tag.manualValue;
+    case 'subs': {
+      const live = channelStats?.subscriberCount;
+      if (typeof live === 'number') return formatCount(live);
+      // Fall back to content.subs.current (the existing manual value) so
+      // existing sites without an API key keep rendering 744.
+      if (content.subs.current > 0) return String(content.subs.current);
+      return tag.manualValue;
+    }
+    case 'views': {
+      const live = channelStats?.viewCount;
+      if (typeof live === 'number') return formatCount(live);
+      if (content.viewsManual > 0) return formatCount(content.viewsManual);
+      return tag.manualValue;
+    }
+    case 'videos': {
+      const live = channelStats?.videoCount;
+      if (typeof live === 'number') return String(live);
+      if (content.videosManual > 0) return String(content.videosManual);
+      return tag.manualValue;
+    }
+    case 'pinnedLikes': {
+      const pinned = videos.find(v => v.id === content.videos.pinnedId);
+      const live = pinned?.likeCount;
+      if (typeof live === 'number' && live > 0) return formatCount(live);
+      return tag.manualValue;
+    }
+  }
+};
+
+// Maps a tag's logical position (corner) to the responsive style object
+// FloatingTag expects. Mirrors the offsets used by the previous
+// hardcoded SUBS and RANK tags so layouts don't shift.
+const positionFor = (
+  pos: TagPosition,
+  isDesktop: boolean,
+  isTablet: boolean
+): { top?: number; right?: number; bottom?: number; left?: number } => {
+  switch (pos) {
+    case 'tr':
+      return {
+        right: isDesktop ? -16 : isTablet ? 24 : 8,
+        top: isDesktop ? 28 : isTablet ? 16 : 4
+      };
+    case 'tl':
+      return {
+        left: isDesktop ? -16 : isTablet ? 24 : 8,
+        top: isDesktop ? 28 : isTablet ? 16 : 4
+      };
+    case 'br':
+      return {
+        right: isDesktop ? -16 : isTablet ? 24 : 8,
+        bottom: isDesktop ? 70 : isTablet ? 30 : 14
+      };
+    case 'bl':
+      return {
+        left: isDesktop ? -16 : isTablet ? 24 : 8,
+        bottom: isDesktop ? 70 : isTablet ? 30 : 14
+      };
+  }
+};
+
+const delayFor = (pos: TagPosition): string => {
+  switch (pos) {
+    case 'tr': return '0s';
+    case 'tl': return '.4s';
+    case 'br': return '.6s';
+    case 'bl': return '.8s';
+  }
+};
 
 const YT_URL = 'https://www.youtube.com/@khalilgaming2020';
 
-export const Hero = ({ mode, theme, size, content }: Props) => {
+export const Hero = ({ mode, theme, size, content, videos, channelStats }: Props) => {
   const m = content.hero[mode];
   const stats = content.stats[mode];
   const isDesktop = size === 'desktop';
@@ -49,26 +137,22 @@ export const Hero = ({ mode, theme, size, content }: Props) => {
         portraitPhotoUrl={portraitPhotoUrl}
       />
 
-      <FloatingTag
-        label="SUBS"
-        value={content.subs.current}
-        theme={theme}
-        position={{
-          right: isDesktop ? -16 : isTablet ? 24 : 8,
-          top: isDesktop ? 28 : isTablet ? 16 : 4
-        }}
-        delay="0s"
-      />
-      <FloatingTag
-        label="RANK"
-        value="GOAT"
-        theme={theme}
-        position={{
-          left: isDesktop ? -16 : isTablet ? 24 : 8,
-          bottom: isDesktop ? 70 : isTablet ? 30 : 14
-        }}
-        delay=".8s"
-      />
+      {content.floatingTags
+        .filter(tag => tag.enabled)
+        .map(tag => {
+          const value = resolveTagValue(tag, channelStats, content, videos);
+          if (!value) return null;
+          return (
+            <FloatingTag
+              key={tag.position}
+              label={tag.label}
+              value={value}
+              theme={theme}
+              position={positionFor(tag.position, isDesktop, isTablet)}
+              delay={delayFor(tag.position)}
+            />
+          );
+        })}
     </div>
   );
 
