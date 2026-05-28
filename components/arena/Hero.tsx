@@ -39,7 +39,7 @@ const resolveTagValue = (
       if (typeof live === 'number') return formatCount(live);
       // Fall back to content.subs.current (the existing manual value) so
       // existing sites without an API key keep rendering 744.
-      if (content.subs.current > 0) return String(content.subs.current);
+      if (content.subs.current > 0) return formatCount(content.subs.current);
       return tag.manualValue;
     }
     case 'views': {
