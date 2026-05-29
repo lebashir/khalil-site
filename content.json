@@ -137,10 +137,34 @@
     }
   },
   "floatingTags": [
-    { "enabled": true, "source": "views",  "label": "VIEWS",  "manualValue": "0",    "position": "tl" },
-    { "enabled": true, "source": "subs",   "label": "SUBS",   "manualValue": "744",  "position": "tr" },
-    { "enabled": true, "source": "manual", "label": "RANK",   "manualValue": "GOAT", "position": "bl" },
-    { "enabled": true, "source": "videos", "label": "VIDEOS", "manualValue": "0",    "position": "br" }
+    {
+      "enabled": true,
+      "source": "views",
+      "label": "VIEWS",
+      "manualValue": "0",
+      "position": "tl"
+    },
+    {
+      "enabled": true,
+      "source": "subs",
+      "label": "SUBS",
+      "manualValue": "744",
+      "position": "tr"
+    },
+    {
+      "enabled": true,
+      "source": "manual",
+      "label": "RANK",
+      "manualValue": "GOAT",
+      "position": "bl"
+    },
+    {
+      "enabled": true,
+      "source": "videos",
+      "label": "VIDEOS",
+      "manualValue": "0",
+      "position": "br"
+    }
   ],
   "songs": [],
   "viewsManual": 0,
