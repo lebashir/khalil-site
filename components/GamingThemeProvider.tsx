@@ -19,14 +19,20 @@ import {
 
 interface ThemeContextValue {
   themeKey: GamingThemeKey;
-  /** Set the active theme for THIS browser only (writes localStorage +
-   *  swaps the html class). Used by the /edit picker as a "preview" —
-   *  the published theme (visible to visitors) is set via content.json
-   *  + SAVE. */
+  /** TRANSIENT preview for THIS browser: swaps the html class so the page
+   *  repaints, but does NOT touch localStorage. Reverts to the published
+   *  theme on the next reload. The /edit picker uses this for both hover
+   *  and click so auditioning a theme can never permanently override what
+   *  Khalil sees vs. what visitors see. */
+  previewThemeKey: (k: GamingThemeKey) => void;
+  /** PERSISTED preview: same as previewThemeKey but also writes localStorage
+   *  so the choice survives reloads/navigation. Kept for callers that want
+   *  a sticky local override; the /edit picker intentionally does NOT use
+   *  this (see previewThemeKey) to avoid silent preview/published drift. */
   setThemeKey: (k: GamingThemeKey) => void;
   /** Clear the localStorage preview so this browser falls back to the
-   *  published theme. Called after Khalil hits SAVE in /edit so his
-   *  preview ends and he sees what visitors will see. */
+   *  published theme. Called by the /edit picker's "view as visitor" /
+   *  reset so a stale override is genuinely removed, not re-written. */
   clearLocalOverride: () => void;
   theme: GamingTheme;
 }
@@ -61,7 +67,9 @@ export const GamingThemeProvider = ({ initialKey, children }: Props) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const setThemeKey = useCallback((next: GamingThemeKey) => {
+  // Transient: update React state + swap the html theme class so every
+  // CSS-var consumer repaints. Deliberately does NOT persist.
+  const previewThemeKey = useCallback((next: GamingThemeKey) => {
     setKeyState(next);
     if (typeof document !== 'undefined') {
       const html = document.documentElement;
@@ -70,12 +78,20 @@ export const GamingThemeProvider = ({ initialKey, children }: Props) => {
         .forEach((c) => html.classList.remove(c));
       html.classList.add(`theme-${next}`);
     }
-    try {
-      localStorage.setItem(STORAGE_KEY, next);
-    } catch {
-      /* private-mode safari etc. */
-    }
   }, []);
+
+  // Persisted: preview + remember it across reloads via localStorage.
+  const setThemeKey = useCallback(
+    (next: GamingThemeKey) => {
+      previewThemeKey(next);
+      try {
+        localStorage.setItem(STORAGE_KEY, next);
+      } catch {
+        /* private-mode safari etc. */
+      }
+    },
+    [previewThemeKey]
+  );
 
   const clearLocalOverride = useCallback(() => {
     try {
@@ -88,11 +104,12 @@ export const GamingThemeProvider = ({ initialKey, children }: Props) => {
   const value = useMemo<ThemeContextValue>(
     () => ({
       themeKey,
+      previewThemeKey,
       setThemeKey,
       clearLocalOverride,
       theme: GAMING_THEMES[themeKey] ?? GAMING_THEMES[DEFAULT_GAMING_THEME]!
     }),
-    [themeKey, setThemeKey, clearLocalOverride]
+    [themeKey, previewThemeKey, setThemeKey, clearLocalOverride]
   );
 
   return (

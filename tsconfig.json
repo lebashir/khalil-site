@@ -39,6 +39,8 @@
   ],
   "exclude": [
     "node_modules",
-    "_archive"
+    "_archive",
+    "**/*.test.ts",
+    "thebashway.config.ts"
   ]
 }

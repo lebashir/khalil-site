@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { useGamingTheme } from '@/components/GamingThemeProvider';
 import {
   GAMING_THEMES,
@@ -9,6 +10,7 @@ import {
   isLightGamingTheme,
   type GamingThemeKey
 } from '@/lib/gaming-themes';
+import { themePreviewStatus } from '@/lib/theme-preview';
 import type { GamingThemeSettings } from '@/lib/content';
 import { ED, FONT } from '../constants';
 import { Panel } from '../primitives';
@@ -50,7 +52,29 @@ const normalize = (raw: GamingThemeSettings | undefined): GamingThemeSettings =>
 // theme — Khalil sees what visitors will see.
 export const ThemeModule = ({ theme, setTheme }: Props) => {
   const settings = normalize(theme);
-  const { themeKey: localPreview, setThemeKey, clearLocalOverride } = useGamingTheme();
+  // previewThemeKey is TRANSIENT — it repaints this browser but never writes
+  // localStorage, so auditioning themes can't silently override what Khalil
+  // sees vs. what visitors get (the old setThemeKey persisted on every hover).
+  const { themeKey: localPreview, previewThemeKey, clearLocalOverride } = useGamingTheme();
+
+  const isFixed = settings.mode === 'fixed';
+  const isRandom = settings.mode === 'random';
+  const isShuffle = settings.mode === 'shuffle';
+  const usesPool = isRandom || isShuffle;
+  const poolEmpty = usesPool && settings.pool.length === 0;
+
+  // What visitors would actually land on right now — used as the anchor the
+  // grid reverts to when the mouse leaves, and as the reset target.
+  // normalize() guarantees both are valid registry keys, but the
+  // GamingThemeSettings type widens them to string — cast back.
+  const publishedTarget: GamingThemeKey =
+    usesPool && settings.pool.length > 0
+      ? (settings.pool[0] as GamingThemeKey)
+      : (settings.fixedKey as GamingThemeKey);
+
+  // The theme the user has actively committed to this session (last click),
+  // i.e. what hover-previews snap back to. Starts at the published target.
+  const [committed, setCommitted] = useState<GamingThemeKey>(publishedTarget);
 
   const setMode = (next: ThemeMode) => {
     setTheme({ ...settings, mode: next });
@@ -58,7 +82,8 @@ export const ThemeModule = ({ theme, setTheme }: Props) => {
 
   const setFixed = (k: GamingThemeKey) => {
     setTheme({ ...settings, fixedKey: k });
-    setThemeKey(k);
+    setCommitted(k);
+    previewThemeKey(k);
   };
 
   const togglePool = (k: GamingThemeKey) => {
@@ -67,19 +92,91 @@ export const ThemeModule = ({ theme, setTheme }: Props) => {
     setTheme({ ...settings, pool: nextPool });
     // Always preview the clicked theme — even if we're removing it from
     // the pool, the click is a clear intent to look at it.
-    setThemeKey(k);
+    setCommitted(k);
+    previewThemeKey(k);
   };
 
-  const previewOnly = (k: GamingThemeKey) => setThemeKey(k);
+  // Hover = transient look. Leaving the grid snaps back to the committed pick.
+  const previewOnly = (k: GamingThemeKey) => previewThemeKey(k);
+  const revertToCommitted = () => previewThemeKey(committed);
 
-  const isFixed = settings.mode === 'fixed';
-  const isRandom = settings.mode === 'random';
-  const isShuffle = settings.mode === 'shuffle';
-  const usesPool = isRandom || isShuffle;
-  const poolEmpty = usesPool && settings.pool.length === 0;
+  // "View as visitor" / reset: genuinely drop the local override (so a reload
+  // shows the published theme) AND repaint to it now.
+  const resetToPublished = () => {
+    clearLocalOverride();
+    setCommitted(publishedTarget);
+    previewThemeKey(publishedTarget);
+  };
+
+  // Is this browser showing something other than what visitors get?
+  const status = themePreviewStatus({
+    mode: settings.mode,
+    fixedKey: settings.fixedKey,
+    pool: settings.pool,
+    preview: localPreview
+  });
 
   return (
     <Panel title="THEME · GAMING" kicker="// picks the gaming-mode palette for visitors" accent={ED.pink}>
+      {/* Divergence banner — loud, so a stale local preview can never quietly
+          masquerade as the published theme. Only shows when this browser is
+          painting something other than what visitors get. */}
+      {status.diverged && (
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 10,
+            flexWrap: 'wrap',
+            padding: '10px 12px',
+            marginBottom: 14,
+            background: `${ED.amber}1f`,
+            border: `1px solid ${ED.amber}`,
+            borderRadius: 4,
+            boxShadow: `0 0 18px ${ED.amber}33`
+          }}
+        >
+          <div
+            style={{
+              fontFamily: FONT.mono,
+              fontSize: 10,
+              letterSpacing: 1.1,
+              color: ED.amber,
+              textTransform: 'uppercase',
+              lineHeight: 1.5,
+              flex: '1 1 220px',
+              minWidth: 0
+            }}
+          >
+            👁 preview only — your browser shows{' '}
+            <strong style={{ color: ED.ink }}>{localPreview}</strong>. visitors see{' '}
+            <strong style={{ color: ED.green }}>{status.publishedLabel}</strong>.{' '}
+            save to publish, or reset to match.
+          </div>
+          <button
+            type="button"
+            onClick={resetToPublished}
+            style={{
+              flexShrink: 0,
+              fontFamily: FONT.mono,
+              fontSize: 10,
+              letterSpacing: 1.4,
+              color: ED.amber,
+              background: 'rgba(0,0,0,0.4)',
+              border: `1px solid ${ED.amber}`,
+              padding: '6px 12px',
+              borderRadius: 3,
+              cursor: 'pointer',
+              textTransform: 'uppercase',
+              fontWeight: 700
+            }}
+          >
+            ⟲ reset to visitor view
+          </button>
+        </div>
+      )}
+
       {/* Mode toggle — three rows wrap nicely on phone, render side by side on desktop */}
       <div
         style={{
@@ -154,6 +251,7 @@ export const ThemeModule = ({ theme, setTheme }: Props) => {
 
       {/* Theme tiles */}
       <div
+        onMouseLeave={revertToCommitted}
         style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
@@ -309,20 +407,9 @@ export const ThemeModule = ({ theme, setTheme }: Props) => {
         </div>
         <button
           type="button"
-          onClick={() => {
-            // Reset Khalil's local override so HE sees what visitors see
-            // (the published theme). Useful to sanity-check the published
-            // setting after iterating in preview.
-            clearLocalOverride();
-            // Update local preview state to match published immediately.
-            // For RANDOM / SHUFFLE we can't predict the visitor's roll,
-            // so we show the first pool entry as a representative pick.
-            const target =
-              usesPool && settings.pool.length > 0
-                ? settings.pool[0]!
-                : settings.fixedKey;
-            if (isGamingThemeKey(target)) setThemeKey(target);
-          }}
+          // Drop the local override so HE sees what visitors see (the
+          // published theme), and genuinely clear it so a reload stays put.
+          onClick={resetToPublished}
           style={{
             fontFamily: FONT.mono,
             fontSize: 10,
